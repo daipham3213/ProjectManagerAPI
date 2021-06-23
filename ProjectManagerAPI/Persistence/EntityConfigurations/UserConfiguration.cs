@@ -8,11 +8,14 @@ using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Persistence.EntityConfigurations
 {
-    public class UserConfiguration : IEntityTypeConfiguration<User>
+    public class UserConfiguration : BaseConfiguration
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
-            builder.HasOne(u => u.UserType);
+            builder.HasOne(u => u.UserType).WithMany(e => e.Users);
+            builder.HasOne(u => u.Group)
+                .WithMany(e => e.Users)
+                .HasForeignKey(k => k.GroupRef);                
         }
     }
 }

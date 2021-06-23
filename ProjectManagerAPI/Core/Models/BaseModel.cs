@@ -1,21 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Core.Models
 {
+
     public class BaseModel
     {
-        [Key]
-        public Guid id { get; set; }
-        public string name { get; set; }
-        public string remark { get; set; }
-        public DateTime date_created { get; set; }
-        public DateTime date_modified { get; set; }
-        public Guid user_created { get; set; }
-        public bool is_active { get; set; }
-        public bool is_delete { get; set; }
+        public Guid ID { get; set; }
+        public string Name { get; set; }
+        public string? Remark { get; set; }
+        public DateTime DateCreated { get; set; }
+        public DateTime DateModified { get; set; }
+        public Guid UserCreated { get; set; }
+        public bool IsActived { get; set; }
+        [DefaultValue(false)]
+        public bool IsDeleted { get; set; }
     }
 }

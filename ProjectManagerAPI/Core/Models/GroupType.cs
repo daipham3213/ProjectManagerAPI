@@ -7,7 +7,7 @@ namespace ProjectManagerAPI.Core.Models
 {
     public class GroupType : BaseModel
     {
-        
-        public virtual HashSet<GroupType> parent_n { get; set; }
+        public GroupType? ParentN { get; set; }
+        public ICollection<Group> Group { get; set; }
     }
 }
