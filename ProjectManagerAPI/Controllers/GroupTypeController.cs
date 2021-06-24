@@ -17,7 +17,7 @@ namespace ProjectManagerAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll(string postId)
+        public async Task<IActionResult> GetAll()
         {
             var type = await _unitOfWork.GroupType.GetAll();
             return Ok(type);
