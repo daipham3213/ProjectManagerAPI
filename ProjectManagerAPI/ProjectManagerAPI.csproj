@@ -6,8 +6,7 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
-    <Folder Include="Core\Repositories\" />
-    <Folder Include="Persistence\Mock\" />
+    <Folder Include="Core\Models\Resources\" />
   </ItemGroup>
 
   <ItemGroup>
