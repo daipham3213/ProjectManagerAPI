@@ -19,7 +19,7 @@ namespace ProjectManagerAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll(string postId)
         {
-            var type = _unitOfWork.GroupType.GetAll();
+            var type = await _unitOfWork.GroupType.GetAll();
             return Ok(type);
         }
     }
