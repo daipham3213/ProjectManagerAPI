@@ -11,13 +11,15 @@ namespace ProjectManagerAPI.Persistence
     {
         private readonly ProjectManagerDBContext _context;
 
-        public UnitOfWork(ProjectManagerDBContext context, IGroupTypeRepository groupType)
+        public UnitOfWork(ProjectManagerDBContext context, IGroupTypeRepository groupType , IProjectRepository projectRepository)
         {
             _context = context;
             GroupType = groupType;
+            Project = projectRepository;
         }
 
         public IGroupTypeRepository GroupType { get; private set; }
+        public IProjectRepository Project { get; private set; }
 
         public async Task<int> Complete()
         {

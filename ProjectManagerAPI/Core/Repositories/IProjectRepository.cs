@@ -8,7 +8,8 @@ namespace ProjectManagerAPI.Core.Repositories
 {
     public interface IProjectRepository : IRepository<Project>
     {
-        public void LoadParent(Project project);
-        public void RemoveRelation(Project project);
+        
+      
+    
     }
 }
