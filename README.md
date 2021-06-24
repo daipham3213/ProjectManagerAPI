@@ -6,6 +6,7 @@
 Microsoft.EntityFrameworkCore
 Microsoft.EntityFrameworkCore.SqlServer
 Microsoft.EntityFrameworkCore.Tools
+Microsoft.AspNetCore.Mvc.Newtonsof
 ```
 
 ###Configurations
