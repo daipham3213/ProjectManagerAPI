@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Core.Repositories
 {
-    interface IRepositoires<TEntity> where TEntity : class
+    public interface IRepository<TEntity> where TEntity : class
     {
         Task<TEntity> Get(int id);
         Task<TEntity> SingleOrDefault(Expression<Func<TEntity, bool>> predicate);

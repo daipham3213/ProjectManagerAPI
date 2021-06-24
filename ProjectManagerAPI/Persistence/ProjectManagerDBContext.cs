@@ -2,7 +2,7 @@
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Persistence.EntityConfigurations;
 
-namespace ProjectManagerAPI.Core
+namespace ProjectManagerAPI.Persistence
 {
     public class ProjectManagerDBContext : DbContext
     {

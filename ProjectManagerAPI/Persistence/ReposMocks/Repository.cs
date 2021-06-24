@@ -8,7 +8,7 @@ using ProjectManagerAPI.Core.Repositories;
 
 namespace ProjectManagerAPI.Persistence.ReposMocks
 {
-    public class Repository<TEntity> : IRepositoires<TEntity> where TEntity : class
+    public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     {
         protected readonly DbContext Context;
         private DbSet<TEntity> _entities;
