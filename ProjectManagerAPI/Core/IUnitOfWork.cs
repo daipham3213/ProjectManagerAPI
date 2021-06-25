@@ -9,6 +9,8 @@ namespace ProjectManagerAPI.Core
     public interface IUnitOfWork: IDisposable
     {
         IGroupTypeRepository GroupType { get; }
+        IProjectRepository Project { get; }
+
         Task<int> Complete();
     }
 }
