@@ -10,6 +10,6 @@ namespace ProjectManagerAPI.Core.Repositories
     {
         public void LoadParent(GroupType type);
         public void RemoveRelation(GroupType type);
-
+        public Task<IEnumerable<GroupType>> LoadValidated();
     }
 }

@@ -1,13 +1,18 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ProjectManagerAPI.Core;
+using ProjectManagerAPI.Core.Models;
+using ProjectManagerAPI.Core.Models.Services;
 using ProjectManagerAPI.Core.Repositories;
 using ProjectManagerAPI.Persistence;
 using ProjectManagerAPI.Persistence.ReposMocks;
+using ProjectManagerAPI.Persistence.Services;
+using System;
 
 namespace ProjectManagerAPI
 {
@@ -28,9 +33,12 @@ namespace ProjectManagerAPI
             );
             services.AddDbContext<ProjectManagerDBContext>(options => options.UseSqlServer(Configuration.GetConnectionString("LocalDB")));
 
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+            services.AddAutoMapper(typeof(Startup));
+                 
             //Inject interfaces
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IGroupTypeService, GroupTypeService>();
+
             services.AddScoped<IGroupTypeRepository, GroupTypeRepository>();
 
         }
