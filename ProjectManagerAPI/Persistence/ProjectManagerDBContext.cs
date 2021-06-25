@@ -1,10 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Persistence.EntityConfigurations;
+using System;
 
 namespace ProjectManagerAPI.Persistence
 {
-    public class ProjectManagerDBContext : DbContext
+    public class ProjectManagerDBContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
     {
         public DbSet<UserType> UserTypes { get; set; }
         public DbSet<User> Users { get; set; }
@@ -14,17 +17,17 @@ namespace ProjectManagerAPI.Persistence
         public DbSet<Project> Projects { get; set; }
         public DbSet<Task> Tasks { get; set; }
         public DbSet<Report> Reports { get; set; }
+        public DbSet<Avatar> Avatars { get; set; }
 
         public ProjectManagerDBContext(DbContextOptions<ProjectManagerDBContext> options)
             : base(options)
         {
-            
+
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            
             builder.ApplyConfiguration(new GroupConfiguration());
             builder.ApplyConfiguration(new GroupTypeConfiguration());
             builder.ApplyConfiguration(new PhaseConfiguration());

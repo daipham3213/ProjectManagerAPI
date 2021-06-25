@@ -2,7 +2,6 @@
 using ProjectManagerAPI.Core.Repositories;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Persistence.ReposMocks
@@ -12,7 +11,7 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
         private readonly ProjectManagerDBContext _context;
 
         public UsertypeRepository(ProjectManagerDBContext context)
-            :base(context)
+            : base(context)
         {
             _context = context;
         }

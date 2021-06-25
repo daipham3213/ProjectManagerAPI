@@ -1,11 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ProjectManagerAPI.Core;
-using ProjectManagerAPI.Core.Models;
-using ProjectManagerAPI.Core.Repositories;
+﻿using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Persistence;
 using ProjectManagerAPI.Persistence.ReposMocks;
 using System;
-using System.Linq;
 
 namespace ProjectManagerAPI.Core.Repositories
 {
@@ -16,12 +12,6 @@ namespace ProjectManagerAPI.Core.Repositories
             : base(context)
         {
             _context = context;
-        }
-
-
-        public void RemoveRelation(Project project)
-        {
-            throw new NotImplementedException();
         }
     }
 }

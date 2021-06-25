@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Repositories;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,11 +10,11 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
     public class GroupTypeRepository : Repository<GroupType>, IGroupTypeRepository
     {
         private readonly ProjectManagerDBContext _context;
-        public GroupTypeRepository (ProjectManagerDBContext context)
-            :base (context)
+        public GroupTypeRepository(ProjectManagerDBContext context)
+            : base(context)
         {
             _context = context;
-        }     
+        }
 
         public void LoadParent(GroupType type)
         {
@@ -24,7 +22,7 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             if (type.ParentN == null)
             {
                 return;
-            }      
+            }
             LoadParent(type.ParentN);
         }
 

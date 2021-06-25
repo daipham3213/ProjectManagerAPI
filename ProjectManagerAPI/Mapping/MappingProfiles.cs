@@ -1,10 +1,6 @@
 ﻿using AutoMapper;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Models.Resources;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Mapping
 {
@@ -14,11 +10,12 @@ namespace ProjectManagerAPI.Mapping
         {
             CreateMap<GroupType, GroupTypeResource>()
                 .ForMember(u => u.ParentN, opt => opt.Ignore())
-                .AfterMap((c, u) => {
+                .AfterMap((c, u) =>
+                {
                     MapParent(c, u);
                 });
             CreateMap<GroupType, GroupTypeViewResource>()
-                .ForMember(u => u.url, opt => opt.MapFrom(u =>"api/grouptype/" + u.ID));
+                .ForMember(u => u.url, opt => opt.MapFrom(u => "api/grouptype/" + u.ID));
         }
 
         private void MapParent(GroupType domain, GroupTypeResource resource)

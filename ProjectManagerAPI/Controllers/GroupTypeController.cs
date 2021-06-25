@@ -5,7 +5,6 @@ using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Models.Resources;
 using ProjectManagerAPI.Core.Models.Services;
-using ProjectManagerAPI.Core.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -19,7 +18,7 @@ namespace ProjectManagerAPI.Controllers
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IGroupTypeService _groupTypeService;
-        public GroupTypeController(IUnitOfWork unitOfWork, IMapper mapper,IGroupTypeService groupTypeService)
+        public GroupTypeController(IUnitOfWork unitOfWork, IMapper mapper, IGroupTypeService groupTypeService)
         {
             this._unitOfWork = unitOfWork;
             this._mapper = mapper;
@@ -29,13 +28,13 @@ namespace ProjectManagerAPI.Controllers
         [HttpGet("all")]
         public async Task<IActionResult> GetAll()
         {
-            var type = await _unitOfWork.GroupType.GetAll();
+            var type = await _unitOfWork.GroupTypes.GetAll();
             return Ok(type);
         }
         [HttpGet]
         public async Task<IActionResult> GetList()
         {
-            var type = await _unitOfWork.GroupType.LoadValidated();
+            var type = await _unitOfWork.GroupTypes.LoadValidated();
             if (type == null)
             {
                 return NotFound();
@@ -46,13 +45,13 @@ namespace ProjectManagerAPI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(Guid id)
         {
-            await this._unitOfWork.GroupType.GetAll();
-            var type = await _unitOfWork.GroupType.Get(id);
+            await this._unitOfWork.GroupTypes.GetAll();
+            var type = await _unitOfWork.GroupTypes.Get(id);
             if (type == null)
             {
                 return NotFound();
             }
-            this._unitOfWork.GroupType.LoadParent(type);
+            this._unitOfWork.GroupTypes.LoadParent(type);
             var result = _mapper.Map<GroupType, GroupTypeResource>(type);
             return Ok(result);
         }
