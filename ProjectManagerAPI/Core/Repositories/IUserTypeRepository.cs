@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Core.Repositories
 {
-    public interface IGroupTypeRepository : IRepository<GroupType>
+    public interface IUserTypeRepository : IRepository<UserType>
     {
         public void LoadParent(GroupType type);
         public void RemoveRelation(GroupType type);

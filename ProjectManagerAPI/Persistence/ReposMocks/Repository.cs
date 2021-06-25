@@ -32,7 +32,7 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             return this._entities.Where(predicate);
         }
 
-        public async Task<TEntity> Get(int id)
+        public async Task<TEntity> Get(Guid id)
         {
             return await this._entities.FindAsync(id);
         }

@@ -12,10 +12,12 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
+            builder.Property(x => x.DateCreated).ValueGeneratedOnAdd();
+            builder.Property(x => x.DateModified).ValueGeneratedOnAddOrUpdate();
             builder.HasOne(u => u.UserType).WithMany(e => e.Users);
             builder.HasOne(u => u.Group)
                 .WithMany(e => e.Users)
-                .HasForeignKey(k => k.GroupRef);                
+                .HasForeignKey(k => k.GroupRef);
         }
     }
 }
