@@ -56,5 +56,14 @@ namespace ProjectManagerAPI.Controllers
             var result = _mapper.Map<GroupType, GroupTypeResource>(type);
             return Ok(result);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] CreatedGroupType groupType)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            return null;
+        }
     }
 }
