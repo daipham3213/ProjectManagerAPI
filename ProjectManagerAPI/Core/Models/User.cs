@@ -1,34 +1,30 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Core.Models
 {
-    public class User : BaseModel
+    public class User : IdentityUser<Guid>
     {
         public User()
         {
             this.IsActived = false;
             this.IsSuperuser = false;
+            Tasks = new List<Task>();
         }
-
-        public User(string username, string email, string phone, UserType userType, User parentN, bool isSuperuser, Guid? groupRef, Group group)
-        {
-            Username = username;
-            Email = email;
-            Phone = phone;
-            UserType = userType;
-            ParentN = parentN;
-            IsSuperuser = isSuperuser;
-            GroupRef = groupRef;
-            Group = group;
-        }
-
-        public string Username { get; set; }
-        public string? Email { get; set; }
+      
+        public string Name { get; set; }
+        public string? Bio { get; set; }
+        public DateTime DateCreated { get; set; }
+        public DateTime DateModified { get; set; }
+        public bool IsActived { get; set; }
+        [DefaultValue(false)]
+        public bool IsDeleted { get; set; }
         public string? Phone { get; set; }
         public UserType UserType { get; set; }
         public User? ParentN { get; set; }

@@ -8,6 +8,10 @@ namespace ProjectManagerAPI.Core.Models
 {
     public class Task : BaseModel
     {
+        public Task()
+        {
+        }
+
         public DateTime? StartDate { get; set; }
         public DateTime? DueDate { get; set; }
         [DefaultValue(0)]   

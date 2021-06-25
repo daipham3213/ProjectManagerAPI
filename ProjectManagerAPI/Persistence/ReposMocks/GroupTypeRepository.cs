@@ -3,7 +3,9 @@ using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Repositories;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Persistence.ReposMocks
 {
@@ -14,13 +16,21 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             :base (context)
         {
             _context = context;
-        }
+        }     
+
         public void LoadParent(GroupType type)
         {
-            this._context.GroupTypes.Where(u => u.ParentN == type).Load();
-            if (type.ParentN == null) return;
+            this._context.GroupTypes.Where(u => u.ParentN.ID == type.ID).Load();
+            if (type.ParentN == null)
+            {
+                return;
+            }      
+            LoadParent(type.ParentN);
+        }
 
-            LoadParent(type);
+        public async Task<IEnumerable<GroupType>> LoadValidated()
+        {
+            return await this._context.GroupTypes.Where(u => u.IsDeleted == false).ToListAsync();
         }
 
         public void RemoveRelation(GroupType type)
