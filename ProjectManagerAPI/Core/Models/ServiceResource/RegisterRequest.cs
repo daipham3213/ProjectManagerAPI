@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace ProjectManagerAPI.Core.Models.ServiceResource
+﻿namespace ProjectManagerAPI.Core.Models.ServiceResource
 {
     public class RegisterRequest
     {
+        public string Username { set; get; }
+        public string Password { set; get; }
+        public string Email { set; get; }
+        public string Name { get; set; }
+        public string PhoneNumber { get; set; }
     }
 }
