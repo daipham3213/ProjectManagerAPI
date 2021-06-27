@@ -6,6 +6,7 @@ namespace ProjectManagerAPI.Core.Models
     {
         public Guid Id { get; set; }
         public string Path { get; set; }
+        public string PublicID { get; set; }
         public DateTime UploadTime { get; set; }
         public bool IsMain { get; set; }
 

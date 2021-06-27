@@ -1,30 +1,38 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Models.Resources;
+using ProjectManagerAPI.Core.Models.ServiceResource;
 using ProjectManagerAPI.Core.Models.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class GroupTypeController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IGroupTypeService _groupTypeService;
-        public GroupTypeController(IUnitOfWork unitOfWork, IMapper mapper, IGroupTypeService groupTypeService)
+        private readonly ITokenParser _tokenParser;
+
+        public GroupTypeController(IMapper mapper, IUnitOfWork unitOfWork, IGroupTypeService groupTypeService, ITokenParser tokenParser)
         {
-            this._unitOfWork = unitOfWork;
-            this._mapper = mapper;
-            this._groupTypeService = groupTypeService;
+            _mapper = mapper;
+            _unitOfWork = unitOfWork;
+            _groupTypeService = groupTypeService;
+            _tokenParser = tokenParser;
         }
-        [Authorize]
+
+        [Authorize(Roles = RoleNames.RoleAdmin)]
         [HttpGet("all")]
         public async Task<IActionResult> GetAll()
         {
@@ -51,18 +59,66 @@ namespace ProjectManagerAPI.Controllers
             {
                 return NotFound();
             }
-            this._unitOfWork.GroupTypes.LoadParent(type);
+            await this._groupTypeService.GetParents(type.ID);
             var result = _mapper.Map<GroupType, GroupTypeResource>(type);
             return Ok(result);
         }
 
         [HttpPost]
+        [Authorize(Roles = RoleNames.RoleAdmin)]
         public async Task<IActionResult> Post([FromBody] CreatedGroupType groupType)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+            string token = await HttpContext.GetTokenAsync("access_token");
+            var user = await _tokenParser.LoginResponse(token);
+            if (user == null)
+                return BadRequest("Authentication credentials is not provided");
+            var parent_n = this._unitOfWork.GroupTypes.Find(c => c.ID == groupType.ParentN.ID);
+            if (parent_n == null & groupType.ParentNID != null)
+                return BadRequest();
 
-            return null;
+            //Init new entity
+            var type = new GroupType();
+            type.Name = groupType.Name;
+            if (groupType.ParentNID != null)
+                type.ParentN = await this._unitOfWork.GroupTypes.SingleOrDefault(c => c.ID == groupType.ParentNID);
+            type.Remark = groupType.Remark;
+            type.IsActived = true;
+            type.IsDeleted = false;
+            type.DateCreated = DateTime.Now;
+            type.DateModified = DateTime.Now;
+            type.UserCreated = user.Id;
+
+            try
+            {
+                await this._unitOfWork.GroupTypes.Add(type);
+                await this._unitOfWork.Complete();
+                type = await this._unitOfWork.GroupTypes.GetTypeByName(type.Name);
+                await this._groupTypeService.GetParents(type.ID);
+                var result = this._mapper.Map<GroupType, CreatedGroupType>(type);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
+
+        [HttpDelete]
+        [Authorize(Roles = RoleNames.RoleAdmin)]
+        public async Task<IActionResult> DeleteType(Guid typeID)
+        {
+            var type = await this._unitOfWork.GroupTypes.SingleOrDefault(c => c.ID == typeID);
+            if (type == null)
+                return BadRequest();
+
+            this._unitOfWork.GroupTypes.RemoveAllChildren(typeID);
+            this._unitOfWork.GroupTypes.Remove(type);
+            await this._unitOfWork.Complete();
+
+            return Ok();
+        }
+
     }
 }

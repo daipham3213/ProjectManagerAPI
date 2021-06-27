@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ProjectManagerAPI.Migrations
 {
-    public partial class adduse : Migration
+    public partial class avatar : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,7 +12,6 @@ namespace ProjectManagerAPI.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -289,10 +288,7 @@ namespace ProjectManagerAPI.Migrations
                 {
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    UserId2 = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    RoleId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    UserId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -304,12 +300,6 @@ namespace ProjectManagerAPI.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_AspNetUserRoles_AspNetRoles_RoleId1",
-                        column: x => x.RoleId1,
-                        principalTable: "AspNetRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
@@ -318,12 +308,6 @@ namespace ProjectManagerAPI.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetUsers_UserId1",
                         column: x => x.UserId1,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_AspNetUserRoles_AspNetUsers_UserId2",
-                        column: x => x.UserId2,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -362,6 +346,7 @@ namespace ProjectManagerAPI.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Path = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PublicID = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UploadTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsMain = table.Column<bool>(type: "bit", nullable: false),
                     UserID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
@@ -477,19 +462,9 @@ namespace ProjectManagerAPI.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserRoles_RoleId1",
-                table: "AspNetUserRoles",
-                column: "RoleId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserRoles_UserId1",
                 table: "AspNetUserRoles",
                 column: "UserId1");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserRoles_UserId2",
-                table: "AspNetUserRoles",
-                column: "UserId2");
 
             migrationBuilder.CreateIndex(
                 name: "EmailIndex",
