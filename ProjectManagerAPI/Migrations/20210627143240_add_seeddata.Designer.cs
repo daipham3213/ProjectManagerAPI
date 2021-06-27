@@ -10,8 +10,8 @@ using ProjectManagerAPI.Persistence;
 namespace ProjectManagerAPI.Migrations
 {
     [DbContext(typeof(ProjectManagerDBContext))]
-    [Migration("20210627131844_avatar")]
-    partial class avatar
+    [Migration("20210627143240_add_seeddata")]
+    partial class add_seeddata
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

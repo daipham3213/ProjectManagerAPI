@@ -34,7 +34,7 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
 
         public async Task<IEnumerable<UserType>> LoadValidated()
         {
-            return await this._context.UserTypes.Where(u => u.IsDeleted == false).Distinct().ToListAsync();
+            return await this._context.UserTypes.Where(u => u.IsDeleted == false & u.IsActived == true).Distinct().ToListAsync();
         }
 
         public void RemoveAllChild(Guid id)

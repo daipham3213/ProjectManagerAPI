@@ -11,7 +11,6 @@ namespace ProjectManagerAPI.Core
         IAvatarRepository Avatars { get; }
         IUserRepository Users { get; }
         IUserTypeRepository UserTypes { get; }
-
         Task<int> Complete();
     }
 }

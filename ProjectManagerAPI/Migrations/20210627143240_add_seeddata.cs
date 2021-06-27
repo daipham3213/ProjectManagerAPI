@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ProjectManagerAPI.Migrations
 {
-    public partial class avatar : Migration
+    public partial class add_seeddata : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

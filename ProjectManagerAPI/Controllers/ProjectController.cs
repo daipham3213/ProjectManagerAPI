@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Repositories;
 using System;
 using System.Threading.Tasks;
@@ -26,7 +27,7 @@ namespace ProjectManagerAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetProjectID(Guid idPro)
         {
-            var projects = await _unitOfWork.Project.Get(idPro);
+            var projects = await _unitOfWork.Projects.Get(idPro);
             return Ok(projects);
         }
 

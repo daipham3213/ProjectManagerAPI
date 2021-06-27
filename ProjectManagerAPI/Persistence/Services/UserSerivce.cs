@@ -174,13 +174,15 @@ namespace ProjectManagerAPI.Persistence.Services
             {
                 listError.Add("Username already exists");
             }
-
+            var type = await _unitOfWork.UserTypes.GetTypeByName("Member");
             user = new User()
             {
                 UserName = request.Username,
                 Name = request.Name,
                 PhoneNumber = request.PhoneNumber,
                 Email = request.Email,
+                DateCreated = DateTime.Now,
+                DateModified = DateTime.Now,
                 SecurityStamp = Guid.NewGuid().ToString()
             };
             if (listError.Count != 0)

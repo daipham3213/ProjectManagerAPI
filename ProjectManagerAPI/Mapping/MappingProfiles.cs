@@ -35,7 +35,7 @@ namespace ProjectManagerAPI.Mapping
                 .ForMember(u => u.AvatarUrl, opt => opt.MapFrom(p => p.Avatars.FirstOrDefault(a => a.IsMain) != null ? p.Avatars.FirstOrDefault(a => a.IsMain).Path : null))
                 .ForMember(u => u.EmailConfirmed, opt => opt.MapFrom(a => a.IsActived))
                 .ForMember(u => u.GroupID, opt => opt.MapFrom(g => g.GroupRef))
-                .ForMember(u => u.UserTypeID, opt => opt.MapFrom(r => r.UserType.ID));
+                .ForMember(u => u.UserTypeID, opt => opt.MapFrom(r => r.UserTypeID));
         }
 
         private void MapParentGroup(GroupType domain, GroupTypeResource resource)
