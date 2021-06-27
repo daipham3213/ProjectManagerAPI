@@ -51,6 +51,12 @@ namespace ProjectManagerAPI.Persistence.Services
             if (!result.Succeeded)
                 return null;
 
+            var is_activated = user.IsActived;
+            if (!is_activated)
+                return new LoginResponse{
+                    IsActivated = false
+                };
+
             //get roles
             var roles = await _userManager.GetRolesAsync(user);
 
@@ -101,15 +107,20 @@ namespace ProjectManagerAPI.Persistence.Services
                 Token = finalToken,
                 DisplayName = user.Name,
                 AvatarUrl = path,
-                RoleName = roles.FirstOrDefault()
+                RoleName = roles.FirstOrDefault(),
+                IsActivated = user.IsActived
             };
 
             return loginResponse;
         }
 
-        public Task<bool> ChangePassword(string userName, string currentPassword, string newPassword)
+        public async Task<bool> ChangePassword(string userName, string currentPassword, string newPassword)
         {
-            throw new System.NotImplementedException();
+            var user = await this._userManager.FindByNameAsync(userName);
+
+            var result = await this._userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+
+            return result.Succeeded;
         }
 
         public async Task<bool> CheckPassword(string userName, string password)
@@ -126,6 +137,15 @@ namespace ProjectManagerAPI.Persistence.Services
             var user = await this._userManager.FindByNameAsync(username);
 
             var result = await _userManager.ChangeEmailAsync(user, newEmail, token);
+
+            return result.Succeeded;
+        }
+
+        public async Task<bool> ConfirmActivation(string username, string token)
+        {
+            var user = await this._userManager.FindByNameAsync(username);
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
 
             return result.Succeeded;
         }
@@ -174,7 +194,7 @@ namespace ProjectManagerAPI.Persistence.Services
                 return null;
             }
 
-            throw new Exception("Error when creating user!! oh yeah");
+            throw new Exception("Error while creating user account.");
         }
 
         public async Task<List<User>> SearchUser(string key)
@@ -257,6 +277,38 @@ namespace ProjectManagerAPI.Persistence.Services
             {
                 ToEmail = user.Email,
                 Subject = "Change email",
+                Body = htmlContent
+            };
+
+            try
+            {
+                await this._mailService.SendEmailAsync(mailRequest);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+        public async System.Threading.Tasks.Task SendActivationRequest(string username, string callbackurl)
+        {
+            var user = await this._userManager.FindByNameAsync(username);
+
+            var token = await this._userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            // append userId and confirmation code as parameters to the url
+            callbackurl += String.Format("?username={0}&token={1}", user.UserName, HttpUtility.UrlEncode(token));
+
+            var htmlContent = String.Format(
+                    @"Activate your account. Please confirm the email by clicking this link: 
+                    <br><a href='{0}'>Confirm new email</a>",
+                    callbackurl);
+
+            // send email to the user with the confirmation link
+            MailRequest mailRequest = new MailRequest()
+            {
+                ToEmail = user.Email,
+                Subject = "Account Activation",
                 Body = htmlContent
             };
 

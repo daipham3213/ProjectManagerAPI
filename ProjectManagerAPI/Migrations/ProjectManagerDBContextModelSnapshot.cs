@@ -180,6 +180,9 @@ namespace ProjectManagerAPI.Migrations
                     b.Property<string>("Path")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PublicID")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("UploadTime")
                         .HasColumnType("datetime2");
 

@@ -14,5 +14,7 @@ namespace ProjectManagerAPI.Core.Models.Services
         public Task<bool> ConfirmChangeEmail(string username, string newEmail, string token);
         public Task<bool> ChangePassword(string userName, string currentPassword, string newPassword);
         public Task<bool> CheckPassword(string userName, string password);
+        System.Threading.Tasks.Task SendActivationRequest(string username, string callbackurl);
+        Task<bool> ConfirmActivation(string username, string token);
     }
 }

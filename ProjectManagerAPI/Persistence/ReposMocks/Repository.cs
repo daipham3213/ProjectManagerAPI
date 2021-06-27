@@ -39,7 +39,7 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
 
         public async Task<IEnumerable<TEntity>> GetAll()
         {
-            return await this._entities.ToListAsync();
+            return await this._entities.Distinct().ToListAsync();
         }
         public async Task Load(Expression<Func<TEntity, bool>> predicate)
         {

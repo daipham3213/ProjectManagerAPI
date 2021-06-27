@@ -57,7 +57,7 @@ namespace ProjectManagerAPI
                 options.SuppressModelStateInvalidFilter = true;
             });
 
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
 
             services.AddDbContext<ProjectManagerDBContext>(options => options.UseSqlServer(Configuration.GetConnectionString("LocalDB")));
             services.AddIdentity<User, IdentityRole<Guid>>(opt =>
@@ -82,6 +82,8 @@ namespace ProjectManagerAPI
             services.AddScoped<IUserService, UserSerivce>();
             services.AddScoped<IMailService, MailService>();
             services.AddScoped<IGroupTypeService, GroupTypeService>();
+            services.AddScoped<ITokenParser, TokenParser>();
+            services.AddScoped<IPhotoService, PhotoService>();
 
             //Inject core model
             services.AddScoped<IUserTypeRepository, UsertypeRepository>();
@@ -141,7 +143,8 @@ namespace ProjectManagerAPI
                        ValidateIssuerSigningKey = true,
                        IssuerSigningKey = key,
                        ValidateIssuer = false,
-                       ValidateAudience = false
+                       ValidateAudience = false,
+                       SaveSigninToken = true,
                    };
                });
 
