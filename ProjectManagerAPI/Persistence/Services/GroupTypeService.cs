@@ -1,6 +1,6 @@
 ﻿using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
-using ProjectManagerAPI.Core.Models.Services;
+using ProjectManagerAPI.Core.Services;
 using System;
 using System.Linq;
 using System.Threading.Tasks;

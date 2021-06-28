@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ProjectManagerAPI.Core.Models.Resources
+namespace ProjectManagerAPI.Core.Resources
 {
     public class CreatedGroupType
     {

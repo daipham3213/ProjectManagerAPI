@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
-using ProjectManagerAPI.Core.Models.Resources;
-using ProjectManagerAPI.Core.Models.ServiceResource;
-using ProjectManagerAPI.Core.Models.Services;
+using ProjectManagerAPI.Core.Resources;
+using ProjectManagerAPI.Core.ServiceResource;
+using ProjectManagerAPI.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,8 +25,6 @@ namespace ProjectManagerAPI.Controllers
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
-        private readonly RoleManager<IdentityRole<Guid>> roleManager;
-
         public UserController(IUserService userService, IMapper mapper, IUnitOfWork unitOfWork, IConfiguration configuration)
         {
             _userService = userService;

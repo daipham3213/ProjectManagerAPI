@@ -28,6 +28,7 @@ namespace ProjectManagerAPI.Core.Models
         public bool IsActived { get; set; }
         [DefaultValue(false)]
         public bool IsDeleted { get; set; }
+        public Guid UserTypeID { get; set; }
         public UserType UserType { get; set; }
         public User? ParentN { get; set; }
         [DefaultValue(false)]

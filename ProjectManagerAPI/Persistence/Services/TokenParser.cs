@@ -2,8 +2,8 @@
 using Microsoft.IdentityModel.Tokens;
 using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
-using ProjectManagerAPI.Core.Models.ServiceResource;
-using ProjectManagerAPI.Core.Models.Services;
+using ProjectManagerAPI.Core.ServiceResource;
+using ProjectManagerAPI.Core.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;

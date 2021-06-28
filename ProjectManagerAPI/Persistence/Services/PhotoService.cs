@@ -2,11 +2,10 @@
 using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using ProjectManagerAPI.Core.Models.ServiceResource;
-using ProjectManagerAPI.Core.Models.Services;
+using ProjectManagerAPI.Core.ServiceResource;
+using ProjectManagerAPI.Core.Services;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Persistence.Services

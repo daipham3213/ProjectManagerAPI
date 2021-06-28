@@ -2,8 +2,8 @@
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using ProjectManagerAPI.Core.Models.ServiceResource;
-using ProjectManagerAPI.Core.Models.Services;
+using ProjectManagerAPI.Core.ServiceResource;
+using ProjectManagerAPI.Core.Services;
 using System.IO;
 using System.Threading.Tasks;
 

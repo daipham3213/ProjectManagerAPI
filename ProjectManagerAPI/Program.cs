@@ -28,7 +28,7 @@ namespace ProjectManagerAPI
             //    var userManager = services.GetRequiredService<UserManager<User>>();
             //    var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
             //    await context.Database.MigrateAsync();
-            //    await Seed.SeedData(userManager, roleManager);
+            //    await Seed.SeedData(userManager, roleManager, context);
             //}
             //catch (Exception ex)
             //{

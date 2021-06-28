@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
-using ProjectManagerAPI.Core.Models.ServiceResource;
-using System;
+using ProjectManagerAPI.Core.ServiceResource;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
-namespace ProjectManagerAPI.Core.Models.Services
+namespace ProjectManagerAPI.Core.Services
 {
     public interface IPhotoService
     {

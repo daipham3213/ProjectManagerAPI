@@ -12,13 +12,13 @@ using Microsoft.IdentityModel.Tokens;
 using ProjectManagerAPI.Persistence;
 using ProjectManagerAPI.Core.Models;
 using System;
-using ProjectManagerAPI.Core.Models.ServiceResource;
 using ProjectManagerAPI.Core;
-using ProjectManagerAPI.Core.Models.Services;
 using ProjectManagerAPI.Persistence.Services;
 using ProjectManagerAPI.Core.Repositories;
 using ProjectManagerAPI.Persistence.ReposMocks;
 using Microsoft.AspNetCore.Mvc;
+using ProjectManagerAPI.Core.ServiceResource;
+using ProjectManagerAPI.Core.Services;
 
 namespace ProjectManagerAPI
 {

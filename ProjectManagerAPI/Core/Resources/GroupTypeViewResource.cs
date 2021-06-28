@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using ProjectManagerAPI.Core.Models;
+using System.Collections.Generic;
 
-namespace ProjectManagerAPI.Core.Models.Resources
+namespace ProjectManagerAPI.Core.Resources
 {
     public class GroupTypeViewResource
     {
