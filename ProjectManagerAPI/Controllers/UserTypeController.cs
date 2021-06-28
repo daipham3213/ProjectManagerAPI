@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
-using ProjectManagerAPI.Core.Models.Resources;
-using ProjectManagerAPI.Core.Models.ServiceResource;
-using ProjectManagerAPI.Core.Models.Services;
+using ProjectManagerAPI.Core.Resources;
+using ProjectManagerAPI.Core.ServiceResource;
+using ProjectManagerAPI.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +32,7 @@ namespace ProjectManagerAPI.Controllers
         }
 
         [HttpPost]
-        //[Authorize(Roles = RoleNames.RoleAdmin)]
+        [Authorize(Roles = RoleNames.RoleAdmin)]
         public async Task<IActionResult> Post([FromBody]CreatedUserType usertype)
         {
             if (!ModelState.IsValid)

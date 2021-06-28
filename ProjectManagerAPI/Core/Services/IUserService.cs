@@ -1,8 +1,9 @@
-﻿using ProjectManagerAPI.Core.Models.ServiceResource;
+﻿using ProjectManagerAPI.Core.Models;
+using ProjectManagerAPI.Core.ServiceResource;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace ProjectManagerAPI.Core.Models.Services
+namespace ProjectManagerAPI.Core.Services
 {
     public interface IUserService
     {

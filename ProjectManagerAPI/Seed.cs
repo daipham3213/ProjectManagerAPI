@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using ProjectManagerAPI.Core.Models;
-using ProjectManagerAPI.Core.Models.ServiceResource;
+using ProjectManagerAPI.Core.ServiceResource;
 using ProjectManagerAPI.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 
 namespace ProjectManagerAPI
@@ -77,6 +76,7 @@ namespace ProjectManagerAPI
                     await context.SaveChangesAsync();
                 }
             }
+            //Add some user
             if (context.Users.Where(u => u.UserName == "admin").Count() == 0)
             {
                 var member = context.UserTypes.Where(u => u.Name == "Member").First();
@@ -113,6 +113,35 @@ namespace ProjectManagerAPI
 
                 await userManager.CreateAsync(users[1], "member123456");
                 await userManager.AddToRoleAsync(users[1], roleUser.Name);
+            }
+            //Add some grouptypes
+            if (context.GroupTypes.Where(u => u.Name == "Department").Count() == 0)
+            {
+                var admin =await userManager.FindByNameAsync("admin");
+                var types = new List<GroupType> { 
+                    new GroupType{
+                        Name = "Department",
+                        Remark = "",
+                        DateCreated = DateTime.Now,
+                        DateModified = DateTime.Now,
+                        UserCreated = admin.Id,
+                        IsActived = true,
+                    },
+                    new GroupType{
+                        Name = "Team",
+                        Remark = "",
+                        DateCreated = DateTime.Now,
+                        DateModified = DateTime.Now,
+                        UserCreated = admin.Id,
+                        IsActived = true,
+                    },
+                };
+
+                context.GroupTypes.Add(types[0]);
+                await context.SaveChangesAsync();
+                types[1].ParentN = context.GroupTypes.FirstOrDefault(u => u.Name == types[0].Name);
+                context.GroupTypes.Add(types[1]);
+                await context.SaveChangesAsync();
             }
         }
     }

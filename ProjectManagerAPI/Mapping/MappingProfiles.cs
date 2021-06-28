@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using ProjectManagerAPI.Core.Models;
-using ProjectManagerAPI.Core.Models.Resources;
+using ProjectManagerAPI.Core.Resources;
 using System.Linq;
 
 namespace ProjectManagerAPI.Mapping

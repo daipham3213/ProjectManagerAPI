@@ -1,7 +1,8 @@
-﻿using System;
+﻿using ProjectManagerAPI.Core.Models;
+using System;
 using System.Threading.Tasks;
 
-namespace ProjectManagerAPI.Core.Models.Services
+namespace ProjectManagerAPI.Core.Services
 {
     public interface IGroupTypeService
     {
