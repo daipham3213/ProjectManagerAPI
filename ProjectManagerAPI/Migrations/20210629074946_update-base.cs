@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ProjectManagerAPI.Migrations
 {
-    public partial class add_seeddata : Migration
+    public partial class updatebase : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -27,12 +27,12 @@ namespace ProjectManagerAPI.Migrations
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ParentNID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Remark = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
+                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
                     UserCreated = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IsActived = table.Column<bool>(type: "bit", nullable: false),
+                    IsActived = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -53,42 +53,17 @@ namespace ProjectManagerAPI.Migrations
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DueDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Remark = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
+                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
                     UserCreated = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IsActived = table.Column<bool>(type: "bit", nullable: false),
+                    IsActived = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Projects", x => x.ID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserTypes",
-                columns: table => new
-                {
-                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ParentNID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Remark = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserCreated = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IsActived = table.Column<bool>(type: "bit", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserTypes", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_UserTypes_UserTypes_ParentNID",
-                        column: x => x.ParentNID,
-                        principalTable: "UserTypes",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -117,25 +92,25 @@ namespace ProjectManagerAPI.Migrations
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    GroupTypeID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     GroupTypeFK = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LeaderID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Remark = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
+                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
                     UserCreated = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IsActived = table.Column<bool>(type: "bit", nullable: false),
+                    IsActived = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Groups", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Groups_GroupTypes_GroupTypeID",
-                        column: x => x.GroupTypeID,
+                        name: "FK_Groups_GroupTypes_GroupTypeFK",
+                        column: x => x.GroupTypeFK,
                         principalTable: "GroupTypes",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -145,15 +120,13 @@ namespace ProjectManagerAPI.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Bio = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
+                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
                     IsActived = table.Column<bool>(type: "bit", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    UserTypeID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ParentNId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     IsSuperuser = table.Column<bool>(type: "bit", nullable: false),
                     GroupRef = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    GroupID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -179,15 +152,9 @@ namespace ProjectManagerAPI.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_AspNetUsers_Groups_GroupID",
-                        column: x => x.GroupID,
+                        name: "FK_AspNetUsers_Groups_GroupRef",
+                        column: x => x.GroupRef,
                         principalTable: "Groups",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_AspNetUsers_UserTypes_UserTypeID",
-                        column: x => x.UserTypeID,
-                        principalTable: "UserTypes",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -202,12 +169,12 @@ namespace ProjectManagerAPI.Migrations
                     Progress = table.Column<float>(type: "real", nullable: false),
                     ProjectID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     GroupID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Remark = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
+                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
                     UserCreated = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IsActived = table.Column<bool>(type: "bit", nullable: false),
+                    IsActived = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -223,8 +190,7 @@ namespace ProjectManagerAPI.Migrations
                         name: "FK_Reports_Projects_ProjectID",
                         column: x => x.ProjectID,
                         principalTable: "Projects",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ID");
                 });
 
             migrationBuilder.CreateTable(
@@ -235,8 +201,7 @@ namespace ProjectManagerAPI.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -247,12 +212,6 @@ namespace ProjectManagerAPI.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AspNetUserClaims_AspNetUsers_UserId1",
-                        column: x => x.UserId1,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -262,8 +221,7 @@ namespace ProjectManagerAPI.Migrations
                     LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -274,12 +232,6 @@ namespace ProjectManagerAPI.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AspNetUserLogins_AspNetUsers_UserId1",
-                        column: x => x.UserId1,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -287,8 +239,7 @@ namespace ProjectManagerAPI.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -305,12 +256,6 @@ namespace ProjectManagerAPI.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AspNetUserRoles_AspNetUsers_UserId1",
-                        column: x => x.UserId1,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -320,8 +265,7 @@ namespace ProjectManagerAPI.Migrations
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -332,12 +276,6 @@ namespace ProjectManagerAPI.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AspNetUserTokens_AspNetUsers_UserId1",
-                        column: x => x.UserId1,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -370,12 +308,12 @@ namespace ProjectManagerAPI.Migrations
                     ReportID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DueDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Remark = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
+                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
                     UserCreated = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IsActived = table.Column<bool>(type: "bit", nullable: false),
+                    IsActived = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -399,12 +337,12 @@ namespace ProjectManagerAPI.Migrations
                     Percent = table.Column<float>(type: "real", nullable: false),
                     PhaseID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Remark = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
+                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
                     UserCreated = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IsActived = table.Column<bool>(type: "bit", nullable: false),
+                    IsActived = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -442,19 +380,9 @@ namespace ProjectManagerAPI.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserClaims_UserId1",
-                table: "AspNetUserClaims",
-                column: "UserId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserLogins_UserId",
                 table: "AspNetUserLogins",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserLogins_UserId1",
-                table: "AspNetUserLogins",
-                column: "UserId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserRoles_RoleId",
@@ -462,29 +390,19 @@ namespace ProjectManagerAPI.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserRoles_UserId1",
-                table: "AspNetUserRoles",
-                column: "UserId1");
-
-            migrationBuilder.CreateIndex(
                 name: "EmailIndex",
                 table: "AspNetUsers",
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_GroupID",
+                name: "IX_AspNetUsers_GroupRef",
                 table: "AspNetUsers",
-                column: "GroupID");
+                column: "GroupRef");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUsers_ParentNId",
                 table: "AspNetUsers",
                 column: "ParentNId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_UserTypeID",
-                table: "AspNetUsers",
-                column: "UserTypeID");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
@@ -494,19 +412,28 @@ namespace ProjectManagerAPI.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserTokens_UserId1",
-                table: "AspNetUserTokens",
-                column: "UserId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Avatars_UserID",
                 table: "Avatars",
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Groups_GroupTypeID",
+                name: "IX_Groups_GroupTypeFK",
                 table: "Groups",
-                column: "GroupTypeID");
+                column: "GroupTypeFK");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Groups_Name",
+                table: "Groups",
+                column: "Name",
+                unique: true,
+                filter: "[Name] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GroupTypes_Name",
+                table: "GroupTypes",
+                column: "Name",
+                unique: true,
+                filter: "[Name] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GroupTypes_ParentNID",
@@ -514,9 +441,23 @@ namespace ProjectManagerAPI.Migrations
                 column: "ParentNID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Phases_Name",
+                table: "Phases",
+                column: "Name",
+                unique: true,
+                filter: "[Name] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Phases_ReportID",
                 table: "Phases",
                 column: "ReportID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Projects_Name",
+                table: "Projects",
+                column: "Name",
+                unique: true,
+                filter: "[Name] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reports_GroupID",
@@ -524,9 +465,23 @@ namespace ProjectManagerAPI.Migrations
                 column: "GroupID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Reports_Name",
+                table: "Reports",
+                column: "Name",
+                unique: true,
+                filter: "[Name] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Reports_ProjectID",
                 table: "Reports",
                 column: "ProjectID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tasks_Name",
+                table: "Tasks",
+                column: "Name",
+                unique: true,
+                filter: "[Name] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_PhaseID",
@@ -537,11 +492,6 @@ namespace ProjectManagerAPI.Migrations
                 name: "IX_Tasks_UserID",
                 table: "Tasks",
                 column: "UserID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserTypes_ParentNID",
-                table: "UserTypes",
-                column: "ParentNID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -575,9 +525,6 @@ namespace ProjectManagerAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Phases");
-
-            migrationBuilder.DropTable(
-                name: "UserTypes");
 
             migrationBuilder.DropTable(
                 name: "Reports");

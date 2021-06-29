@@ -14,8 +14,8 @@ namespace ProjectManagerAPI.Core.Models
             this.IsSuperuser = false;
             Tasks = new List<Task>();
             Avatars = new List<Avatar>();
-            DateCreated = DateTime.Now;
-            DateModified = DateTime.Now;
+            //DateCreated = DateTime.Now;
+            //DateModified = DateTime.Now;
         }
         public override Guid Id
         {
@@ -24,17 +24,16 @@ namespace ProjectManagerAPI.Core.Models
         }
         public string Name { get; set; }
         public string? Bio { get; set; }
-        public DateTime DateCreated { get; set; }
-        public DateTime DateModified { get; set; }
+        public DateTime? DateCreated { get; set; }
+        public DateTime? DateModified { get; set; }
         public bool IsActived { get; set; }
         [DefaultValue(false)]
         public bool IsDeleted { get; set; }
-        public Guid UserTypeID { get; set; }
         public User? ParentN { get; set; }
         [DefaultValue(false)]
         public bool IsSuperuser { get; set; }
         public Guid? GroupRef { get; set; }
-        public Group Group { get; set; }
+        public Group? Group { get; set; }
         public ICollection<Task> Tasks { get; set; }
         public ICollection<Avatar> Avatars { get; set; }
         public virtual ICollection<IdentityUserClaim<Guid>> Claims { get; set; }

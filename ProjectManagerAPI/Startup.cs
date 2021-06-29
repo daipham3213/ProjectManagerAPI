@@ -156,7 +156,7 @@ namespace ProjectManagerAPI
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Upico v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "PM API v1"));
             }
 
             app.UseCors(_myAllowSpecificOrigins);

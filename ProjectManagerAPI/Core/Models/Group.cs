@@ -15,8 +15,8 @@ namespace ProjectManagerAPI.Core.Models
         {
             Users = new List<User>();
             Reports = new List<Report>();
-            base.DateCreated = DateTime.Now;
-            base.DateModified = DateTime.Now;
+            //base.DateCreated = DateTime.Now;
+            //base.DateModified = DateTime.Now;
             base.IsActived = true;
         }
     }

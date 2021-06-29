@@ -1,17 +1,22 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProjectManagerAPI.Core.Models;
 
 namespace ProjectManagerAPI.Persistence.EntityConfigurations
 {
-    public class UserConfiguration : BaseConfiguration
+    public class UserConfiguration : IEntityTypeConfiguration<User>
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.HasKey(u => u.Id);
             builder.Property(u => u.Id).ValueGeneratedOnAdd();
 
-            builder.Property(x => x.DateCreated).ValueGeneratedOnAdd();
-            builder.Property(x => x.DateModified).ValueGeneratedOnAddOrUpdate();
+            builder.Property(x => x.DateCreated)
+                .HasDefaultValueSql("getdate()")
+                .ValueGeneratedOnAdd();
+            builder.Property(x => x.DateModified)
+                .HasDefaultValueSql("getdate()")
+                .ValueGeneratedOnAddOrUpdate();
             builder.HasOne(u => u.Group)
                 .WithMany(e => e.Users)
                 .HasForeignKey(k => k.GroupRef);
@@ -37,7 +42,7 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
             builder.HasMany(e => e.UserRoles)
                 .WithOne()
                 .HasForeignKey(ur => ur.UserId)
-                .IsRequired();
+                .IsRequired();         
         }
     }
 }

@@ -17,19 +17,19 @@ namespace ProjectManagerAPI.Controllers
             this._unitOfWork = unitOfWork;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var projects = await _unitOfWork.Projects.GetAll();
-            return Ok(projects);
-        }
+        //[HttpGet]
+        //public async Task<IActionResult> GetAll()
+        //{
+        //    var projects = await _unitOfWork.Projects.GetAll();
+        //    return Ok(projects);
+        //}
 
-        [HttpGet]
-        public async Task<IActionResult> GetProjectID(Guid idPro)
-        {
-            var projects = await _unitOfWork.Projects.Get(idPro);
-            return Ok(projects);
-        }
+        //[HttpGet]
+        //public async Task<IActionResult> GetProjectID(Guid idPro)
+        //{
+        //    var projects = await _unitOfWork.Projects.Get(idPro);
+        //    return Ok(projects);
+        //}
 
 
     }

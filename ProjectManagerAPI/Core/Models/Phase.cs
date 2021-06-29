@@ -12,8 +12,8 @@ namespace ProjectManagerAPI.Core.Models
         public ICollection<Task> Tasks { get; set; }
         public Phase()
         {
-            base.DateCreated = DateTime.Now;
-            base.DateModified = DateTime.Now;
+            //base.DateCreated = DateTime.Now;
+            //base.DateModified = DateTime.Now;
             base.IsActived = true;
             Tasks = new List<Task>();
         }
