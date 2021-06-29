@@ -174,7 +174,6 @@ namespace ProjectManagerAPI.Persistence.Services
             {
                 listError.Add("Username already exists");
             }
-            var type = await _unitOfWork.UserTypes.GetTypeByName("Member");
             user = new User()
             {
                 UserName = request.Username,
@@ -198,15 +197,17 @@ namespace ProjectManagerAPI.Persistence.Services
 
             throw new Exception("Error while creating user account.");
         }
-
+        
         public async Task<List<User>> SearchUser(string key)
         {
             var users = new List<User>();
-
-            var user = await this._unitOfWork.Users.SearchUserById(key);
-            if (user != null)
+            
+            Guid guidOutput;
+            User user;
+            bool isValid = Guid.TryParse(key, out guidOutput);
+            if (isValid)
             {
-                users.Add(user);
+                user = await this._unitOfWork.Users.SearchUserById(guidOutput);
             }
 
             user = await this._unitOfWork.Users.SearchUserByUsername(key);

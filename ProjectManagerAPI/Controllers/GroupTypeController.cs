@@ -20,15 +20,13 @@ namespace ProjectManagerAPI.Controllers
     public class GroupTypeController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IGroupTypeService _groupTypeService;
+        private readonly IUnitOfWork _unitOfWork;  
         private readonly ITokenParser _tokenParser;
 
-        public GroupTypeController(IMapper mapper, IUnitOfWork unitOfWork, IGroupTypeService groupTypeService, ITokenParser tokenParser)
+        public GroupTypeController(IMapper mapper, IUnitOfWork unitOfWork, ITokenParser tokenParser)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
-            _groupTypeService = groupTypeService;
             _tokenParser = tokenParser;
         }
 
@@ -59,7 +57,7 @@ namespace ProjectManagerAPI.Controllers
             {
                 return NotFound();
             }
-            await this._groupTypeService.GetParents(type.ID);
+            await this._unitOfWork.GroupTypes.GetParents(type.ID);
             var result = _mapper.Map<GroupType, GroupTypeResource>(type);
             return Ok(result);
         }
@@ -84,10 +82,6 @@ namespace ProjectManagerAPI.Controllers
             if (groupType.ParentNID != null)
                 type.ParentN = await this._unitOfWork.GroupTypes.SingleOrDefault(c => c.ID == groupType.ParentNID);
             type.Remark = groupType.Remark;
-            type.IsActived = true;
-            type.IsDeleted = false;
-            type.DateCreated = DateTime.Now;
-            type.DateModified = DateTime.Now;
             type.UserCreated = user.Id;
 
             try
@@ -95,7 +89,7 @@ namespace ProjectManagerAPI.Controllers
                 await this._unitOfWork.GroupTypes.Add(type);
                 await this._unitOfWork.Complete();
                 type = await this._unitOfWork.GroupTypes.GetTypeByName(type.Name);
-                await this._groupTypeService.GetParents(type.ID);
+                await this._unitOfWork.GroupTypes.GetParents(type.ID);
                 var result = this._mapper.Map<GroupType, CreatedGroupType>(type);
                 return Ok(result);
             }

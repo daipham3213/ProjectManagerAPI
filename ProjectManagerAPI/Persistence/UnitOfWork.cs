@@ -14,16 +14,24 @@ namespace ProjectManagerAPI.Persistence
 
         public IUserRepository Users { get; private set; }
 
-        public IUserTypeRepository UserTypes { get; private set; }
 
-        public UnitOfWork(ProjectManagerDBContext context, IGroupTypeRepository groupTypes, IProjectRepository projects, IAvatarRepository avatars, IUserRepository users, IUserTypeRepository userTypes)
+        public IGroupRepository Groups { get; private set; }
+
+        public UnitOfWork(
+            ProjectManagerDBContext context,
+            IGroupTypeRepository groupTypes,
+            IProjectRepository projects,
+            IAvatarRepository avatars,
+            IUserRepository users,        
+            IGroupRepository groups
+            )
         {
             _context = context;
             GroupTypes = groupTypes;
             Projects = projects;
             Avatars = avatars;
             Users = users;
-            UserTypes = userTypes;
+            Groups = groups;
         }
         public async Task<int> Complete()
         {

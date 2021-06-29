@@ -14,7 +14,8 @@ namespace ProjectManagerAPI.Core.Models
             this.IsSuperuser = false;
             Tasks = new List<Task>();
             Avatars = new List<Avatar>();
-            
+            DateCreated = DateTime.Now;
+            DateModified = DateTime.Now;
         }
         public override Guid Id
         {
@@ -29,7 +30,6 @@ namespace ProjectManagerAPI.Core.Models
         [DefaultValue(false)]
         public bool IsDeleted { get; set; }
         public Guid UserTypeID { get; set; }
-        public UserType UserType { get; set; }
         public User? ParentN { get; set; }
         [DefaultValue(false)]
         public bool IsSuperuser { get; set; }

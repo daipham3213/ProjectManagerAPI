@@ -10,7 +10,7 @@ namespace ProjectManagerAPI.Core
         IProjectRepository Projects { get; }
         IAvatarRepository Avatars { get; }
         IUserRepository Users { get; }
-        IUserTypeRepository UserTypes { get; }
+        IGroupRepository Groups { get; }
         Task<int> Complete();
     }
 }

@@ -55,5 +55,13 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             t.ParentN = null;
             _context.SaveChanges();
         }
+        public async Task<GroupType> GetParents(Guid postId)
+        {
+            var child = await _context.GroupTypes.SingleOrDefaultAsync(u => u.ID == postId);
+
+            if (child.ParentN == null)
+                return child;
+            return await GetParents(child.ParentN.ID);
+        }
     }
 }

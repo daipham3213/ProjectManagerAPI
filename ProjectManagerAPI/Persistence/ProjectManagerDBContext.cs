@@ -9,7 +9,6 @@ namespace ProjectManagerAPI.Persistence
 {
     public class ProjectManagerDBContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
     {
-        public DbSet<UserType> UserTypes { get; set; }
         public override DbSet<User> Users { get; set; }
         public DbSet<GroupType> GroupTypes { get; set; }
         public DbSet<Group> Groups { get; set; }

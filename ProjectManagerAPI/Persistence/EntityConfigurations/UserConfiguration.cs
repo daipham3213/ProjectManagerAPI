@@ -12,7 +12,6 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
 
             builder.Property(x => x.DateCreated).ValueGeneratedOnAdd();
             builder.Property(x => x.DateModified).ValueGeneratedOnAddOrUpdate();
-            builder.HasOne(u => u.UserType).WithMany(e => e.Users).HasForeignKey(k => k.UserTypeID);
             builder.HasOne(u => u.Group)
                 .WithMany(e => e.Users)
                 .HasForeignKey(k => k.GroupRef);

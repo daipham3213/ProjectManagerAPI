@@ -16,5 +16,13 @@ namespace ProjectManagerAPI.Core.Models
         public Guid GroupID { get; set; }
 
         public ICollection<Phase> Phases { get; set; }
+
+        public Report()
+        {
+            base.DateCreated = DateTime.Now;
+            base.DateModified = DateTime.Now;
+            base.IsActived = true;
+            Phases = new List<Phase>();
+        }
     }
 }
