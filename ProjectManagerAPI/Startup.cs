@@ -81,13 +81,12 @@ namespace ProjectManagerAPI
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUserService, UserSerivce>();
             services.AddScoped<IMailService, MailService>();
-            services.AddScoped<IGroupTypeService, GroupTypeService>();
             services.AddScoped<ITokenParser, TokenParser>();
             services.AddScoped<IPhotoService, PhotoService>();
 
             //Inject core model
-            services.AddScoped<IUserTypeRepository, UsertypeRepository>();
             services.AddScoped<IGroupTypeRepository, GroupTypeRepository>();
+            services.AddScoped<IGroupRepository, GroupRepository>();
             services.AddScoped<IAvatarRepository, AvatarRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IProjectRepository, ProjectRepository>();

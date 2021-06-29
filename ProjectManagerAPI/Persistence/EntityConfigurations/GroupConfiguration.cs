@@ -10,6 +10,7 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
             builder.HasOne(x => x.GroupType)
                 .WithMany(e => e.Group)
                 .HasForeignKey(f => f.GroupTypeFK);
+            builder.Property(u => u.LeaderID).ValueGeneratedOnAdd();
         }
     }
 }

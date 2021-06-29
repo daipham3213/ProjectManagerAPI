@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjectManagerAPI.Persistence;
 
 namespace ProjectManagerAPI.Migrations
 {
     [DbContext(typeof(ProjectManagerDBContext))]
-    partial class ProjectManagerDBContextModelSnapshot : ModelSnapshot
+    [Migration("20210628052707_update-group")]
+    partial class updategroup
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -591,7 +593,46 @@ namespace ProjectManagerAPI.Migrations
 
                     b.HasIndex("ParentNId");
 
+                    b.HasIndex("UserTypeID");
+
                     b.ToTable("AspNetUsers");
+                });
+
+            modelBuilder.Entity("ProjectManagerAPI.Core.Models.UserType", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActived")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ParentNID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Remark")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserCreated")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ParentNID");
+
+                    b.ToTable("UserTypes");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -749,7 +790,24 @@ namespace ProjectManagerAPI.Migrations
                         .WithMany()
                         .HasForeignKey("ParentNId");
 
+                    b.HasOne("ProjectManagerAPI.Core.Models.UserType", "UserType")
+                        .WithMany("Users")
+                        .HasForeignKey("UserTypeID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Group");
+
+                    b.Navigation("ParentN");
+
+                    b.Navigation("UserType");
+                });
+
+            modelBuilder.Entity("ProjectManagerAPI.Core.Models.UserType", b =>
+                {
+                    b.HasOne("ProjectManagerAPI.Core.Models.UserType", "ParentN")
+                        .WithMany()
+                        .HasForeignKey("ParentNID");
 
                     b.Navigation("ParentN");
                 });
@@ -794,6 +852,11 @@ namespace ProjectManagerAPI.Migrations
                     b.Navigation("Tokens");
 
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("ProjectManagerAPI.Core.Models.UserType", b =>
+                {
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

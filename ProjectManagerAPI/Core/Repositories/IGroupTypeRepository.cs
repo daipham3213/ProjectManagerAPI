@@ -12,5 +12,6 @@ namespace ProjectManagerAPI.Core.Repositories
         public Task<IEnumerable<GroupType>> LoadValidated();
         public Task<GroupType> GetTypeByName(string name);
         void RemoveAllChildren(Guid groupID);
+        public Task<GroupType> GetParents(Guid postId);
     }
 }
