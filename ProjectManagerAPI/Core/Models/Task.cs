@@ -7,8 +7,8 @@ namespace ProjectManagerAPI.Core.Models
     {
         public Task()
         {
-            base.DateCreated = DateTime.Now;
-            base.DateModified = DateTime.Now;
+            //base.DateCreated = DateTime.Now;
+            //base.DateModified = DateTime.Now;
             base.IsActived = true;
         }
 

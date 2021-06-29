@@ -23,7 +23,7 @@ namespace ProjectManagerAPI.Persistence.Services
             _config = config;
         }
 
-        public async Task<User> LoginResponse(string tokenString)
+        public async Task<User> GetUserByToken(string tokenString)
         {
             LoginResponse response = new LoginResponse();
             response = GetValues(tokenString);

@@ -4,15 +4,23 @@ using ProjectManagerAPI.Core.Models;
 
 namespace ProjectManagerAPI.Persistence.EntityConfigurations
 {
-    public class BaseConfiguration : IEntityTypeConfiguration<BaseModel>
+    public abstract class BaseConfiguration<TBase> : IEntityTypeConfiguration<TBase>
+    where TBase : BaseModel
     {
-        public void Configure(EntityTypeBuilder<BaseModel> builder)
+        public virtual void Configure(EntityTypeBuilder<TBase> builder)
         {
             builder.HasKey(k => k.ID);
-            builder.Property(x => x.ID).ValueGeneratedOnAdd()
+            builder.Property(x => x.ID)
+                .ValueGeneratedOnAdd()
                 .IsRequired();
-            builder.Property(x => x.DateCreated).ValueGeneratedOnAdd();
-            builder.Property(x => x.DateModified).ValueGeneratedOnAddOrUpdate();
+            builder.Property(x => x.DateCreated)
+                .HasDefaultValueSql("getdate()")
+                .ValueGeneratedOnAdd();
+            builder.HasIndex(x => x.Name).IsUnique(true);
+            builder.Property(x => x.DateModified)
+                .HasDefaultValueSql("getdate()")
+                .ValueGeneratedOnAddOrUpdate();
+            builder.Property(x => x.IsActived).HasDefaultValue(true);
         }
     }
 }

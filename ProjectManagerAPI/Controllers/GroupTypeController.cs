@@ -69,7 +69,7 @@ namespace ProjectManagerAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             string token = await HttpContext.GetTokenAsync("access_token");
-            var user = await _tokenParser.LoginResponse(token);
+            var user = await _tokenParser.GetUserByToken(token);
             if (user == null)
                 return BadRequest("Authentication credentials is not provided");
             var parent_n = this._unitOfWork.GroupTypes.Find(c => c.ID == groupType.ParentN.ID);

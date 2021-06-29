@@ -5,6 +5,6 @@ namespace ProjectManagerAPI.Core.Services
 {
     public interface ITokenParser
     {
-        public Task<User> LoginResponse(string token);
+        public Task<User> GetUserByToken(string token);
     }
 }

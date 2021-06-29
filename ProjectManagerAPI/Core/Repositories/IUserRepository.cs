@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Core.Repositories
 {
-    public interface IUserRepository
+    public interface IUserRepository 
     {
         public Task<User> GetUser(string userName);
         public Task<User> GetUserProfile(string username);

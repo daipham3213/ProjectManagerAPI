@@ -5,7 +5,6 @@ using ProjectManagerAPI.Core.Models;
 namespace ProjectManagerAPI.Persistence.EntityConfigurations
 {
     public class AvatarConfiguration : IEntityTypeConfiguration<Avatar>
-
     {
         public void Configure(EntityTypeBuilder<Avatar> builder)
         {
@@ -14,8 +13,6 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
             builder.HasOne(a => a.User)
                 .WithMany(au => au.Avatars)
                 .HasForeignKey(a => a.UserID);
-
-
             builder.Property(a => a.Path).IsRequired();
         }
     }
