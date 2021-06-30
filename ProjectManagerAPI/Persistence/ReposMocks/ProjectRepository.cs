@@ -1,14 +1,13 @@
 ﻿using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Persistence;
 using ProjectManagerAPI.Persistence.ReposMocks;
-using System;
 
 namespace ProjectManagerAPI.Core.Repositories
 {
-    public class ProjectRepository : Persistence.ReposMocks.Repository<Project>, IProjectRepository
+    public class ProjectRepository : Repository<Project>, IProjectRepository
     {
-        private readonly ProjectManagerDBContext _context;
-        public ProjectRepository(ProjectManagerDBContext context)
+        private readonly ProjectManagerDbContext _context;
+        public ProjectRepository(ProjectManagerDbContext context)
             : base(context)
         {
             _context = context;

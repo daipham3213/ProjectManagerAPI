@@ -1,14 +1,14 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.ServiceResource;
 using ProjectManagerAPI.Core.Services;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Persistence.Services
 {
@@ -27,7 +27,7 @@ namespace ProjectManagerAPI.Persistence.Services
         {
             LoginResponse response = new LoginResponse();
             response = GetValues(tokenString);
-            var user = await this._unitOfWork.Users.GetUser(response.UserName);
+            var user = await _unitOfWork.Users.GetUser(response.UserName);
             
             return user;
         }

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Core.Resources
 {
@@ -15,7 +12,7 @@ namespace ProjectManagerAPI.Core.Resources
         public string Email { get; set; }
         public bool EmailConfirmed { get; set; }
         public string AvatarUrl { get; set; }
-        public Guid GroupID { get; set; }
-        public Guid UserTypeID { get; set; }
+        public Guid GroupId { get; set; }
+        public Guid UserTypeId { get; set; }
     }
 }

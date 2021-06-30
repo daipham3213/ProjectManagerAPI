@@ -8,7 +8,7 @@ namespace ProjectManagerAPI.Core.Resources
         #nullable enable
         public string? Remark { get; set; }
         #nullable enable
-        public Guid? ParentNID { get; set; }
+        public Guid? ParentNid { get; set; }
         #nullable enable
         public GroupTypeResource? ParentN { get; set; }
     }

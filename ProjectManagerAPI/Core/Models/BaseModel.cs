@@ -1,13 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
 
 namespace ProjectManagerAPI.Core.Models
 {
     public class BaseModel
     {
-        public Guid ID { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public string? Remark { get; set; }        
         public DateTime? DateCreated { get; set; } 

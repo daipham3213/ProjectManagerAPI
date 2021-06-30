@@ -1,12 +1,12 @@
-﻿using ProjectManagerAPI.Core;
+﻿using System.Threading.Tasks;
+using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Repositories;
-using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Persistence
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly ProjectManagerDBContext _context;
+        private readonly ProjectManagerDbContext _context;
         public IGroupTypeRepository GroupTypes { get; private set; }
         public IProjectRepository Projects { get; private set; }
 
@@ -16,14 +16,17 @@ namespace ProjectManagerAPI.Persistence
 
 
         public IGroupRepository Groups { get; private set; }
+        public IReportRepository Reports { get; private set; }
+
 
         public UnitOfWork(
-            ProjectManagerDBContext context,
+            ProjectManagerDbContext context,
             IGroupTypeRepository groupTypes,
             IProjectRepository projects,
             IAvatarRepository avatars,
             IUserRepository users,        
-            IGroupRepository groups
+            IGroupRepository groups,
+            IReportRepository reports
             )
         {
             _context = context;
@@ -32,15 +35,16 @@ namespace ProjectManagerAPI.Persistence
             Avatars = avatars;
             Users = users;
             Groups = groups;
+            Reports = reports;
         }
         public async Task<int> Complete()
         {
-            return await this._context.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
         public void Dispose()
         {
-            this._context.Dispose();
+            _context.Dispose();
         }
     }
 }
