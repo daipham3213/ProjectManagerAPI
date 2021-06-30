@@ -17,6 +17,7 @@ namespace ProjectManagerAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProjectController : ControllerBase
     {
         private readonly ITokenParser _tokenParser;
@@ -30,7 +31,6 @@ namespace ProjectManagerAPI.Controllers
 
 
         [HttpGet("all")]
-        [HttpGet]
         [Authorize(Roles = RoleNames.RoleAdmin)]
         public async Task<IActionResult> GetAll()
         {
@@ -67,11 +67,10 @@ namespace ProjectManagerAPI.Controllers
 
 
         [HttpDelete]
-        [HttpGet("{id}")]
         [Authorize(Roles = RoleNames.RoleAdmin)]
         public async Task<IActionResult> DeleteProject(Guid idPro)
         {
-            var project = await this._unitOfWork.Projects.SingleOrDefault(c => c.ID == idPro);
+            var project = await this._unitOfWork.Projects.SingleOrDefault(c => c.Id == idPro);
             if (project == null)
                 return BadRequest();
 
@@ -82,7 +81,6 @@ namespace ProjectManagerAPI.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = RoleNames.RoleAdmin)]
         public async Task<IActionResult> create([FromBody] CreateProject project) {
             if (!ModelState.IsValid)
                 return new JsonResult("The information provided for creation is not valid")
@@ -107,7 +105,7 @@ namespace ProjectManagerAPI.Controllers
                 await this._unitOfWork.Complete();
 
 
-                entity = await this._unitOfWork.Projects.SearcProjectByName(entity.Name);
+                entity = await this._unitOfWork.Projects.SearchProjectByName(entity.Name);
              
                 var result = this._mapper.Map<Project, CreateProject>(entity);
                 return Ok(result);

@@ -7,6 +7,6 @@ namespace ProjectManagerAPI.Core.Repositories
     public interface IProjectRepository : IRepository<Project>
     {
         public Task<IEnumerable<Project>> LoadValidated();
-        public Task<Project> SearcProjectByName(string name);
+        public Task<Project> SearchProjectByName(string name);
     }
 }

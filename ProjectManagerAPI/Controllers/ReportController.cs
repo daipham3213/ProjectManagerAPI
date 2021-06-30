@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using ProjectManagerAPI.Core;
@@ -18,14 +19,16 @@ namespace ProjectManagerAPI.Controllers
     [Authorize]
     public class ReportController : Controller
     {
-        public ReportController(ITokenParser tokenParser, IUnitOfWork unitOfWork)
+        public ReportController(ITokenParser tokenParser, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _tokenParser = tokenParser;
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         private readonly ITokenParser _tokenParser;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
 
         [HttpPost]

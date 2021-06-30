@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using ProjectManagerAPI.Core.Models;
-using ProjectManagerAPI.Persistence;
-using ProjectManagerAPI.Persistence.ReposMocks;
+using ProjectManagerAPI.Core.Repositories;
 
-namespace ProjectManagerAPI.Core.Repositories
+namespace ProjectManagerAPI.Persistence.ReposMocks
 {
     public class ProjectRepository : Repository<Project>, IProjectRepository
     {
@@ -14,10 +16,9 @@ namespace ProjectManagerAPI.Core.Repositories
             _context = context;
         }
    
-        public async Task<Project> SearcProjectByName(string name)
+        public async Task<Project> SearchProjectByName(string name)
         {
-        
-               var project = await this._context.Projects.FirstOrDefaultAsync(u => u.Name == name);
+            var project = await this._context.Projects.FirstOrDefaultAsync(u => u.Name == name);
             return project;
         }
 
