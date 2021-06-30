@@ -1,12 +1,13 @@
-﻿using CloudinaryDotNet;
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using ProjectManagerAPI.Core.ServiceResource;
 using ProjectManagerAPI.Core.Services;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Persistence.Services
 {
@@ -46,11 +47,11 @@ namespace ProjectManagerAPI.Persistence.Services
                     return new PhotoResource
                     {
                         Id = Guid.NewGuid(),
-                        publicid = uploadResult.PublicId,
+                        Publicid = uploadResult.PublicId,
                         Url = uploadResult.SecureUrl.ToString()
                     };
                 }
-                catch (System.Net.Http.HttpRequestException e)
+                catch (HttpRequestException e)
                 {
                     Console.WriteLine(e);
                 }

@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProjectManagerAPI.Core.Models;
 
 namespace ProjectManagerAPI.Persistence.EntityConfigurations
@@ -10,7 +9,7 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
         {
             builder.HasOne(x => x.GroupType)
                 .WithMany(e => e.Group)
-                .HasForeignKey(f => f.GroupTypeFK);
+                .HasForeignKey(f => f.GroupTypeFk);
             //builder.Property(u => u.LeaderID).ValueGeneratedOnAdd();
             base.Configure(builder);
         }

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Core.Resources
 {
@@ -9,7 +6,7 @@ namespace ProjectManagerAPI.Core.Resources
     {
         public string Name { get; set; }
         public string Remark { get; set; }
-        public Guid? ParentNID { get; set; }
+        public Guid? ParentNid { get; set; }
         public CreatedUserType? ParentN { get; set; }
     }
 }

@@ -1,10 +1,11 @@
 ﻿
+using System.Threading.Tasks;
 using ProjectManagerAPI.Core.ServiceResource;
 
 namespace ProjectManagerAPI.Core.Services
 {
     public interface IMailService
     {
-        public System.Threading.Tasks.Task SendEmailAsync(MailRequest mailRequest);
+        public Task SendEmailAsync(MailRequest mailRequest);
     }
 }

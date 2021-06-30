@@ -1,5 +1,5 @@
-﻿using ProjectManagerAPI.Core.Models;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using ProjectManagerAPI.Core.Models;
 
 namespace ProjectManagerAPI.Core.Services
 {

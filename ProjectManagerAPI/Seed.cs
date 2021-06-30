@@ -1,20 +1,20 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNetCore.Identity;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.ServiceResource;
 using ProjectManagerAPI.Persistence;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
+using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI
 {
     public class Seed
     {
-        public static async System.Threading.Tasks.Task SeedData(
+        public static async Task SeedData(
             UserManager<User> userManager, 
             RoleManager<IdentityRole<Guid>> roleManager,
-            ProjectManagerDBContext context
+            ProjectManagerDbContext context
             )
         {
             // this seed method for creating some sample data in database

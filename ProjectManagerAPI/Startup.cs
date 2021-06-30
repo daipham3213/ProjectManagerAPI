@@ -1,24 +1,25 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using ProjectManagerAPI.Persistence;
-using ProjectManagerAPI.Core.Models;
-using System;
+using Microsoft.OpenApi.Models;
 using ProjectManagerAPI.Core;
-using ProjectManagerAPI.Persistence.Services;
+using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Repositories;
-using ProjectManagerAPI.Persistence.ReposMocks;
-using Microsoft.AspNetCore.Mvc;
 using ProjectManagerAPI.Core.ServiceResource;
 using ProjectManagerAPI.Core.Services;
+using ProjectManagerAPI.Persistence;
+using ProjectManagerAPI.Persistence.ReposMocks;
+using ProjectManagerAPI.Persistence.Services;
 
 namespace ProjectManagerAPI
 {
@@ -59,15 +60,15 @@ namespace ProjectManagerAPI
 
             services.AddControllers().AddNewtonsoftJson();
 
-            services.AddDbContext<ProjectManagerDBContext>(options => options.UseSqlServer(Configuration.GetConnectionString("LocalDB")));
+            services.AddDbContext<ProjectManagerDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("LocalDB")));
             services.AddIdentity<User, IdentityRole<Guid>>(opt =>
             {
                 opt.Password.RequireNonAlphanumeric = false;
                 opt.Password.RequireUppercase = false;
                 opt.Password.RequireDigit = false;
-                opt.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@";
+                opt.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_@";
             })
-                .AddEntityFrameworkStores<ProjectManagerDBContext>()
+                .AddEntityFrameworkStores<ProjectManagerDbContext>()
                 .AddDefaultTokenProviders();
 
 
@@ -90,6 +91,7 @@ namespace ProjectManagerAPI
             services.AddScoped<IAvatarRepository, AvatarRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IProjectRepository, ProjectRepository>();
+            services.AddScoped<IReportRepository, ReportRepository>();
 
             services.AddSwaggerGen(c =>
             {
@@ -104,7 +106,7 @@ namespace ProjectManagerAPI
                     Type = SecuritySchemeType.ApiKey,
                     Scheme = "Bearer"
                 });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
                     {
                         new OpenApiSecurityScheme
@@ -126,7 +128,7 @@ namespace ProjectManagerAPI
             //Authentication
             string issuer = Configuration.GetValue<string>("Tokens:Issuer");
             string signingKey = Configuration.GetValue<string>("Tokens:Key");
-            byte[] signingKeyBytes = System.Text.Encoding.UTF8.GetBytes(signingKey);
+            byte[] signingKeyBytes = Encoding.UTF8.GetBytes(signingKey);
 
             var key = new SymmetricSecurityKey(signingKeyBytes);
 

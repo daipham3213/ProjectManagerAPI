@@ -1,12 +1,12 @@
-﻿using ProjectManagerAPI.Core.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using ProjectManagerAPI.Core.Models;
 
 namespace ProjectManagerAPI.Core.Resources
 {
     public class GroupTypeResource
     {
-        public Guid ID { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public string? Remark { get; set; }
         public DateTime? DateCreated { get; set; }

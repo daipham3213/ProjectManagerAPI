@@ -1,4 +1,7 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,10 +10,6 @@ using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Resources;
 using ProjectManagerAPI.Core.ServiceResource;
 using ProjectManagerAPI.Core.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Controllers
 {
@@ -51,13 +50,13 @@ namespace ProjectManagerAPI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(Guid id)
         {
-            await this._unitOfWork.GroupTypes.GetAll();
+            await _unitOfWork.GroupTypes.GetAll();
             var type = await _unitOfWork.GroupTypes.Get(id);
             if (type == null)
             {
                 return NotFound();
             }
-            await this._unitOfWork.GroupTypes.GetParents(type.ID);
+            await _unitOfWork.GroupTypes.GetParents(type.Id);
             var result = _mapper.Map<GroupType, GroupTypeResource>(type);
             return Ok(result);
         }
@@ -74,29 +73,25 @@ namespace ProjectManagerAPI.Controllers
            
             if (user == null)
                 return BadRequest("Authentication credentials is not provided");
-            var parent_n = this._unitOfWork.GroupTypes.Find(c => c.ID == groupType.ParentN.ID);
-        
-            if (parent_n == null & groupType.ParentNID != null)
+            var parentN = _unitOfWork.GroupTypes.Find(c => c.Id == groupType.ParentN.Id);
+            if (parentN == null & groupType.ParentNid != null)
                 return BadRequest();
 
             //Init new entity
             var type = new GroupType();
             type.Name = groupType.Name;
-            
-            if (groupType.ParentNID != null)
-                type.ParentN = await this._unitOfWork.GroupTypes.SingleOrDefault(c => c.ID == groupType.ParentNID);
+            if (groupType.ParentNid != null)
+                type.ParentN = await _unitOfWork.GroupTypes.SingleOrDefault(c => c.Id == groupType.ParentNid);
             type.Remark = groupType.Remark;
             type.UserCreated = user.Id;
 
             try
             {
-                await this._unitOfWork.GroupTypes.Add(type);
-                await this._unitOfWork.Complete();
-             
-                type = await this._unitOfWork.GroupTypes.GetTypeByName(type.Name);
-                await this._unitOfWork.GroupTypes.GetParents(type.ID);
-                
-                var result = this._mapper.Map<GroupType, CreatedGroupType>(type);
+                await _unitOfWork.GroupTypes.Add(type);
+                await _unitOfWork.Complete();
+                type = await _unitOfWork.GroupTypes.GetTypeByName(type.Name);
+                await _unitOfWork.GroupTypes.GetParents(type.Id);
+                var result = _mapper.Map<GroupType, CreatedGroupType>(type);
                 return Ok(result);
             }
             catch (Exception e)
@@ -107,15 +102,15 @@ namespace ProjectManagerAPI.Controllers
 
         [HttpDelete]
         [Authorize(Roles = RoleNames.RoleAdmin)]
-        public async Task<IActionResult> DeleteType(Guid typeID)
+        public async Task<IActionResult> DeleteType(Guid typeId)
         {
-            var type = await this._unitOfWork.GroupTypes.SingleOrDefault(c => c.ID == typeID);
+            var type = await _unitOfWork.GroupTypes.SingleOrDefault(c => c.Id == typeId);
             if (type == null)
                 return BadRequest();
 
-            this._unitOfWork.GroupTypes.RemoveAllChildren(typeID);
-            this._unitOfWork.GroupTypes.Remove(type);
-            await this._unitOfWork.Complete();
+            _unitOfWork.GroupTypes.RemoveAllChildren(typeId);
+            _unitOfWork.GroupTypes.Remove(type);
+            await _unitOfWork.Complete();
 
             return Ok();
         }

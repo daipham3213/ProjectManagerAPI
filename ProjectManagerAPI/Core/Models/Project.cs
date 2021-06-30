@@ -13,7 +13,7 @@ namespace ProjectManagerAPI.Core.Models
             Reports = new List<Report>();
             //base.DateCreated = DateTime.Now;
             //base.DateModified = DateTime.Now;
-            base.IsActived = true;
+            IsActived = true;
         }
     }
 }
