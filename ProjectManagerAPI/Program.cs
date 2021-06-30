@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -6,13 +7,13 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Persistence;
-using System;
+using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI
 {
     public class Program
     {
-        public static async System.Threading.Tasks.Task Main(string[] args)
+        public static async Task Main(string[] args)
         {
 
             //run that when initializing some sample datas
@@ -24,7 +25,7 @@ namespace ProjectManagerAPI
 
             try
             {
-                var context = services.GetRequiredService<ProjectManagerDBContext>();
+                var context = services.GetRequiredService<ProjectManagerDbContext>();
                 var userManager = services.GetRequiredService<UserManager<User>>();
                 var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
                 await context.Database.MigrateAsync();

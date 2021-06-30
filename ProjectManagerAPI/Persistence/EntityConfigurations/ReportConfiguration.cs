@@ -12,10 +12,10 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
             builder.Property(u => u.DueDate).ValueGeneratedOnAdd();
 
             builder.HasOne(p => p.Project).WithMany(r => r.Reports)
-                .HasForeignKey(k => k.ProjectID).OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(k => k.ProjectId).OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(p => p.Group).WithMany(r => r.Reports)
-                .HasForeignKey(k => k.GroupID);
+                .HasForeignKey(k => k.GroupId);
             base.Configure(builder);
         }
     }

@@ -1,11 +1,11 @@
-﻿using ProjectManagerAPI.Core.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using ProjectManagerAPI.Core.Models;
 
 namespace ProjectManagerAPI.Core.Resources
 {
     public class GroupTypeViewResource
     {
-        public string url { get; set; }
+        public string Url { get; set; }
         public string Name { get; set; }
         public string? Remark { get; set; }
         public ICollection<Group> Group { get; set; }

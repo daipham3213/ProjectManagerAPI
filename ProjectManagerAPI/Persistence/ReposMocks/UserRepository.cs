@@ -1,18 +1,19 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ProjectManagerAPI.Core.Models;
-using ProjectManagerAPI.Core.Repositories;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using ProjectManagerAPI.Core.Models;
+using ProjectManagerAPI.Core.Repositories;
+using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI.Persistence.ReposMocks
 {
     public class UserRepository : Repository<User>, IUserRepository
     {
-        private readonly ProjectManagerDBContext _context;
+        private readonly ProjectManagerDbContext _context;
 
-        public UserRepository(ProjectManagerDBContext context)
+        public UserRepository(ProjectManagerDbContext context)
             : base(context)
         {
             _context = context;
@@ -20,12 +21,12 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
 
         public async Task<User> GetUser(string userName)
         {
-            return await this._context.Users.SingleOrDefaultAsync(u => u.UserName == userName);
+            return await _context.Users.SingleOrDefaultAsync(u => u.UserName == userName);
         }
 
         public async Task<User> GetUserProfile(string username)
         {
-            var user = await this._context.Users
+            var user = await _context.Users
                 .Include(u => u.Tasks)
                 .Include(u => u.Avatars)
                 .SingleOrDefaultAsync(u => u.UserName == username);
@@ -33,27 +34,27 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             return user;
         }
 
-        public async System.Threading.Tasks.Task LoadMainAvatar(string userName)
+        public async Task LoadMainAvatar(string userName)
         {
-            await this._context.Avatars.Where(a => a.IsMain && a.User.UserName == userName).LoadAsync();
+            await _context.Avatars.Where(a => a.IsMain && a.User.UserName == userName).LoadAsync();
         }
 
         public async Task<User> SearchUserById(Guid id)
         {
-            var user = await this._context.Users.SingleOrDefaultAsync(u => u.Id == id);
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == id);
             return user;
         }
 
         public async Task<User> SearchUserByUsername(string username)
         {
-            var user = await this._context.Users.SingleOrDefaultAsync(u => u.UserName == username);
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.UserName == username);
 
             return user;
         }
 
         public async Task<List<User>> SearchUsersByDisplayName(string displayName)
         {
-            var users = await this._context.Users.Where(u => u.Name.Contains(displayName)).ToListAsync();
+            var users = await _context.Users.Where(u => u.Name.Contains(displayName)).ToListAsync();
 
             return users;
         }

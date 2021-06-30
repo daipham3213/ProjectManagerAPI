@@ -1,11 +1,11 @@
-﻿using MailKit.Net.Smtp;
+﻿using System.IO;
+using System.Threading.Tasks;
+using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using ProjectManagerAPI.Core.ServiceResource;
 using ProjectManagerAPI.Core.Services;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Persistence.Services
 {

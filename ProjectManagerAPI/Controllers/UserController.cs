@@ -1,7 +1,7 @@
-﻿using AutoMapper;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using ProjectManagerAPI.Core;
@@ -9,10 +9,6 @@ using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Resources;
 using ProjectManagerAPI.Core.ServiceResource;
 using ProjectManagerAPI.Core.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Controllers
 {
@@ -42,16 +38,16 @@ namespace ProjectManagerAPI.Controllers
             var result = new NotifyResult();
             if (response == null)
             {
-                result.result = "Username or Password incorrect.";
-                result.code = "400";
+                result.Result = "Username or Password incorrect.";
+                result.Code = "400";
                 return BadRequest(Json(result)); 
             }
             if (!response.IsActivated)
             {
                 var callbackurl = _configuration["HostUrl:local"]+ "/api/User/sendActivationEmail?username="+request.Username;
-                result.detail = callbackurl;
-                result.result = "Account have not activated. Please click the link below to recive your activation email.";
-                result.code = "400";
+                result.Detail = callbackurl;
+                result.Result = "Account have not activated. Please click the link below to recive your activation email.";
+                result.Code = "400";
                 return BadRequest(Json(result));
             }
                 
@@ -75,26 +71,24 @@ namespace ProjectManagerAPI.Controllers
                 await SendActivationEmail(user.Username);
                 return Ok();
             }
-            else
+
+            if (errors.Count == 1)
             {
-                if (errors.Count == 1)
+                if (errors[0] == "Email already in use")
                 {
-                    if (errors[0] == "Email already in use")
+                    error = new
                     {
-                        error = new
-                        {
-                            EmailError = "Email already in use",
-                            UserNameError = "",
-                        };
-                    }
-                    else
+                        EmailError = "Email already in use",
+                        UserNameError = "",
+                    };
+                }
+                else
+                {
+                    error = new
                     {
-                        error = new
-                        {
-                            EmailError = "",
-                            UserNameError = "Username already exists",
-                        };
-                    }
+                        EmailError = "",
+                        UserNameError = "Username already exists",
+                    };
                 }
             }
 
@@ -104,9 +98,9 @@ namespace ProjectManagerAPI.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Search(string key)
         {
-            var users = await this._userService.SearchUser(key);
+            var users = await _userService.SearchUser(key);
 
-            var result = this._mapper.Map<IList<User>, IList<SearchUserResource>>(users);
+            var result = _mapper.Map<IList<User>, IList<SearchUserResource>>(users);
 
             return Ok(result);
         }
@@ -115,18 +109,18 @@ namespace ProjectManagerAPI.Controllers
         [Authorize]
         public async Task<IActionResult> GetUserProfile(string targetUsername)
         {
-            var user = await this._unitOfWork.Users.GetUserProfile(targetUsername);
+            var user = await _unitOfWork.Users.GetUserProfile(targetUsername);
             
             if (user == null)
             {
                 JsonResult res = new JsonResult(new NotifyResult { 
-                    detail = "User could not be found.",
-                    result = "Bad request.",
-                    code = BadRequest().StatusCode.ToString()
+                    Detail = "User could not be found.",
+                    Result = "Bad request.",
+                    Code = BadRequest().StatusCode.ToString()
             });
                 res.StatusCode = BadRequest().StatusCode;
             }
-            var result = this._mapper.Map<User, UserResource>(user);
+            var result = _mapper.Map<User, UserResource>(user);
 
             return Ok(result);
         }
@@ -137,7 +131,7 @@ namespace ProjectManagerAPI.Controllers
         {
             var callbackurl = _configuration["HostUrl:local"] +"/api/User/confirmChangeEmail";
 
-            await this._userService.SendChangeEmailRequest(username, newEmail, callbackurl);
+            await _userService.SendChangeEmailRequest(username, newEmail, callbackurl);
 
             return Ok();
         }
@@ -148,7 +142,7 @@ namespace ProjectManagerAPI.Controllers
         {
             var callbackurl = _configuration["HostUrl:local"] + "/api/User/confirmActivation";
 
-            await this._userService.SendActivationRequest(username, callbackurl);
+            await _userService.SendActivationRequest(username, callbackurl);
 
             return Ok();
         }
@@ -156,16 +150,16 @@ namespace ProjectManagerAPI.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmChangeEmail(string username, string newEmail, string token)
         {
-            var user = await this._unitOfWork.Users.GetUser(username);
+            var user = await _unitOfWork.Users.GetUser(username);
             if (user == null)
                 return BadRequest();
 
-            var result = await this._userService.ConfirmChangeEmail(username, newEmail, token);
+            var result = await _userService.ConfirmChangeEmail(username, newEmail, token);
             
             if (result)
                 return Ok(Json(new NotifyResult { 
-                    result = "Success change account email.",
-                    code = "200"
+                    Result = "Success change account email.",
+                    Code = "200"
                 }));
 
             return Problem(detail: "Failed.", statusCode: 400);
@@ -175,20 +169,20 @@ namespace ProjectManagerAPI.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmActivation(string username, string token)
         {
-            var user = await this._unitOfWork.Users.GetUser(username);
+            var user = await _unitOfWork.Users.GetUser(username);
             if (user == null)
                 return BadRequest();
 
-            var result = await this._userService.ConfirmActivation(username, token);
+            var result = await _userService.ConfirmActivation(username, token);
 
             if (result)
             {
                 user.IsActived = true;
-                await this._unitOfWork.Complete();
+                await _unitOfWork.Complete();
                 return Ok(Json(new NotifyResult
                 {
-                    result = "Account Activation Success.",
-                    code = "200"
+                    Result = "Account Activation Success.",
+                    Code = "200"
                 }));
             }
 
