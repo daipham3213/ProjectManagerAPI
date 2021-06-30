@@ -10,5 +10,12 @@ namespace ProjectManagerAPI.Core.Models
         public DateTime? DueDate { get; set; }
         public DateTime? StartDate { get; set; }
         public ICollection<Task> Tasks { get; set; }
+        public Phase()
+        {
+            //base.DateCreated = DateTime.Now;
+            //base.DateModified = DateTime.Now;
+            base.IsActived = true;
+            Tasks = new List<Task>();
+        }
     }
 }

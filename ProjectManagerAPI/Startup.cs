@@ -12,13 +12,13 @@ using Microsoft.IdentityModel.Tokens;
 using ProjectManagerAPI.Persistence;
 using ProjectManagerAPI.Core.Models;
 using System;
-using ProjectManagerAPI.Core.Models.ServiceResource;
 using ProjectManagerAPI.Core;
-using ProjectManagerAPI.Core.Models.Services;
 using ProjectManagerAPI.Persistence.Services;
 using ProjectManagerAPI.Core.Repositories;
 using ProjectManagerAPI.Persistence.ReposMocks;
 using Microsoft.AspNetCore.Mvc;
+using ProjectManagerAPI.Core.ServiceResource;
+using ProjectManagerAPI.Core.Services;
 
 namespace ProjectManagerAPI
 {
@@ -57,7 +57,7 @@ namespace ProjectManagerAPI
                 options.SuppressModelStateInvalidFilter = true;
             });
 
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
 
             services.AddDbContext<ProjectManagerDBContext>(options => options.UseSqlServer(Configuration.GetConnectionString("LocalDB")));
             services.AddIdentity<User, IdentityRole<Guid>>(opt =>
@@ -81,11 +81,12 @@ namespace ProjectManagerAPI
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUserService, UserSerivce>();
             services.AddScoped<IMailService, MailService>();
-            services.AddScoped<IGroupTypeService, GroupTypeService>();
+            services.AddScoped<ITokenParser, TokenParser>();
+            services.AddScoped<IPhotoService, PhotoService>();
 
             //Inject core model
-            services.AddScoped<IUserTypeRepository, UsertypeRepository>();
             services.AddScoped<IGroupTypeRepository, GroupTypeRepository>();
+            services.AddScoped<IGroupRepository, GroupRepository>();
             services.AddScoped<IAvatarRepository, AvatarRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IProjectRepository, ProjectRepository>();
@@ -141,7 +142,8 @@ namespace ProjectManagerAPI
                        ValidateIssuerSigningKey = true,
                        IssuerSigningKey = key,
                        ValidateIssuer = false,
-                       ValidateAudience = false
+                       ValidateAudience = false,
+                       SaveSigninToken = true,
                    };
                });
 
@@ -154,7 +156,7 @@ namespace ProjectManagerAPI
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Upico v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "PM API v1"));
             }
 
             app.UseCors(_myAllowSpecificOrigins);

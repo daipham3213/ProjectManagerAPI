@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 
-namespace ProjectManagerAPI.Core.Models.ServiceResource
+namespace ProjectManagerAPI.Core.ServiceResource
 {
     public class MailRequest
     {

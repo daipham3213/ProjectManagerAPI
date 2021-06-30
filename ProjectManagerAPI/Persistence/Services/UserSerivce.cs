@@ -3,8 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
-using ProjectManagerAPI.Core.Models.ServiceResource;
-using ProjectManagerAPI.Core.Models.Services;
+using ProjectManagerAPI.Core.ServiceResource;
+using ProjectManagerAPI.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -50,6 +50,12 @@ namespace ProjectManagerAPI.Persistence.Services
             var result = await _signInManager.PasswordSignInAsync(user, request.Password, request.RememberMe, true);
             if (!result.Succeeded)
                 return null;
+
+            var is_activated = user.IsActived;
+            if (!is_activated)
+                return new LoginResponse{
+                    IsActivated = false
+                };
 
             //get roles
             var roles = await _userManager.GetRolesAsync(user);
@@ -101,15 +107,20 @@ namespace ProjectManagerAPI.Persistence.Services
                 Token = finalToken,
                 DisplayName = user.Name,
                 AvatarUrl = path,
-                RoleName = roles.FirstOrDefault()
+                RoleName = roles.FirstOrDefault(),
+                IsActivated = user.IsActived
             };
 
             return loginResponse;
         }
 
-        public Task<bool> ChangePassword(string userName, string currentPassword, string newPassword)
+        public async Task<bool> ChangePassword(string userName, string currentPassword, string newPassword)
         {
-            throw new System.NotImplementedException();
+            var user = await this._userManager.FindByNameAsync(userName);
+
+            var result = await this._userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+
+            return result.Succeeded;
         }
 
         public async Task<bool> CheckPassword(string userName, string password)
@@ -126,6 +137,15 @@ namespace ProjectManagerAPI.Persistence.Services
             var user = await this._userManager.FindByNameAsync(username);
 
             var result = await _userManager.ChangeEmailAsync(user, newEmail, token);
+
+            return result.Succeeded;
+        }
+
+        public async Task<bool> ConfirmActivation(string username, string token)
+        {
+            var user = await this._userManager.FindByNameAsync(username);
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
 
             return result.Succeeded;
         }
@@ -154,13 +174,14 @@ namespace ProjectManagerAPI.Persistence.Services
             {
                 listError.Add("Username already exists");
             }
-
             user = new User()
             {
                 UserName = request.Username,
                 Name = request.Name,
                 PhoneNumber = request.PhoneNumber,
                 Email = request.Email,
+                DateCreated = DateTime.Now,
+                DateModified = DateTime.Now,
                 SecurityStamp = Guid.NewGuid().ToString()
             };
             if (listError.Count != 0)
@@ -174,17 +195,19 @@ namespace ProjectManagerAPI.Persistence.Services
                 return null;
             }
 
-            throw new Exception("Error when creating user!! oh yeah");
+            throw new Exception("Error while creating user account.");
         }
-
+        
         public async Task<List<User>> SearchUser(string key)
         {
             var users = new List<User>();
-
-            var user = await this._unitOfWork.Users.SearchUserById(key);
-            if (user != null)
+            
+            Guid guidOutput;
+            User user;
+            bool isValid = Guid.TryParse(key, out guidOutput);
+            if (isValid)
             {
-                users.Add(user);
+                user = await this._unitOfWork.Users.SearchUserById(guidOutput);
             }
 
             user = await this._unitOfWork.Users.SearchUserByUsername(key);
@@ -257,6 +280,38 @@ namespace ProjectManagerAPI.Persistence.Services
             {
                 ToEmail = user.Email,
                 Subject = "Change email",
+                Body = htmlContent
+            };
+
+            try
+            {
+                await this._mailService.SendEmailAsync(mailRequest);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+        public async System.Threading.Tasks.Task SendActivationRequest(string username, string callbackurl)
+        {
+            var user = await this._userManager.FindByNameAsync(username);
+
+            var token = await this._userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            // append userId and confirmation code as parameters to the url
+            callbackurl += String.Format("?username={0}&token={1}", user.UserName, HttpUtility.UrlEncode(token));
+
+            var htmlContent = String.Format(
+                    @"Activate your account. Please confirm the email by clicking this link: 
+                    <br><a href='{0}'>Confirm new email</a>",
+                    callbackurl);
+
+            // send email to the user with the confirmation link
+            MailRequest mailRequest = new MailRequest()
+            {
+                ToEmail = user.Email,
+                Subject = "Account Activation",
                 Body = htmlContent
             };
 

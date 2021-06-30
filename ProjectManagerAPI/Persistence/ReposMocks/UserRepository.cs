@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Repositories;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,12 +26,10 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
         public async Task<User> GetUserProfile(string username)
         {
             var user = await this._context.Users
-                .Include(u => u.Name)
-                .Include(u => u.Group)
                 .Include(u => u.Tasks)
-                .Include(u => u.Avatars.Where(a => a.IsMain))
+                .Include(u => u.Avatars)
                 .SingleOrDefaultAsync(u => u.UserName == username);
-
+            //await this._context.UserRoles.SingleOrDefaultAsync(u => u.UserId == user.Id);
             return user;
         }
 
@@ -39,10 +38,9 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             await this._context.Avatars.Where(a => a.IsMain && a.User.UserName == userName).LoadAsync();
         }
 
-        public async Task<User> SearchUserById(string id)
+        public async Task<User> SearchUserById(Guid id)
         {
-            var user = await this._context.Users.SingleOrDefaultAsync(u => u.Id.ToString() == id);
-
+            var user = await this._context.Users.SingleOrDefaultAsync(u => u.Id == id);
             return user;
         }
 

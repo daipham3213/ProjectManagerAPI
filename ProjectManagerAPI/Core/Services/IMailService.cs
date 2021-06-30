@@ -1,6 +1,7 @@
-﻿using ProjectManagerAPI.Core.Models.ServiceResource;
+﻿
+using ProjectManagerAPI.Core.ServiceResource;
 
-namespace ProjectManagerAPI.Core.Models.Services
+namespace ProjectManagerAPI.Core.Services
 {
     public interface IMailService
     {

@@ -5,7 +5,7 @@ using System;
 
 namespace ProjectManagerAPI.Core.Repositories
 {
-    public class ProjectRepository : Repository<Project>, IProjectRepository
+    public class ProjectRepository : Persistence.ReposMocks.Repository<Project>, IProjectRepository
     {
         private readonly ProjectManagerDBContext _context;
         public ProjectRepository(ProjectManagerDBContext context)

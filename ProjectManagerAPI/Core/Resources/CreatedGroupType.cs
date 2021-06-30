@@ -1,12 +1,15 @@
 ﻿using System;
 
-namespace ProjectManagerAPI.Core.Models.Resources
+namespace ProjectManagerAPI.Core.Resources
 {
     public class CreatedGroupType
     {
         public string Name { get; set; }
+        #nullable enable
         public string? Remark { get; set; }
-        public Guid UserCreated { get; set; }
+        #nullable enable
+        public Guid? ParentNID { get; set; }
+        #nullable enable
         public GroupTypeResource? ParentN { get; set; }
     }
 }

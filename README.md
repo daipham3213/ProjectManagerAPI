@@ -1,14 +1,6 @@
 # ProjectManagerAPI
 ## Net Core API, MS SQL Server
 
-###Packages
-```
-Microsoft.EntityFrameworkCore
-Microsoft.EntityFrameworkCore.SqlServer
-Microsoft.EntityFrameworkCore.Tools
-Microsoft.AspNetCore.Mvc.Newtonsof
-```
-
 ###Configurations
 ```
 Config your ConnectionStrings in appsettings.json

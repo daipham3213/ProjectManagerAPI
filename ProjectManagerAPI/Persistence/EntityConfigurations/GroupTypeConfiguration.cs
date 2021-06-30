@@ -1,14 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProjectManagerAPI.Core.Models;
 
 namespace ProjectManagerAPI.Persistence.EntityConfigurations
 {
-    public class GroupTypeConfiguration : BaseConfiguration
+    public class GroupTypeConfiguration : BaseConfiguration<GroupType>
     {
-        public void Configure(EntityTypeBuilder<GroupType> builder)
+        public override void Configure(EntityTypeBuilder<GroupType> builder)
         {
-            //builder.HasMany(e => e.Group)
-            //    .WithOne(x => x.GroupType);
+            base.Configure(builder);
         }
     }
 }

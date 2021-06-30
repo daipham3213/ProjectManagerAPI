@@ -4,9 +4,9 @@ using ProjectManagerAPI.Core.Models;
 
 namespace ProjectManagerAPI.Persistence.EntityConfigurations
 {
-    public class ReportConfiguration : BaseConfiguration
+    public class ReportConfiguration : BaseConfiguration<Report>
     {
-        public void Configure(EntityTypeBuilder<Report> builder)
+        public override void Configure(EntityTypeBuilder<Report> builder)
         {
             builder.Property(u => u.StartDate).ValueGeneratedOnAdd();
             builder.Property(u => u.DueDate).ValueGeneratedOnAdd();
@@ -16,6 +16,7 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
 
             builder.HasOne(p => p.Group).WithMany(r => r.Reports)
                 .HasForeignKey(k => k.GroupID);
+            base.Configure(builder);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace ProjectManagerAPI.Core.Models.ServiceResource
+﻿namespace ProjectManagerAPI.Core.ServiceResource
 {
     public class LoginRequest
     {
