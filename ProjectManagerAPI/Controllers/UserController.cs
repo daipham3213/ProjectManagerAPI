@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -21,12 +22,14 @@ namespace ProjectManagerAPI.Controllers
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
-        public UserController(IUserService userService, IMapper mapper, IUnitOfWork unitOfWork, IConfiguration configuration)
+        private readonly ITokenManager _tokenManager;
+        public UserController(IUserService userService, IMapper mapper, IUnitOfWork unitOfWork, IConfiguration configuration, ITokenManager tokenManager)
         {
             _userService = userService;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _configuration = configuration;
+            _tokenManager = tokenManager;
         }
 
         [HttpPost("authenticate")]
@@ -35,20 +38,15 @@ namespace ProjectManagerAPI.Controllers
         public async Task<IActionResult> Authenticate([FromBody] LoginRequest request)
         {
             var response = await _userService.Authenticate(request);
-            var result = new NotifyResult();
             if (response == null)
-            {
-                result.Result = "Username or Password incorrect.";
-                result.Code = "400";
-                return BadRequest(Json(result)); 
-            }
+                throw new Exception("Username or Password incorrect.");
             if (!response.IsActivated)
             {
                 var callbackurl = _configuration["HostUrl:local"]+ "/api/User/sendActivationEmail?username="+request.Username;
-                result.Detail = callbackurl;
-                result.Result = "Account have not activated. Please click the link below to recive your activation email.";
-                result.Code = "400";
-                return BadRequest(Json(result));
+                throw new Exception(
+                    "Account have not activated. Please click the link below to recive your activation email.\n url: " +
+                    callbackurl
+                );
             }
                 
             return Ok(response);
@@ -110,16 +108,9 @@ namespace ProjectManagerAPI.Controllers
         public async Task<IActionResult> GetUserProfile(string targetUsername)
         {
             var user = await _unitOfWork.Users.GetUserProfile(targetUsername);
-            
+
             if (user == null)
-            {
-                JsonResult res = new JsonResult(new NotifyResult { 
-                    Detail = "User could not be found.",
-                    Result = "Bad request.",
-                    Code = BadRequest().StatusCode.ToString()
-            });
-                res.StatusCode = BadRequest().StatusCode;
-            }
+                throw new Exception("Account could not be found");
             var result = _mapper.Map<User, UserResource>(user);
 
             return Ok(result);
@@ -157,10 +148,7 @@ namespace ProjectManagerAPI.Controllers
             var result = await _userService.ConfirmChangeEmail(username, newEmail, token);
             
             if (result)
-                return Ok(Json(new NotifyResult { 
-                    Result = "Success change account email.",
-                    Code = "200"
-                }));
+                return Ok(new JsonResult("Account Email Changed Successfully.") { StatusCode = 200, ContentType = "application/json" });
 
             return Problem(detail: "Failed.", statusCode: 400);
         }
@@ -179,11 +167,7 @@ namespace ProjectManagerAPI.Controllers
             {
                 user.IsActived = true;
                 await _unitOfWork.Complete();
-                return Ok(Json(new NotifyResult
-                {
-                    Result = "Account Activation Success.",
-                    Code = "200"
-                }));
+                return Ok(new JsonResult("Account Activation Success."){StatusCode = 200, ContentType = "application/json" });
             }
 
             return Problem(detail: "Failed.", statusCode: 400);

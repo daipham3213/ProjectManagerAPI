@@ -5,6 +5,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Asn1;
 using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Resources;
@@ -20,9 +21,9 @@ namespace ProjectManagerAPI.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;  
-        private readonly ITokenParser _tokenParser;
+        private readonly ITokenManager _tokenParser;
 
-        public GroupTypeController(IMapper mapper, IUnitOfWork unitOfWork, ITokenParser tokenParser)
+        public GroupTypeController(IMapper mapper, IUnitOfWork unitOfWork, ITokenManager tokenParser)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -66,16 +67,14 @@ namespace ProjectManagerAPI.Controllers
         public async Task<IActionResult> Post([FromBody] CreatedGroupType groupType)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            string token = await HttpContext.GetTokenAsync("access_token");
-            var user = await _tokenParser.GetUserByToken(token);
+                throw new Exception(ModelState.ToString());
+            var user = await _tokenParser.GetUserByToken();
            
             if (user == null)
-                return BadRequest("Authentication credentials is not provided");
+                throw new Exception("Authentication credentials is not provided");
             var parentN = _unitOfWork.GroupTypes.Find(c => c.Id == groupType.ParentN.Id);
             if (parentN == null & groupType.ParentNid != null)
-                return BadRequest();
+                throw new Exception();
 
             //Init new entity
             var type = new GroupType();

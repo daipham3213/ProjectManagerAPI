@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -82,7 +83,7 @@ namespace ProjectManagerAPI
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUserService, UserSerivce>();
             services.AddScoped<IMailService, MailService>();
-            services.AddScoped<ITokenParser, TokenParser>();
+            services.AddScoped<ITokenManager, TokenManager>();
             services.AddScoped<IPhotoService, PhotoService>();
 
             //Inject core model
@@ -126,6 +127,9 @@ namespace ProjectManagerAPI
             });
 
             //Authentication
+            services.AddTransient<ITokenManager, TokenManager>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             string issuer = Configuration.GetValue<string>("Tokens:Issuer");
             string signingKey = Configuration.GetValue<string>("Tokens:Key");
             byte[] signingKeyBytes = Encoding.UTF8.GetBytes(signingKey);
@@ -145,7 +149,6 @@ namespace ProjectManagerAPI
                        IssuerSigningKey = key,
                        ValidateIssuer = false,
                        ValidateAudience = false,
-                       SaveSigninToken = true,
                    };
                });
 
@@ -166,6 +169,8 @@ namespace ProjectManagerAPI
             app.UseStaticFiles();
 
             app.UseAuthentication();
+
+            app.UseMiddleware<ErrorHandlerMiddleware>();
 
             app.UseRouting();
 
