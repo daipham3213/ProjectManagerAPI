@@ -48,6 +48,7 @@ namespace ProjectManagerAPI.Controllers
                 {
                     StatusCode = BadRequest().StatusCode
                 });
+           
             var entity = new Group
             {
                 Name = group.Name,
@@ -179,6 +180,7 @@ namespace ProjectManagerAPI.Controllers
             await _unitOfWork.Complete();
             return Ok(new JsonResult(_mapper.Map<GroupResource>(group)) { StatusCode = Ok().StatusCode });
         }
+
         [HttpPost("removemember")]
         public async Task<IActionResult> RemoveMember([FromBody] AddMemberResource resource)
         {
