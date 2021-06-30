@@ -7,10 +7,10 @@ using ProjectManagerAPI.Core.Repositories;
 
 namespace ProjectManagerAPI.Persistence.ReposMocks
 {
-    public class ProjectRepository :Repository<Project>, IProjectRepository
+    public class ProjectRepository : Repository<Project>, IProjectRepository
     {
-        private readonly ProjectManagerDBContext _context;
-        public ProjectRepository(ProjectManagerDBContext context)
+        private readonly ProjectManagerDbContext _context;
+        public ProjectRepository(ProjectManagerDbContext context)
             : base(context)
         {
             _context = context;

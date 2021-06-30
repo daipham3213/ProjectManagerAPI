@@ -1,27 +1,28 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Persistence.EntityConfigurations;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using Task = ProjectManagerAPI.Core.Models.Task;
 
 namespace ProjectManagerAPI.Persistence
 {
-    public class ProjectManagerDBContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
+    public class ProjectManagerDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
     {
         public override DbSet<User> Users { get; set; }
         public DbSet<GroupType> GroupTypes { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<Phase> Phases { get; set; }
         public DbSet<Project> Projects { get; set; }
-        public DbSet<Core.Models.Task> Tasks { get; set; }
+        public DbSet<Task> Tasks { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Avatar> Avatars { get; set; }
 
-        public ProjectManagerDBContext(DbContextOptions<ProjectManagerDBContext> options)
+        public ProjectManagerDbContext(DbContextOptions<ProjectManagerDbContext> options)
             : base(options)
         {
 
@@ -43,18 +44,18 @@ namespace ProjectManagerAPI.Persistence
 
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var AddedEntities = ChangeTracker.Entries().Where(E => E.State == EntityState.Added).ToList();
+            var addedEntities = ChangeTracker.Entries().Where(e => e.State == EntityState.Added).ToList();
 
-            AddedEntities.ForEach(E =>
+            addedEntities.ForEach(e =>
             {
-                E.Property("DateCreated").CurrentValue = DateTime.Now;
+                e.Property("DateCreated").CurrentValue = DateTime.Now;
             });
 
-            var EditedEntities = ChangeTracker.Entries().Where(E => E.State == EntityState.Modified).ToList();
+            var editedEntities = ChangeTracker.Entries().Where(e => e.State == EntityState.Modified).ToList();
 
-            EditedEntities.ForEach(E =>
+            editedEntities.ForEach(e =>
             {
-                E.Property("DateModified").CurrentValue = DateTime.Now;
+                e.Property("DateModified").CurrentValue = DateTime.Now;
             });
 
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);

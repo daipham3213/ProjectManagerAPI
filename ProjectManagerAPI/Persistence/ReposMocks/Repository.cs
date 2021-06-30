@@ -1,10 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ProjectManagerAPI.Core.Repositories;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using ProjectManagerAPI.Core.Repositories;
 
 namespace ProjectManagerAPI.Persistence.ReposMocks
 {
@@ -14,50 +14,50 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
         private DbSet<TEntity> _entities;
         public Repository(DbContext context)
         {
-            this.Context = context;
-            this._entities = context.Set<TEntity>();
+            Context = context;
+            _entities = context.Set<TEntity>();
         }
         public async Task Add(TEntity entity)
         {
-            await this._entities.AddAsync(entity);
+            await _entities.AddAsync(entity);
         }
 
         public async Task AddRange(IEnumerable<TEntity> entities)
         {
-            await this._entities.AddRangeAsync(entities);
+            await _entities.AddRangeAsync(entities);
         }
 
         public IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate)
         {
-            return this._entities.Where(predicate);
+            return _entities.Where(predicate);
         }
 
         public async Task<TEntity> Get(Guid id)
         {
-            return await this._entities.FindAsync(id);
+            return await _entities.FindAsync(id);
         }
 
         public async Task<IEnumerable<TEntity>> GetAll()
         {
-            return await this._entities.ToListAsync();
+            return await _entities.ToListAsync();
         }
         public async Task Load(Expression<Func<TEntity, bool>> predicate)
         {
-            await this._entities.Where(predicate).LoadAsync();
+            await _entities.Where(predicate).LoadAsync();
         }
         public void Remove(TEntity entity)
         {
-            this._entities.Remove(entity);
+            _entities.Remove(entity);
         }
 
         public void RemoveRange(IEnumerable<TEntity> entities)
         {
-            this._entities.RemoveRange(entities);
+            _entities.RemoveRange(entities);
         }
 
         public async Task<TEntity> SingleOrDefault(Expression<Func<TEntity, bool>> predicate)
         {
-            return await this._entities.SingleOrDefaultAsync(predicate);
+            return await _entities.SingleOrDefaultAsync(predicate);
         }
     }
 }

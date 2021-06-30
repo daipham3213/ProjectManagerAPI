@@ -12,7 +12,7 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
 
             builder.HasOne(a => a.User)
                 .WithMany(au => au.Avatars)
-                .HasForeignKey(a => a.UserID);
+                .HasForeignKey(a => a.UserId);
             builder.Property(a => a.Path).IsRequired();
         }
     }

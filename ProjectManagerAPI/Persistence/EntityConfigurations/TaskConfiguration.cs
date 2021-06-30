@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProjectManagerAPI.Core.Models;
 
 namespace ProjectManagerAPI.Persistence.EntityConfigurations
@@ -13,11 +12,11 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
 
             builder.HasOne(p => p.Phase)
                 .WithMany(t => t.Tasks)
-                .HasForeignKey(k => k.PhaseID);
+                .HasForeignKey(k => k.PhaseId);
 
             builder.HasOne(u => u.User)
                 .WithMany(t => t.Tasks)
-                .HasForeignKey(k => k.UserID);
+                .HasForeignKey(k => k.UserId);
             base.Configure(builder);
         }
     }

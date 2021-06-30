@@ -1,7 +1,7 @@
-﻿using AutoMapper;
+﻿using System.Linq;
+using AutoMapper;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Resources;
-using System.Linq;
 
 namespace ProjectManagerAPI.Mapping
 {
@@ -17,24 +17,25 @@ namespace ProjectManagerAPI.Mapping
                     MapParentGroup(c, u);
                 });
             CreateMap<GroupType, GroupTypeViewResource>()
-                .ForMember(u => u.url, opt => opt.MapFrom(u => "api/GroupType/" + u.ID));
+                .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/GroupType/" + u.Id));
             CreateMap<GroupType, CreatedGroupType>()
-                .ForMember(u => u.ParentNID, opt => opt.MapFrom(k => k.ParentN.ID));
+                .ForMember(u => u.ParentNid, opt => opt.MapFrom(k => k.ParentN.Id));
            //User
             CreateMap<Avatar, AvatarResource>();
             CreateMap<User, UserResource>()
                 .ForMember(u => u.AvatarUrl, opt => opt.MapFrom(p => p.Avatars.FirstOrDefault(a => a.IsMain) != null ? p.Avatars.FirstOrDefault(a => a.IsMain).Path : null))
                 .ForMember(u => u.EmailConfirmed, opt => opt.MapFrom(a => a.IsActived))
-                .ForMember(u => u.GroupID, opt => opt.MapFrom(g => g.GroupRef));
+                .ForMember(u => u.GroupId, opt => opt.MapFrom(g => g.GroupRef));
             CreateMap<User, SearchUserResource>()
                 .ForMember(u => u.AvatarUrl, opt => opt.MapFrom(p => p.Avatars.FirstOrDefault(a => a.IsMain) != null ? p.Avatars.FirstOrDefault(a => a.IsMain).Path : null));
 
             //Group
             CreateMap<Group, CreatedGroup>();
             CreateMap<Group, GroupViewResource>()
-                .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Group/" + u.ID))
+                .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Group/" + u.Id))
                 .ForMember(u => u.Users, opt => opt.MapFrom(g => g.Users.Count));
             CreateMap<Group, GroupResource>()
+                .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Group/" + u.Id));
                 .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Group/" + u.ID));
             //Project
             CreateMap<Project, CreateProject>();
@@ -47,7 +48,7 @@ namespace ProjectManagerAPI.Mapping
         private void MapParentGroup(GroupType domain, GroupTypeResource resource)
         {
             //basic mapping
-            resource.ID = domain.ID;
+            resource.Id = domain.Id;
             resource.Name = domain.Name;
             resource.Group = domain.Group;
             resource.Remark = domain.Remark;
@@ -60,10 +61,10 @@ namespace ProjectManagerAPI.Mapping
             if (domain.ParentN == null)
                 return;
 
-            var parent_n = new GroupTypeResource();
-            MapParentGroup(domain.ParentN, parent_n);
+            var parentN = new GroupTypeResource();
+            MapParentGroup(domain.ParentN, parentN);
 
-            resource.ParentN = parent_n;
+            resource.ParentN = parentN;
         }
         
     }
