@@ -8,7 +8,6 @@ namespace ProjectManagerAPI.Core.Resources
 {
     public class CreatedGroup
     {
-        public Guid ID { get; set; }
         public string  Name { get; set; }
         public string Remark { get; set; }
         public Guid? LeaderID { get; set; }

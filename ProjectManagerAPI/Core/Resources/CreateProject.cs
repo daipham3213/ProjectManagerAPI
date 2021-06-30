@@ -7,7 +7,6 @@ namespace ProjectManagerAPI.Core.Resources
 {
     public class CreateProject
     {
-        public Guid ID { get; set; }
         public string Name { get; set; }
         public string Remark { get; set; }
         public DateTime? DueDate { get; set; }

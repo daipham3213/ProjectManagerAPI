@@ -40,6 +40,8 @@ namespace ProjectManagerAPI.Mapping
             CreateMap<Project, CreateProject>();
             CreateMap<Project, ProjectViewResource>().ForMember(u => u.url, opt => opt.MapFrom(u => "api/Project/" + u.ID));
             CreateMap<Project, ProjectResource>().ForMember(u => u.url, opt => opt.MapFrom(u => "api/Project/" + u.ID));
+            //Report
+            CreateMap<Report, CreatedReport>();
         }
 
         private void MapParentGroup(GroupType domain, GroupTypeResource resource)

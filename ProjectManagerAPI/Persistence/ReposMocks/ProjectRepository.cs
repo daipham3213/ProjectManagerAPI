@@ -1,15 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ProjectManagerAPI.Core.Models;
-using ProjectManagerAPI.Persistence;
-using ProjectManagerAPI.Persistence.ReposMocks;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using ProjectManagerAPI.Core.Models;
+using ProjectManagerAPI.Core.Repositories;
 
-namespace ProjectManagerAPI.Core.Repositories
+namespace ProjectManagerAPI.Persistence.ReposMocks
 {
-    public class ProjectRepository : Persistence.ReposMocks.Repository<Project>, IProjectRepository
+    public class ProjectRepository :Repository<Project>, IProjectRepository
     {
         private readonly ProjectManagerDBContext _context;
         public ProjectRepository(ProjectManagerDBContext context)
@@ -18,10 +16,9 @@ namespace ProjectManagerAPI.Core.Repositories
             _context = context;
         }
    
-        public async Task<Project> SearcProjectByName(string name)
+        public async Task<Project> SearchProjectByName(string name)
         {
-        
-               var project = await this._context.Projects.FirstOrDefaultAsync(u => u.Name == name);
+            var project = await this._context.Projects.FirstOrDefaultAsync(u => u.Name == name);
             return project;
         }
 

@@ -82,7 +82,6 @@ namespace ProjectManagerAPI.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = RoleNames.RoleAdmin)]
         public async Task<IActionResult> create([FromBody] CreateProject project) {
             if (!ModelState.IsValid)
                 return new JsonResult("The information provided for creation is not valid")
