@@ -1,10 +1,11 @@
 ﻿using System.Threading.Tasks;
 using ProjectManagerAPI.Core.Models;
+using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI.Core.Services
 {
-    public interface ITokenParser
+    public interface ITokenManager
     {
-        public Task<User> GetUserByToken(string token);
+        public Task<User> GetUserByToken();
     }
 }

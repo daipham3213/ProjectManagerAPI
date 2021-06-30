@@ -50,11 +50,11 @@ namespace ProjectManagerAPI.Controllers
         {       
             var user = await _unitOfWork.Users.GetUser(userName);
             if (user == null)
-                return NotFound();
+                return NotFound(Json("User can not be found."));
 
             var avatar = await _unitOfWork.Avatars.SingleOrDefault(a => a.UserId == user.Id && a.IsMain);
             if (avatar == null)
-                return NotFound();
+                return NotFound(Json("Main Avatar can not be found."));
 
             var result = _mapper.Map<Avatar, AvatarResource>(avatar);
             return Ok(result);
@@ -70,7 +70,7 @@ namespace ProjectManagerAPI.Controllers
 
             var user = await _unitOfWork.Users.GetUser(userName);
             if (user == null)
-                return NotFound();
+                return NotFound("User can not be found");
 
             //Get main avatar of user
             var oldAvatar = await _unitOfWork.Avatars.SingleOrDefault(a => a.UserId == user.Id && a.IsMain);
@@ -110,14 +110,14 @@ namespace ProjectManagerAPI.Controllers
         {
             var user = await _unitOfWork.Users.GetUser(userName);
             if (user == null)
-                return NotFound();
+                return NotFound("User can not be found");
 
             //Load all avatars of user
             await _unitOfWork.Avatars.Load(a => a.UserId == user.Id);
 
             var avatar = user.Avatars.FirstOrDefault(a => a.Id == photoId);
             if (avatar == null)
-                return NotFound();
+                return NotFound(Json("Avatar can not be found"));
 
             if (avatar.IsMain)
                 return BadRequest("Can not delete main avatar");
@@ -127,7 +127,7 @@ namespace ProjectManagerAPI.Controllers
             var result = await _photoService.DeletePhoto(photo.PublicId);
 
             if (result == null)
-                return Problem();
+                throw new Exception("Error while deleting photo.");
 
             // Delete photo from database
             user.Avatars.Remove(avatar);
@@ -135,7 +135,7 @@ namespace ProjectManagerAPI.Controllers
 
             await _unitOfWork.Complete();
 
-            return Ok();
+            return Ok(Json("Deleted successfully."));
         }
     }
 }
