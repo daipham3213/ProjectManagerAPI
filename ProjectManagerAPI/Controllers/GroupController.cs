@@ -49,6 +49,7 @@ namespace ProjectManagerAPI.Controllers
                 {
                     StatusCode = BadRequest().StatusCode
                 });
+           
             var entity = new Group
             {
                 Name = group.Name,
@@ -57,6 +58,7 @@ namespace ProjectManagerAPI.Controllers
                 GroupTypeFK = group.GroupTypeFK,
                 GroupType = grouptype,
             };
+
             if (group.LeaderID == Guid.Empty | group.LeaderID == null) entity.LeaderID = user.Id;
             else
             {
@@ -81,9 +83,11 @@ namespace ProjectManagerAPI.Controllers
             //Set user's group id
             var lead = await this._unitOfWork.Users.SearchUserById(entity.LeaderID);
             entity = await this._unitOfWork.Groups.FindGroupByName(group.Name);
+          
             lead.Group = entity;
             lead.GroupRef = entity.ID;
             lead.DateModified = DateTime.Now;
+           
             await this._unitOfWork.Complete();
             return Ok(new JsonResult(_mapper.Map<CreatedGroup>(entity)) {
                 StatusCode = Ok().StatusCode
@@ -180,6 +184,7 @@ namespace ProjectManagerAPI.Controllers
             await this._unitOfWork.Complete();
             return Ok(new JsonResult(_mapper.Map<GroupResource>(group)) { StatusCode = Ok().StatusCode });
         }
+
         [HttpPost("removemember")]
         public async Task<IActionResult> RemoveMember([FromBody] AddMemberResource resource)
         {

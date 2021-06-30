@@ -68,17 +68,21 @@ namespace ProjectManagerAPI.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
             string token = await HttpContext.GetTokenAsync("access_token");
             var user = await _tokenParser.GetUserByToken(token);
+           
             if (user == null)
                 return BadRequest("Authentication credentials is not provided");
             var parent_n = this._unitOfWork.GroupTypes.Find(c => c.ID == groupType.ParentN.ID);
+        
             if (parent_n == null & groupType.ParentNID != null)
                 return BadRequest();
 
             //Init new entity
             var type = new GroupType();
             type.Name = groupType.Name;
+            
             if (groupType.ParentNID != null)
                 type.ParentN = await this._unitOfWork.GroupTypes.SingleOrDefault(c => c.ID == groupType.ParentNID);
             type.Remark = groupType.Remark;
@@ -88,8 +92,10 @@ namespace ProjectManagerAPI.Controllers
             {
                 await this._unitOfWork.GroupTypes.Add(type);
                 await this._unitOfWork.Complete();
+             
                 type = await this._unitOfWork.GroupTypes.GetTypeByName(type.Name);
                 await this._unitOfWork.GroupTypes.GetParents(type.ID);
+                
                 var result = this._mapper.Map<GroupType, CreatedGroupType>(type);
                 return Ok(result);
             }
