@@ -94,7 +94,6 @@ namespace ProjectManagerAPI.Controllers
             {
                 Name = project.Name,
                 Remark = project.Remark,
-                //DueDate 
                 StartDate = project.StartDate,
                 DueDate = project.DueDate,
             };
