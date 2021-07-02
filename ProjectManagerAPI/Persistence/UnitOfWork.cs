@@ -18,6 +18,7 @@ namespace ProjectManagerAPI.Persistence
         public IGroupRepository Groups { get; private set; }
         public IReportRepository Reports { get; private set; }
 
+         public IPhaseRepository Phases { get; private set; }
 
         public UnitOfWork(
             ProjectManagerDbContext context,
@@ -26,7 +27,8 @@ namespace ProjectManagerAPI.Persistence
             IAvatarRepository avatars,
             IUserRepository users,        
             IGroupRepository groups,
-            IReportRepository reports
+            IReportRepository reports,
+            IPhaseRepository phases
             )
         {
             _context = context;
@@ -36,6 +38,7 @@ namespace ProjectManagerAPI.Persistence
             Users = users;
             Groups = groups;
             Reports = reports;
+            Phases = phases;
         }
         public async Task<int> Complete()
         {

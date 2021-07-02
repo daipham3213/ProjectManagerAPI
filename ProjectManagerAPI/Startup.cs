@@ -93,6 +93,7 @@ namespace ProjectManagerAPI
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IProjectRepository, ProjectRepository>();
             services.AddScoped<IReportRepository, ReportRepository>();
+            services.AddScoped<IPhaseRepository,  PhaseRepository>();
 
             services.AddSwaggerGen(c =>
             {
