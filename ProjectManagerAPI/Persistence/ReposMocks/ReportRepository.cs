@@ -16,5 +16,15 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
         {
             _context = context;
         }
+
+        public async Task<IList<Report>> FindReportByGroupId(Guid groupId)
+        {
+            return await this._context.Reports.Where(u => u.GroupId == groupId).ToListAsync();
+        }
+
+        public async Task<IList<Report>> FindReportByGroupIdAndProjectId(Guid groupId, Guid prjId)
+        {
+            return await this._context.Reports.Where(u => u.GroupId == groupId & u.ProjectId == prjId).ToListAsync();
+        }
     }
 }

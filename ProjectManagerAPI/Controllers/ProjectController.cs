@@ -10,6 +10,7 @@ using ProjectManagerAPI.Core.ServiceResource;
 using ProjectManagerAPI.Core.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 
@@ -20,14 +21,16 @@ namespace ProjectManagerAPI.Controllers
     [Authorize]
     public class ProjectController : ControllerBase
     {
-        private readonly ITokenParser _tokenParser;
+        public ProjectController(ITokenManager tokenParser, IMapper mapper, IUnitOfWork unitOfWork)
+        {
+            _tokenParser = tokenParser;
+            _mapper = mapper;
+            _unitOfWork = unitOfWork;
+        }
+
+        private readonly ITokenManager _tokenParser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
-
-        public ProjectController(IUnitOfWork unitOfWork)
-        {
-            this._unitOfWork = unitOfWork;
-        }
 
 
         [HttpGet("all")]
@@ -43,7 +46,7 @@ namespace ProjectManagerAPI.Controllers
         public async Task<IActionResult> GetList()
         {
             var type = await _unitOfWork.Projects.LoadValidated();
-            if (type == null)
+            if (type.Count() == 0)
             {
                 return NotFound();
             }
@@ -81,14 +84,11 @@ namespace ProjectManagerAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> create([FromBody] CreateProject project) {
+        public async Task<IActionResult> Create([FromBody] CreateProject project)
+        {
             if (!ModelState.IsValid)
-                return new JsonResult("The information provided for creation is not valid")
-                {
-                    StatusCode = BadRequest().StatusCode,
-                };
-            string token = await HttpContext.GetTokenAsync("access_token");
-            var user = await _tokenParser.GetUserByToken(token);
+                throw new Exception("The information provided for creation is not valid");
+            var user = await _tokenParser.GetUserByToken();
 
             var entity = new Project
             {
