@@ -67,6 +67,7 @@ namespace ProjectManagerAPI.Mapping
 
 
 
+
             //Working-stage
             CreateMap<Phase, CreatedPhase>();
             CreateMap<Phase, PhaseViewResource>().ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Phase/" + u.Id));
