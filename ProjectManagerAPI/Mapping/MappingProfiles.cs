@@ -52,7 +52,7 @@ namespace ProjectManagerAPI.Mapping
                 .ForMember(u => u.ProjectName, opt => opt.MapFrom(g => g.Project.Name))
                 .ForMember(u => u.GroupUrl, opt => opt.MapFrom(u => "api/Group/" + u.GroupId))
                 .ForMember(u => u.ProjectUrl, opt => opt.MapFrom(u => "api/Project/" + u.ProjectId))
-                .ForMember(u => u.UserCreated, opt => opt.MapFrom(u => "api/User/" + u.ProjectId));
+                .ForMember(u => u.UserCreated, opt => opt.MapFrom(u => "api/user/profile?key=" + u.UserCreated));
 
         }
 

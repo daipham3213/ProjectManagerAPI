@@ -105,9 +105,14 @@ namespace ProjectManagerAPI.Controllers
 
         [HttpGet("profile")]
         [Authorize]
-        public async Task<IActionResult> GetUserProfile(string targetUsername)
+        public async Task<IActionResult> GetUserProfile(string key)
         {
-            var user = await _unitOfWork.Users.GetUserProfile(targetUsername);
+            Guid guid = default;
+            User user;
+            if (Guid.TryParse(key, out guid))
+                user = await _unitOfWork.Users.Get(guid);
+            else user = await _unitOfWork.Users.GetUser(key);
+
 
             if (user == null)
                 throw new Exception("Account could not be found");

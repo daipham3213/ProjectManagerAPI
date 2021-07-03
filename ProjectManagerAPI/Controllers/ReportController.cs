@@ -79,6 +79,7 @@ namespace ProjectManagerAPI.Controllers
             IEnumerable<Group> groups;
             if (user == null)
                 throw new Exception("Credential information not provided.");
+            await this._unitOfWork.Users.Load(u => u.Id == user.ParentNId);
             if (user.ParentN != null)
                 groups = await this._unitOfWork.Groups.GetGroupListValidated(user.ParentN.Id);
             else groups = await this._unitOfWork.Groups.GetGroupListValidated(user.Id);
@@ -106,12 +107,13 @@ namespace ProjectManagerAPI.Controllers
             return Ok(new JsonResult(result) { StatusCode = 200, ContentType = "application/json" });
         }
 
-        [HttpGet("{%id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetReport(Guid id)
         {
             var user = await _tokenParser.GetUserByToken();
             if (user == null)
                 throw new Exception("Credential information not provided.");
+            await this._unitOfWork.Users.Load(u => u.Id == user.ParentNId);
             IEnumerable<Group> groups;
             if (user.ParentN != null)
                 groups = await this._unitOfWork.Groups.GetGroupListValidated(user.ParentN.Id);
@@ -119,12 +121,14 @@ namespace ProjectManagerAPI.Controllers
             var report = await this._unitOfWork.Reports.Get(id);
             if (report == null)
                 throw new Exception("Invalid Report ID.");
-            foreach (var @group in groups)
+            foreach (var group in groups)
             {
-                if (report.GroupId == @group.Id)
-                    return null;
+                if (report.GroupId == group.Id)
+                    return Ok(_mapper.Map<ReportResource>(report));
             }
-            return null;
+            throw new Exception("Invalid request.");
         }
+
+
     }
 }
