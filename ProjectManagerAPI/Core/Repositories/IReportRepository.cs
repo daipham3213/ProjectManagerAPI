@@ -10,5 +10,6 @@ namespace ProjectManagerAPI.Core.Repositories
     {
         Task<IList<Report>> FindReportByGroupId(Guid groupId);
         Task<IList<Report>> FindReportByGroupIdAndProjectId(Guid groupId, Guid prjId);
+        Task<IList<Report>> LoadValidated();
     }
 }

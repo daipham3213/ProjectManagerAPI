@@ -39,6 +39,22 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             await _context.Avatars.Where(a => a.IsMain && a.User.UserName == userName).LoadAsync();
         }
 
+        public async Task LeaveGroup(Guid id)
+        {
+            var user = await this._context.Users.FindAsync(id);
+            if (user == null)
+                throw new Exception("User is invalid.");
+            if (user.Group == null & user.GroupRef == null)
+                throw new Exception("User don't have group.");
+            if (user.Id == user.Group.LeaderId)
+                throw new Exception("Leader can't leave group. Promo others to leader before leave.");
+            user.Group = null;
+            user.GroupRef = null;
+            user.ParentN = null;
+            user.DateModified = DateTime.UtcNow;
+            await this._context.SaveChangesAsync();
+        }
+
         public async Task<User> SearchUserById(Guid id)
         {
             var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == id);
@@ -58,5 +74,7 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
 
             return users;
         }
+
+
     }
 }

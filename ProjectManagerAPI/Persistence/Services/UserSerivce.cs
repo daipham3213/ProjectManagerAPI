@@ -151,6 +151,43 @@ namespace ProjectManagerAPI.Persistence.Services
             return result.Succeeded;
         }
 
+        public async Task Promotion(string username)
+        {
+            var user = await this._userManager.FindByNameAsync(username);
+            if (user == null)
+                throw new Exception("Invalid information.");
+            if (user.Group == null)
+                throw new Exception("User's group is invalid.");
+            await this._userManager.AddToRoleAsync(user, user.Group.GroupType.IdentityRole.Name);
+        }
+
+        public async Task DePromotion(string username)
+        {
+            var leader = await _userManager.FindByNameAsync(username);
+            await this._userManager.RemoveFromRoleAsync(leader, leader.Group.GroupType.IdentityRole.Name);
+        }
+
+        public async Task<bool> PromotionBy(string lead_username, string promo_username)
+        {
+            var leader = await this._userManager.FindByNameAsync(lead_username);
+            var user = await this._userManager.FindByNameAsync(promo_username);
+            var group = leader.Group;
+
+            if (leader == null | user == null | group == null)
+                throw new Exception("Invalid information.");
+            if (leader.GroupRef != leader.Id)
+                throw new Exception("Permission not allowed.");
+            if (group.Id != user.GroupRef)
+                throw new Exception(promo_username + "  is not a member of " + group.Name);
+
+            leader.ParentN = user;
+            group.LeaderId = user.Id;
+
+            await this._userManager.RemoveFromRoleAsync(leader, group.GroupType.IdentityRole.Name);
+            await this._userManager.AddToRoleAsync(user, group.GroupType.IdentityRole.Name);
+            return true;
+        }
+
 
         public async Task<User> GetUser(string userName)
         {

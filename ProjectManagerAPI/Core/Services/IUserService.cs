@@ -18,5 +18,8 @@ namespace ProjectManagerAPI.Core.Services
         public Task<bool> CheckPassword(string userName, string password);
         Task SendActivationRequest(string username, string callbackurl);
         Task<bool> ConfirmActivation(string username, string token);
+        Task<bool> PromotionBy(string lead_username, string promo_username);
+        Task Promotion(string username);
+        Task DePromotion(string username);
     }
 }

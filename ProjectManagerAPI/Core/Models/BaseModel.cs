@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace ProjectManagerAPI.Core.Models
 {
@@ -10,6 +11,7 @@ namespace ProjectManagerAPI.Core.Models
         public DateTime? DateCreated { get; set; } 
         public DateTime? DateModified { get; set; }
         public Guid UserCreated { get; set; }
+        [DefaultValue(true)]
         public bool IsActived { get; set; }
         public bool IsDeleted { get; set; }
     }

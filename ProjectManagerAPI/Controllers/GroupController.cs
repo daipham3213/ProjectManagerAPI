@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Resources;
 using ProjectManagerAPI.Core.ServiceResource;
 using ProjectManagerAPI.Core.Services;
+using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI.Controllers
 {
@@ -21,12 +24,14 @@ namespace ProjectManagerAPI.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITokenManager _tokenParser;
         private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
-        public GroupController(IUnitOfWork unitOfWork, ITokenManager tokenParser, IMapper mapper)
+        public GroupController(IUnitOfWork unitOfWork, ITokenManager tokenParser, IMapper mapper, IUserService userService)
         {
             _unitOfWork = unitOfWork;
             _tokenParser = tokenParser;
             _mapper = mapper;
+            _userService = userService;
         }
 
         [HttpPost]
@@ -71,6 +76,7 @@ namespace ProjectManagerAPI.Controllers
             lead.Group = entity;
             lead.GroupRef = entity.Id;
             lead.DateModified = DateTime.Now;
+            await this._userService.Promotion(lead.UserName);
             await _unitOfWork.Complete();
             return Ok(new JsonResult(_mapper.Map<CreatedGroup>(entity)) {
                 StatusCode = Ok().StatusCode
@@ -183,11 +189,30 @@ namespace ProjectManagerAPI.Controllers
             var list = await _unitOfWork.Groups.GetGroupListValidated(userM.Id);
             if (!list.Contains(group))
                 throw new Exception("Permission not allowed.");
+            var leader = this._unitOfWork.Users.Find(u => u.Id == group.LeaderId).FirstOrDefault();
             foreach (var user in group.Users)
                 _unitOfWork.Groups.RemoveUserFromGroup(id, user.Id);
             _unitOfWork.Groups.Remove(group);
+            await this._userService.DePromotion(leader.UserName);
             await _unitOfWork.Complete();
             return Ok(new JsonResult(group.Name + " removed successfully.") { StatusCode = Ok().StatusCode });
+        }
+
+        [HttpPut("promotion")]
+        public async Task<IActionResult> Promotion(string username)
+        {
+            var user = await this._tokenParser.GetUserByToken();
+            var new_leader = await this._userService.GetUser(username);
+            await this._userService.PromotionBy(user.UserName, new_leader.UserName);
+            return Ok();
+        }
+
+        [HttpPost("leave")]
+        public async Task<IActionResult> LeaveGroup()
+        {
+            var user = await this._tokenParser.GetUserByToken();
+            await this._unitOfWork.Users.LeaveGroup(user.Id);
+            return Ok();
         }
     }
 }
