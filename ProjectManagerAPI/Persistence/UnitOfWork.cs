@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
-using ProjectManagerAPI.Core;
+﻿using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Repositories;
+using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Persistence
 {
@@ -25,7 +25,7 @@ namespace ProjectManagerAPI.Persistence
             IGroupTypeRepository groupTypes,
             IProjectRepository projects,
             IAvatarRepository avatars,
-            IUserRepository users,        
+            IUserRepository users,
             IGroupRepository groups,
             IReportRepository reports,
             IPhaseRepository phases

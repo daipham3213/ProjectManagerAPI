@@ -1,19 +1,19 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using ProjectManagerAPI.Core.Models;
+using ProjectManagerAPI.Core.Repositories;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using ProjectManagerAPI.Core.Models;
-using ProjectManagerAPI.Core.Repositories;
 
 namespace ProjectManagerAPI.Persistence.ReposMocks
 {
-    public class GroupRepository : Repository<Group>, IGroupRepository 
+    public class GroupRepository : Repository<Group>, IGroupRepository
     {
         private readonly ProjectManagerDbContext _context;
 
         public GroupRepository(ProjectManagerDbContext context)
-            :base(context)
+            : base(context)
         {
             _context = context;
         }
@@ -30,14 +30,21 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
 
         public async Task<ICollection<Group>> GetGroupListValidated(Guid leaderId)
         {
-            var mainGroup = GetGroupByLeaderId(leaderId);
+           // var user = await this._context.Users.FindAsync(leaderId);
+           
+            var mainGroup = await GetGroupByLeaderId(leaderId);
             if (mainGroup == null)
-                return null;
-            var type = await _context.GroupTypes.FirstOrDefaultAsync(u => u.ParentN == mainGroup.Result.GroupType & u.IsDeleted == false);
+                throw new Exception("No group were found.");
+            var type = await _context.GroupTypes.FirstOrDefaultAsync(u => u.ParentN == mainGroup.GroupType & u.IsDeleted == false);
             var childGroup = await _context.Groups.Where(u => u.GroupType == type & u.IsDeleted == false).ToListAsync();
             List<Group> result = new List<Group>();
-            result.Add(mainGroup.Result);
-            result.AddRange(childGroup);
+            if (!result.Exists(u => u == mainGroup))
+                result.Add(mainGroup);
+            foreach (var child in childGroup)
+            {
+                if (!result.Exists(u => u == child))
+                    result.Add(child);
+            }
             return result;
         }
 
@@ -70,6 +77,7 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
         {
             var group = await Get(groupId);
             var user = await _context.Users.FindAsync(userId);
+
             group.Users.Remove(user);
             group.DateModified = DateTime.Now;
             user.Group = null;

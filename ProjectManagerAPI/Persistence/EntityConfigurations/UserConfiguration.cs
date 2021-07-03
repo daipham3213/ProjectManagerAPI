@@ -21,6 +21,10 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
                 .WithMany(e => e.Users)
                 .HasForeignKey(k => k.GroupRef);
 
+            builder.HasOne(u => u.ParentN)
+                .WithMany()
+                .HasForeignKey(k => k.ParentNId);
+
             builder.HasMany(e => e.Claims)
                 .WithOne()
                 .HasForeignKey(uc => uc.UserId)
@@ -42,7 +46,7 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
             builder.HasMany(e => e.UserRoles)
                 .WithOne()
                 .HasForeignKey(ur => ur.UserId)
-                .IsRequired();         
+                .IsRequired();
         }
     }
 }

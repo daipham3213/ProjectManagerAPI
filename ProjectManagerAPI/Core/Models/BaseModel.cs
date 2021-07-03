@@ -7,8 +7,8 @@ namespace ProjectManagerAPI.Core.Models
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public string? Remark { get; set; }        
-        public DateTime? DateCreated { get; set; } 
+        public string? Remark { get; set; }
+        public DateTime? DateCreated { get; set; }
         public DateTime? DateModified { get; set; }
         public Guid UserCreated { get; set; }
         [DefaultValue(true)]

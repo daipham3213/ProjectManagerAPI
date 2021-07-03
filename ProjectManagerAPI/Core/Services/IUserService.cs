@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using ProjectManagerAPI.Core.Models;
+﻿using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.ServiceResource;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI.Core.Services

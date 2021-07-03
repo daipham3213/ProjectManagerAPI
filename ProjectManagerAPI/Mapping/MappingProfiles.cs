@@ -1,9 +1,7 @@
-﻿using System;
-using System.Linq;
-using AutoMapper;
+﻿using AutoMapper;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Resources;
-using ProjectManagerAPI.Persistence;
+using System.Linq;
 
 namespace ProjectManagerAPI.Mapping
 {
@@ -22,7 +20,7 @@ namespace ProjectManagerAPI.Mapping
                 .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/GroupType/" + u.Id));
             CreateMap<GroupType, CreatedGroupType>()
                 .ForMember(u => u.ParentNid, opt => opt.MapFrom(k => k.ParentN.Id));
-           //User
+            //User
             CreateMap<Avatar, AvatarResource>();
             CreateMap<User, UserResource>()
                 .ForMember(u => u.AvatarUrl, opt => opt.MapFrom(p => p.Avatars.FirstOrDefault(a => a.IsMain) != null ? p.Avatars.FirstOrDefault(a => a.IsMain).Path : null))
@@ -54,7 +52,7 @@ namespace ProjectManagerAPI.Mapping
                 .ForMember(u => u.ProjectName, opt => opt.MapFrom(g => g.Project.Name))
                 .ForMember(u => u.GroupUrl, opt => opt.MapFrom(u => "api/Group/" + u.GroupId))
                 .ForMember(u => u.ProjectUrl, opt => opt.MapFrom(u => "api/Project/" + u.ProjectId))
-                .ForMember(u => u.UserCreated, opt => opt.MapFrom(u => "api/User/" + u.ProjectId));
+                .ForMember(u => u.UserCreated, opt => opt.MapFrom(u => "api/user/profile?key=" + u.UserCreated));
 
   //Working-stage
             CreateMap<Phase, CreatedPhase>();
@@ -84,6 +82,6 @@ namespace ProjectManagerAPI.Mapping
             resource.ParentN = parentN;
         }
 
-       
+
     }
 }

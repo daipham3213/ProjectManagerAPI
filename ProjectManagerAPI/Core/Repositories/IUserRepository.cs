@@ -1,8 +1,8 @@
-﻿using System;
+﻿using ProjectManagerAPI.Core.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using ProjectManagerAPI.Core.Models;
 using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI.Core.Repositories

@@ -7,6 +7,5 @@ namespace ProjectManagerAPI.Core.Resources
         public Guid Id { set; get; }
         public string Name { set; get; }
         public string AvatarUrl { get; set; }
-        public Guid UserTypeId { get; set; }
     }
 }

@@ -1,20 +1,16 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Distributed;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.ServiceResource;
 using ProjectManagerAPI.Core.Services;
-using Task = System.Threading.Tasks.Task;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Persistence.Services
 {
@@ -49,7 +45,7 @@ namespace ProjectManagerAPI.Persistence.Services
             LoginResponse response = new LoginResponse();
             response = GetValues();
             var user = await _unitOfWork.Users.GetUser(response.UserName);
-            
+
             return user;
         }
         protected LoginResponse GetValues()
@@ -65,7 +61,7 @@ namespace ProjectManagerAPI.Persistence.Services
                 ValidateAudience = false
             };
             var claims = handler.ValidateToken(GetCurrentAsync(), validations, out var tokenSecure);
-            
+
             LoginResponse response = new LoginResponse();
             response.UserName = claims.Claims.First(c => c.Type == ClaimTypes.Name).Value;
             response.DisplayName = claims.Claims.First(c => c.Type == ClaimTypes.GivenName).Value;

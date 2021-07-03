@@ -1,15 +1,12 @@
-﻿using System;
+﻿using ProjectManagerAPI.Core.Models;
+using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Threading.Tasks;
-using ProjectManagerAPI.Core.Models;
 
 namespace ProjectManagerAPI.Core.Resources
 {
     public class ReportResource
     {
-        
+
         public string Name { get; set; }
         public string Url { get; set; }
         public string Remark { get; set; }

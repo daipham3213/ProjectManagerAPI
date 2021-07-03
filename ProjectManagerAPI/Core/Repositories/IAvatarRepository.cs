@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using ProjectManagerAPI.Core.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using ProjectManagerAPI.Core.Models;
 
 namespace ProjectManagerAPI.Core.Repositories
 {
