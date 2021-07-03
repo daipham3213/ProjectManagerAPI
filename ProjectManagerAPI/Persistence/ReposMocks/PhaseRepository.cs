@@ -1,4 +1,5 @@
-﻿using ProjectManagerAPI.Core.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Repositories;
 using System;
 using System.Collections.Generic;
@@ -16,5 +17,11 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             _context = context;
         }
 
+        public async Task<Phase> SearchPhaneByName(string name)
+        {
+            return await _context.Phases.FirstOrDefaultAsync(u => u.Name.ToLower().Trim().Contains(name.ToLower().Trim()));
+        }
+
+    
     }
 }
