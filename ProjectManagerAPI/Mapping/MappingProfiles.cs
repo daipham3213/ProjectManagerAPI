@@ -1,7 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using AutoMapper;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Resources;
+using ProjectManagerAPI.Persistence;
 
 namespace ProjectManagerAPI.Mapping
 {
@@ -46,29 +48,15 @@ namespace ProjectManagerAPI.Mapping
                 .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Group/" + u.Id))
                 .ForMember(u => u.GroupName, opt => opt.MapFrom(g => g.Group.Name))
                 .ForMember(u => u.ProjectName, opt => opt.MapFrom(g => g.Project.Name));
+            CreateMap<Report, ReportResource>()
+                .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Group/" + u.Id))
+                .ForMember(u => u.GroupName, opt => opt.MapFrom(g => g.Group.Name))
+                .ForMember(u => u.ProjectName, opt => opt.MapFrom(g => g.Project.Name))
+                .ForMember(u => u.GroupUrl, opt => opt.MapFrom(u => "api/Group/" + u.GroupId))
+                .ForMember(u => u.ProjectUrl, opt => opt.MapFrom(u => "api/Project/" + u.ProjectId))
+                .ForMember(u => u.UserCreated, opt => opt.MapFrom(u => "api/User/" + u.ProjectId));
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            //Working-stage
+  //Working-stage
             CreateMap<Phase, CreatedPhase>();
             CreateMap<Phase, PhaseViewResource>().ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Phase/" + u.Id));
 
@@ -95,6 +83,7 @@ namespace ProjectManagerAPI.Mapping
 
             resource.ParentN = parentN;
         }
-        
+
+       
     }
 }

@@ -18,16 +18,34 @@ namespace ProjectManagerAPI
             )
         {
             // this seed method for creating some sample data in database
+            //Check if the seed is planted
+            var server = context.ServerInfos.FirstOrDefault(u => u.Name == "API Server");
+            if (server != null)
+                if (server.IsSeeded)
+                    return;
+
+            if (server == null)
+            {
+                server = new ServerInfo()
+                {
+                    IsSeeded = true
+                };
+                context.ServerInfos.Add(server);
+            }
+            else if (server.IsSeeded == false)
+                server.IsSeeded = true;
 
             //initalizing some roles
             var roleAdmin = new IdentityRole<Guid>(RoleNames.RoleAdmin);
             var roleUser = new IdentityRole<Guid>(RoleNames.RoleUser);
+            var roleDep = new IdentityRole<Guid>(RoleNames.DepartmentLead);
+            var roleTeam = new IdentityRole<Guid>(RoleNames.TeamLead);
             
             //Add some user
-            if (context.Users.Where(u => u.UserName == "admin").Count() == 0)
-            {
-                await roleManager.CreateAsync(roleUser);
+            await roleManager.CreateAsync(roleUser);
                 await roleManager.CreateAsync(roleAdmin);
+                await roleManager.CreateAsync(roleDep);
+                await roleManager.CreateAsync(roleTeam);
                 var users = new List<User>{
                     new User
                     {
@@ -55,29 +73,30 @@ namespace ProjectManagerAPI
 
                 await userManager.CreateAsync(users[1], "member123456");
                 await userManager.AddToRoleAsync(users[1], roleUser.Name);
-            }
+            
             //Add some grouptypes
-            if (context.GroupTypes.Where(u => u.Name == "Department").Count() == 0)
-            {
-                var admin =await userManager.FindByNameAsync("admin");
+            var admin =await userManager.FindByNameAsync("admin");
                 var types = new List<GroupType> {
                     new GroupType{
                         Name = "System Admin",
-                        Remark = "",
+                        Remark = "System administrators and maintainers.",
                         UserCreated = admin.Id,
-                        IsActived = true,
+                        IsActived = false,
+                        IdentityRole = await roleManager.FindByNameAsync(RoleNames.RoleAdmin)
                     },
                     new GroupType{
                         Name = "Department",
-                        Remark = "",
+                        Remark = "Big group that consist of smaller related group.",
                         UserCreated = admin.Id,
                         IsActived = true,
+                        IdentityRole = await roleManager.FindByNameAsync(RoleNames.DepartmentLead)
                     },
                     new GroupType{
-                        Name = "Team",
-                        Remark = "",
+                        Name = "Group",
+                        Remark = "Small group of people for specified works.",
                         UserCreated = admin.Id,
                         IsActived = true,
+                        IdentityRole = await roleManager.FindByNameAsync(RoleNames.TeamLead)
                     },
                 };
 
@@ -89,7 +108,7 @@ namespace ProjectManagerAPI
                 types[2].ParentN = context.GroupTypes.FirstOrDefault(u => u.Name == types[1].Name);
                 context.GroupTypes.Add(types[2]);
                 await context.SaveChangesAsync();
-            }
+
         }
     }
 }

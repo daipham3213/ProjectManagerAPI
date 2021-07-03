@@ -20,7 +20,7 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
             builder.Property(x => x.DateModified)
                 .HasDefaultValueSql("getdate()")
                 .ValueGeneratedOnAddOrUpdate();
-            builder.Property(x => x.IsActived).HasDefaultValue(true);
+            //builder.Property(x => x.IsActived).HasDefaultValue(true);
         }
     }
 }

@@ -21,6 +21,7 @@ namespace ProjectManagerAPI.Persistence
         public DbSet<Task> Tasks { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Avatar> Avatars { get; set; }
+        public DbSet<ServerInfo> ServerInfos { get; set; }
 
         public ProjectManagerDbContext(DbContextOptions<ProjectManagerDbContext> options)
             : base(options)
@@ -38,27 +39,9 @@ namespace ProjectManagerAPI.Persistence
             builder.ApplyConfiguration(new ReportConfiguration());
             builder.ApplyConfiguration(new TaskConfiguration());
             builder.ApplyConfiguration(new UserConfiguration());
+            builder.ApplyConfiguration(new ServerInfoConfiguration());
             builder.Ignore<BaseModel>();
             builder.Entity<BaseModel>().ToTable("BaseModel", t => t.ExcludeFromMigrations());
-        }
-
-        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            var addedEntities = ChangeTracker.Entries().Where(e => e.State == EntityState.Added).ToList();
-
-            addedEntities.ForEach(e =>
-            {
-                e.Property("DateCreated").CurrentValue = DateTime.Now;
-            });
-
-            var editedEntities = ChangeTracker.Entries().Where(e => e.State == EntityState.Modified).ToList();
-
-            editedEntities.ForEach(e =>
-            {
-                e.Property("DateModified").CurrentValue = DateTime.Now;
-            });
-
-            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
     }
 }

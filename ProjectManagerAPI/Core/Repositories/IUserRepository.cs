@@ -7,7 +7,7 @@ using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI.Core.Repositories
 {
-    public interface IUserRepository 
+    public interface IUserRepository : IRepository<User>
     {
         public Task<User> GetUser(string userName);
         public Task<User> GetUserProfile(string username);
@@ -16,5 +16,6 @@ namespace ProjectManagerAPI.Core.Repositories
         public Task<List<User>> SearchUsersByDisplayName(string displayName);
         public Task LoadMainAvatar(string userName);
         Task Load(Expression<Func<User, bool>> predicate);
+        Task LeaveGroup(Guid id);
     }
 }

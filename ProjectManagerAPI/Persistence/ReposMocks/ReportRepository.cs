@@ -5,12 +5,15 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Repositories;
+using ProjectManagerAPI.Core.Services;
 
 namespace ProjectManagerAPI.Persistence.ReposMocks
 {
     public class ReportRepository : Repository<Report>, IReportRepository
     {
         private readonly ProjectManagerDbContext _context;
+        
+
         public ReportRepository(ProjectManagerDbContext context) 
             : base(context)
         {
@@ -25,6 +28,13 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
         public async Task<IList<Report>> FindReportByGroupIdAndProjectId(Guid groupId, Guid prjId)
         {
             return await this._context.Reports.Where(u => u.GroupId == groupId & u.ProjectId == prjId).ToListAsync();
+        }
+
+        public async Task<IList<Report>> LoadValidated()
+        {
+            
+
+            return null;
         }
     }
 }

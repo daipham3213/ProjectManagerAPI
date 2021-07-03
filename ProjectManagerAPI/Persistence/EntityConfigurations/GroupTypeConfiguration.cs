@@ -8,6 +8,9 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
         public override void Configure(EntityTypeBuilder<GroupType> builder)
         {
             base.Configure(builder);
+            builder.HasOne(u => u.IdentityRole)
+                .WithMany()
+                .HasForeignKey(f => f.IdentityRoleId);
         }
     }
 }

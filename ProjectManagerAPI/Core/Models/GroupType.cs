@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
 
 namespace ProjectManagerAPI.Core.Models
 {
@@ -9,6 +10,8 @@ namespace ProjectManagerAPI.Core.Models
         public Guid? ParentNid { get; set; }
         public ICollection<Group> Group { get; set; }
 
+        public IdentityRole<Guid> IdentityRole { get; set; }
+        public Guid IdentityRoleId { get; set; }
         public GroupType()
         {
             Group = new List<Group>();
