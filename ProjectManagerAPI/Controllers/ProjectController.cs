@@ -21,16 +21,17 @@ namespace ProjectManagerAPI.Controllers
     [Authorize]
     public class ProjectController : ControllerBase
     {
+
+        private readonly ITokenManager _tokenParser;
+        private readonly IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
+
         public ProjectController(ITokenManager tokenParser, IMapper mapper, IUnitOfWork unitOfWork)
         {
             _tokenParser = tokenParser;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
         }
-
-        private readonly ITokenManager _tokenParser;
-        private readonly IMapper _mapper;
-        private readonly IUnitOfWork _unitOfWork;
 
 
         [HttpGet("all")]
@@ -94,7 +95,6 @@ namespace ProjectManagerAPI.Controllers
             {
                 Name = project.Name,
                 Remark = project.Remark,
-                //DueDate 
                 StartDate = project.StartDate,
                 DueDate = project.DueDate,
             };

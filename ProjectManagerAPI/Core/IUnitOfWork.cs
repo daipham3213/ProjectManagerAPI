@@ -12,6 +12,7 @@ namespace ProjectManagerAPI.Core
         IUserRepository Users { get; }
         IGroupRepository Groups { get; }
         IReportRepository Reports { get; }
+        IPhaseRepository Phases { get;  }
         Task<int> Complete();
     }
 }
