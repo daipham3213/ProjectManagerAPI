@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace ProjectManagerAPI.Core.Models
 {
@@ -10,8 +9,8 @@ namespace ProjectManagerAPI.Core.Models
     {
         public User()
         {
-            this.IsActived = false;
-            this.IsSuperuser = false;
+            IsActived = false;
+            IsSuperuser = false;
             Tasks = new List<Task>();
             Avatars = new List<Avatar>();
             //DateCreated = DateTime.Now;

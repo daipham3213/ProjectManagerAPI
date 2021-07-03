@@ -11,9 +11,9 @@ namespace ProjectManagerAPI.Core.Models
         [DefaultValue(0)]
         public float Progress { get; set; }
         public Project Project { get; set; }
-        public Guid ProjectID { get; set; }
+        public Guid ProjectId { get; set; }
         public Group Group { get; set; }
-        public Guid GroupID { get; set; }
+        public Guid GroupId { get; set; }
 
         public ICollection<Phase> Phases { get; set; }
 
@@ -21,7 +21,7 @@ namespace ProjectManagerAPI.Core.Models
         {
             //base.DateCreated = DateTime.Now;
             //base.DateModified = DateTime.Now;
-            base.IsActived = true;
+            IsActived = true;
             Phases = new List<Phase>();
         }
     }

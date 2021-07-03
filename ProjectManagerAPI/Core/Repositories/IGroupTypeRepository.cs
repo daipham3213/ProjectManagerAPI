@@ -1,7 +1,7 @@
-﻿using ProjectManagerAPI.Core.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ProjectManagerAPI.Core.Models;
 
 namespace ProjectManagerAPI.Core.Repositories
 {
@@ -11,7 +11,7 @@ namespace ProjectManagerAPI.Core.Repositories
         public void RemoveRelation(GroupType type);
         public Task<IEnumerable<GroupType>> LoadValidated();
         public Task<GroupType> GetTypeByName(string name);
-        void RemoveAllChildren(Guid groupID);
+        void RemoveAllChildren(Guid groupId);
         public Task<GroupType> GetParents(Guid postId);
     }
 }

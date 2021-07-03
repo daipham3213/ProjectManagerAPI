@@ -1,5 +1,8 @@
-﻿using AutoMapper;
-using CloudinaryDotNet;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,11 +10,6 @@ using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Resources;
 using ProjectManagerAPI.Core.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Controllers
 {
@@ -25,24 +23,24 @@ namespace ProjectManagerAPI.Controllers
 
         public AvatarController(IUnitOfWork unitOfWork, IMapper mapper, IPhotoService photoService)
         {
-            this._unitOfWork = unitOfWork;
-            this._mapper = mapper;
-            this._photoService = photoService;
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _photoService = photoService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get(string userName)
         {
             
-            var user = await this._unitOfWork.Users.GetUser(userName);
+            var user = await _unitOfWork.Users.GetUser(userName);
             if (user == null)
                 return NotFound();
 
-            var avatars = await this._unitOfWork.Avatars.GetAvatars(userName);
+            var avatars = await _unitOfWork.Avatars.GetAvatars(userName);
 
-            await this._unitOfWork.Complete();
+            await _unitOfWork.Complete();
 
-            var result = this._mapper.Map<List<Avatar>, List<AvatarResource>>(avatars);
+            var result = _mapper.Map<List<Avatar>, List<AvatarResource>>(avatars);
 
             return Ok(result);
         }
@@ -50,15 +48,15 @@ namespace ProjectManagerAPI.Controllers
         [HttpGet("main")]
         public async Task<IActionResult> GetMain(string userName)
         {       
-            var user = await this._unitOfWork.Users.GetUser(userName);
+            var user = await _unitOfWork.Users.GetUser(userName);
             if (user == null)
-                return NotFound();
+                return NotFound(Json("User can not be found."));
 
-            var avatar = await this._unitOfWork.Avatars.SingleOrDefault(a => a.UserID == user.Id && a.IsMain == true);
+            var avatar = await _unitOfWork.Avatars.SingleOrDefault(a => a.UserId == user.Id && a.IsMain);
             if (avatar == null)
-                return NotFound();
+                return NotFound(Json("Main Avatar can not be found."));
 
-            var result = this._mapper.Map<Avatar, AvatarResource>(avatar);
+            var result = _mapper.Map<Avatar, AvatarResource>(avatar);
             return Ok(result);
         }
 
@@ -70,74 +68,74 @@ namespace ProjectManagerAPI.Controllers
             if (file == null)
                 return BadRequest("no file");
 
-            var user = await this._unitOfWork.Users.GetUser(userName);
+            var user = await _unitOfWork.Users.GetUser(userName);
             if (user == null)
-                return NotFound();
+                return NotFound("User can not be found");
 
             //Get main avatar of user
-            var oldAvatar = await this._unitOfWork.Avatars.SingleOrDefault(a => a.UserID == user.Id && a.IsMain == true);
+            var oldAvatar = await _unitOfWork.Avatars.SingleOrDefault(a => a.UserId == user.Id && a.IsMain);
             if (oldAvatar != null)
                 oldAvatar.IsMain = false;
 
             //Upload new photo to clound
-            var cloudPhoto = await this._photoService.AddPhoto(file);
+            var cloudPhoto = await _photoService.AddPhoto(file);
 
             //Create a new photo in db
-            var newAvatar = new Avatar()
+            var newAvatar = new Avatar
             {
                 Id = cloudPhoto.Id,
                 Path = cloudPhoto.Url,
                 UploadTime = DateTime.Now,
                 IsMain = true,
-                PublicID = cloudPhoto.publicid,
+                PublicId = cloudPhoto.Publicid,
                 User = user,
-                UserID = user.Id,
+                UserId = user.Id,
             };
             try
             {
-                await this._unitOfWork.Avatars.Add(newAvatar);
-                await this._unitOfWork.Complete();
+                await _unitOfWork.Avatars.Add(newAvatar);
+                await _unitOfWork.Complete();
             }
             catch (Exception e)
             {
                 return Problem(detail: e.Message, statusCode: 500, title: "Upload Photo");
             }
 
-            return Ok(this._mapper.Map<Avatar, AvatarResource>(newAvatar));
+            return Ok(_mapper.Map<Avatar, AvatarResource>(newAvatar));
         }
 
         [HttpDelete("{photoID}")]
         [Authorize]
         public async Task<IActionResult> DeleteAvatar(string userName, Guid photoId)
         {
-            var user = await this._unitOfWork.Users.GetUser(userName);
+            var user = await _unitOfWork.Users.GetUser(userName);
             if (user == null)
-                return NotFound();
+                return NotFound("User can not be found");
 
             //Load all avatars of user
-            await this._unitOfWork.Avatars.Load(a => a.UserID == user.Id);
+            await _unitOfWork.Avatars.Load(a => a.UserId == user.Id);
 
             var avatar = user.Avatars.FirstOrDefault(a => a.Id == photoId);
             if (avatar == null)
-                return NotFound();
+                return NotFound(Json("Avatar can not be found"));
 
             if (avatar.IsMain)
                 return BadRequest("Can not delete main avatar");
 
             // Delete photo from cloud service
-            var photo = await this._unitOfWork.Avatars.Get(photoId);
-            var result = await this._photoService.DeletePhoto(photo.PublicID);
+            var photo = await _unitOfWork.Avatars.Get(photoId);
+            var result = await _photoService.DeletePhoto(photo.PublicId);
 
             if (result == null)
-                return Problem();
+                throw new Exception("Error while deleting photo.");
 
             // Delete photo from database
             user.Avatars.Remove(avatar);
-            this._unitOfWork.Avatars.Remove(avatar);
+            _unitOfWork.Avatars.Remove(avatar);
 
-            await this._unitOfWork.Complete();
+            await _unitOfWork.Complete();
 
-            return Ok();
+            return Ok(Json("Deleted successfully."));
         }
     }
 }

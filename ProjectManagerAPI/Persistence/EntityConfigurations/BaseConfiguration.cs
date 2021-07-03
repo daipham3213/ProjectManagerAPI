@@ -9,14 +9,14 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
     {
         public virtual void Configure(EntityTypeBuilder<TBase> builder)
         {
-            builder.HasKey(k => k.ID);
-            builder.Property(x => x.ID)
+            builder.HasKey(k => k.Id);
+            builder.Property(x => x.Id)
                 .ValueGeneratedOnAdd()
                 .IsRequired();
             builder.Property(x => x.DateCreated)
                 .HasDefaultValueSql("getdate()")
                 .ValueGeneratedOnAdd();
-            builder.HasIndex(x => x.Name).IsUnique(true);
+            builder.HasIndex(x => x.Name).IsUnique();
             builder.Property(x => x.DateModified)
                 .HasDefaultValueSql("getdate()")
                 .ValueGeneratedOnAddOrUpdate();

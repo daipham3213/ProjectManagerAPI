@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using ProjectManagerAPI.Core.ServiceResource;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using ProjectManagerAPI.Core.ServiceResource;
 
 namespace ProjectManagerAPI.Core.Services
 {

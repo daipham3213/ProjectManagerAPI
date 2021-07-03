@@ -1,6 +1,6 @@
-﻿using ProjectManagerAPI.Core.Repositories;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using ProjectManagerAPI.Core.Repositories;
 
 namespace ProjectManagerAPI.Core
 {
@@ -11,6 +11,7 @@ namespace ProjectManagerAPI.Core
         IAvatarRepository Avatars { get; }
         IUserRepository Users { get; }
         IGroupRepository Groups { get; }
+        IReportRepository Reports { get; }
         Task<int> Complete();
     }
 }

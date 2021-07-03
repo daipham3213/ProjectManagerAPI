@@ -1,11 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using ProjectManagerAPI.Core;
-using ProjectManagerAPI.Core.Models;
-using ProjectManagerAPI.Core.ServiceResource;
-using ProjectManagerAPI.Core.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -13,6 +6,14 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using ProjectManagerAPI.Core;
+using ProjectManagerAPI.Core.Models;
+using ProjectManagerAPI.Core.ServiceResource;
+using ProjectManagerAPI.Core.Services;
+using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI.Persistence.Services
 {
@@ -51,8 +52,8 @@ namespace ProjectManagerAPI.Persistence.Services
             if (!result.Succeeded)
                 return null;
 
-            var is_activated = user.IsActived;
-            if (!is_activated)
+            var isActivated = user.IsActived;
+            if (!isActivated)
                 return new LoginResponse{
                     IsActivated = false
                 };
@@ -93,7 +94,7 @@ namespace ProjectManagerAPI.Persistence.Services
             var finalToken = tokenHandler.WriteToken(token);
 
             //Load Avatar
-            await this._unitOfWork.Avatars.Load(a => a.UserID == user.Id && a.IsMain);
+            await _unitOfWork.Avatars.Load(a => a.UserId == user.Id && a.IsMain);
 
             var avatar = user.Avatars.Where(a => a.IsMain).FirstOrDefault();
             string path = null;
@@ -101,7 +102,7 @@ namespace ProjectManagerAPI.Persistence.Services
             if (avatar != null)
                 path = avatar.Path;
 
-            var loginResponse = new LoginResponse()
+            var loginResponse = new LoginResponse
             {
                 UserName = user.UserName,
                 Token = finalToken,
@@ -116,25 +117,25 @@ namespace ProjectManagerAPI.Persistence.Services
 
         public async Task<bool> ChangePassword(string userName, string currentPassword, string newPassword)
         {
-            var user = await this._userManager.FindByNameAsync(userName);
+            var user = await _userManager.FindByNameAsync(userName);
 
-            var result = await this._userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+            var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
 
             return result.Succeeded;
         }
 
         public async Task<bool> CheckPassword(string userName, string password)
         {
-            var user = await this._userManager.FindByNameAsync(userName);
+            var user = await _userManager.FindByNameAsync(userName);
 
-            var result = await this._userManager.CheckPasswordAsync(user, password);
+            var result = await _userManager.CheckPasswordAsync(user, password);
 
             return result;
         }
 
         public async Task<bool> ConfirmChangeEmail(string username, string newEmail, string token)
         {
-            var user = await this._userManager.FindByNameAsync(username);
+            var user = await _userManager.FindByNameAsync(username);
 
             var result = await _userManager.ChangeEmailAsync(user, newEmail, token);
 
@@ -143,7 +144,7 @@ namespace ProjectManagerAPI.Persistence.Services
 
         public async Task<bool> ConfirmActivation(string username, string token)
         {
-            var user = await this._userManager.FindByNameAsync(username);
+            var user = await _userManager.FindByNameAsync(username);
 
             var result = await _userManager.ConfirmEmailAsync(user, token);
 
@@ -153,7 +154,7 @@ namespace ProjectManagerAPI.Persistence.Services
 
         public async Task<User> GetUser(string userName)
         {
-            return await this._unitOfWork.Users.GetUser(userName);
+            return await _unitOfWork.Users.GetUser(userName);
         }
 
 
@@ -174,7 +175,7 @@ namespace ProjectManagerAPI.Persistence.Services
             {
                 listError.Add("Username already exists");
             }
-            user = new User()
+            user = new User
             {
                 UserName = request.Username,
                 Name = request.Name,
@@ -207,10 +208,10 @@ namespace ProjectManagerAPI.Persistence.Services
             bool isValid = Guid.TryParse(key, out guidOutput);
             if (isValid)
             {
-                user = await this._unitOfWork.Users.SearchUserById(guidOutput);
+                user = await _unitOfWork.Users.SearchUserById(guidOutput);
             }
 
-            user = await this._unitOfWork.Users.SearchUserByUsername(key);
+            user = await _unitOfWork.Users.SearchUserByUsername(key);
             if (user != null)
             {
                 users.Add(user);
@@ -220,14 +221,14 @@ namespace ProjectManagerAPI.Persistence.Services
             {
                 if (await IsOnlyRoleUser(users[0]))
                 {
-                    await this._unitOfWork.Users.LoadMainAvatar(users[0].UserName);
+                    await _unitOfWork.Users.LoadMainAvatar(users[0].UserName);
 
                     return users;
                 }
 
             }
 
-            users = await this._unitOfWork.Users.SearchUsersByDisplayName(key);
+            users = await _unitOfWork.Users.SearchUsersByDisplayName(key);
 
             var usersRoleUser = new List<User>();
             foreach (var user1 in users)
@@ -240,7 +241,7 @@ namespace ProjectManagerAPI.Persistence.Services
 
             foreach (var userRoleUser in usersRoleUser)
             {
-                await this._unitOfWork.Users.LoadMainAvatar(userRoleUser.UserName);
+                await _unitOfWork.Users.LoadMainAvatar(userRoleUser.UserName);
             }
 
 
@@ -250,7 +251,7 @@ namespace ProjectManagerAPI.Persistence.Services
         {
             //Only role User or not has any roles
 
-            var roles = await this._userManager.GetRolesAsync(user);
+            var roles = await _userManager.GetRolesAsync(user);
 
             bool flag = true;
             foreach (var role in roles)
@@ -261,11 +262,11 @@ namespace ProjectManagerAPI.Persistence.Services
 
             return flag;
         }
-        public async System.Threading.Tasks.Task SendChangeEmailRequest(string username, string newEmail, string callbackurl)
+        public async Task SendChangeEmailRequest(string username, string newEmail, string callbackurl)
         {
-            var user = await this._userManager.FindByNameAsync(username);
+            var user = await _userManager.FindByNameAsync(username);
 
-            var token = await this._userManager.GenerateChangeEmailTokenAsync(user, newEmail);
+            var token = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
 
             // append userId and confirmation code as parameters to the url
             callbackurl += String.Format("?username={0}&newEmail={1}&token={2}", user.UserName, newEmail, HttpUtility.UrlEncode(token));
@@ -276,7 +277,7 @@ namespace ProjectManagerAPI.Persistence.Services
                     callbackurl);
 
             // send email to the user with the confirmation link
-            MailRequest mailRequest = new MailRequest()
+            MailRequest mailRequest = new MailRequest
             {
                 ToEmail = user.Email,
                 Subject = "Change email",
@@ -285,7 +286,7 @@ namespace ProjectManagerAPI.Persistence.Services
 
             try
             {
-                await this._mailService.SendEmailAsync(mailRequest);
+                await _mailService.SendEmailAsync(mailRequest);
 
             }
             catch (Exception e)
@@ -293,11 +294,11 @@ namespace ProjectManagerAPI.Persistence.Services
                 Console.WriteLine(e);
             }
         }
-        public async System.Threading.Tasks.Task SendActivationRequest(string username, string callbackurl)
+        public async Task SendActivationRequest(string username, string callbackurl)
         {
-            var user = await this._userManager.FindByNameAsync(username);
+            var user = await _userManager.FindByNameAsync(username);
 
-            var token = await this._userManager.GenerateEmailConfirmationTokenAsync(user);
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
             // append userId and confirmation code as parameters to the url
             callbackurl += String.Format("?username={0}&token={1}", user.UserName, HttpUtility.UrlEncode(token));
@@ -308,7 +309,7 @@ namespace ProjectManagerAPI.Persistence.Services
                     callbackurl);
 
             // send email to the user with the confirmation link
-            MailRequest mailRequest = new MailRequest()
+            MailRequest mailRequest = new MailRequest
             {
                 ToEmail = user.Email,
                 Subject = "Account Activation",
@@ -317,7 +318,7 @@ namespace ProjectManagerAPI.Persistence.Services
 
             try
             {
-                await this._mailService.SendEmailAsync(mailRequest);
+                await _mailService.SendEmailAsync(mailRequest);
 
             }
             catch (Exception e)
