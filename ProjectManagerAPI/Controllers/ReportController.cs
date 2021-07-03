@@ -1,17 +1,14 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Authentication;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Resources;
 using ProjectManagerAPI.Core.Services;
-using Task = System.Threading.Tasks.Task;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Controllers
 {
@@ -72,7 +69,7 @@ namespace ProjectManagerAPI.Controllers
                 throw new Exception("This name is already taken.");
             }
             var result = _mapper.Map<CreatedReport>(newRp);
-            return Ok(new JsonResult(result) { StatusCode = 200, ContentType = "application/json"});
+            return Ok(new JsonResult(result) { StatusCode = 200, ContentType = "application/json" });
         }
 
         [HttpGet]
@@ -106,7 +103,7 @@ namespace ProjectManagerAPI.Controllers
             }
 
             var result = this._mapper.Map<IEnumerable<ReportViewResource>>(listRp);
-            return Ok(new JsonResult(result){StatusCode = 200, ContentType = "application/json"});
+            return Ok(new JsonResult(result) { StatusCode = 200, ContentType = "application/json" });
         }
 
         [HttpGet("{%id}")]

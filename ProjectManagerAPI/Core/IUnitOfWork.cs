@@ -1,6 +1,6 @@
-﻿using System;
+﻿using ProjectManagerAPI.Core.Repositories;
+using System;
 using System.Threading.Tasks;
-using ProjectManagerAPI.Core.Repositories;
 
 namespace ProjectManagerAPI.Core
 {

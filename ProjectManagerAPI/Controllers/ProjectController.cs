@@ -1,10 +1,8 @@
 using AutoMapper;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
-using ProjectManagerAPI.Core.Repositories;
 using ProjectManagerAPI.Core.Resources;
 using ProjectManagerAPI.Core.ServiceResource;
 using ProjectManagerAPI.Core.Services;
@@ -106,7 +104,7 @@ namespace ProjectManagerAPI.Controllers
 
 
                 entity = await this._unitOfWork.Projects.SearchProjectByName(entity.Name);
-             
+
                 var result = this._mapper.Map<Project, CreateProject>(entity);
                 return Ok(result);
             }

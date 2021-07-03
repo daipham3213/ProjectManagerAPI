@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -21,6 +18,9 @@ using ProjectManagerAPI.Core.Services;
 using ProjectManagerAPI.Persistence;
 using ProjectManagerAPI.Persistence.ReposMocks;
 using ProjectManagerAPI.Persistence.Services;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace ProjectManagerAPI
 {
@@ -37,10 +37,12 @@ namespace ProjectManagerAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(options => {
+            services.AddCors(options =>
+            {
 
                 options.AddPolicy(name: _myAllowSpecificOrigins,
-                    builder => {
+                    builder =>
+                    {
                         builder.WithOrigins("http://localhost:5000", "http://localhost:3000")
                             .AllowAnyOrigin()
                             .AllowAnyMethod()

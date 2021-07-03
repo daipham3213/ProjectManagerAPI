@@ -1,6 +1,6 @@
-﻿using System;
+﻿using ProjectManagerAPI.Core.Models;
+using System;
 using System.Collections.Generic;
-using ProjectManagerAPI.Core.Models;
 
 namespace ProjectManagerAPI.Core.Resources
 {

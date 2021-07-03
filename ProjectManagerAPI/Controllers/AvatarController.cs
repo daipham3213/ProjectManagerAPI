@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +6,10 @@ using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Resources;
 using ProjectManagerAPI.Core.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Controllers
 {
@@ -31,7 +31,7 @@ namespace ProjectManagerAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(string userName)
         {
-            
+
             var user = await _unitOfWork.Users.GetUser(userName);
             if (user == null)
                 return NotFound();
@@ -47,7 +47,7 @@ namespace ProjectManagerAPI.Controllers
 
         [HttpGet("main")]
         public async Task<IActionResult> GetMain(string userName)
-        {       
+        {
             var user = await _unitOfWork.Users.GetUser(userName);
             if (user == null)
                 return NotFound(Json("User can not be found."));

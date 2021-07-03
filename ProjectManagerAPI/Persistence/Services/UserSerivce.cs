@@ -1,4 +1,11 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using ProjectManagerAPI.Core;
+using ProjectManagerAPI.Core.Models;
+using ProjectManagerAPI.Core.ServiceResource;
+using ProjectManagerAPI.Core.Services;
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -6,13 +13,6 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using ProjectManagerAPI.Core;
-using ProjectManagerAPI.Core.Models;
-using ProjectManagerAPI.Core.ServiceResource;
-using ProjectManagerAPI.Core.Services;
 using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI.Persistence.Services
@@ -21,6 +21,7 @@ namespace ProjectManagerAPI.Persistence.Services
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMailService _mailService;
         private readonly IConfiguration _config;
@@ -30,7 +31,8 @@ namespace ProjectManagerAPI.Persistence.Services
             SignInManager<User> signInManager,
             IUnitOfWork unitOfWork,
             IMailService mailService,
-            IConfiguration config
+            IConfiguration config,
+            RoleManager<IdentityRole<Guid>> roleManager
             )
         {
             _userManager = userManager;
@@ -38,6 +40,7 @@ namespace ProjectManagerAPI.Persistence.Services
             _unitOfWork = unitOfWork;
             _mailService = mailService;
             _config = config;
+            _roleManager = roleManager;
         }
 
         public async Task<LoginResponse> Authenticate(LoginRequest request)
@@ -54,7 +57,8 @@ namespace ProjectManagerAPI.Persistence.Services
 
             var isActivated = user.IsActived;
             if (!isActivated)
-                return new LoginResponse{
+                return new LoginResponse
+                {
                     IsActivated = false
                 };
 
@@ -158,33 +162,43 @@ namespace ProjectManagerAPI.Persistence.Services
                 throw new Exception("Invalid information.");
             if (user.Group == null)
                 throw new Exception("User's group is invalid.");
-            await this._userManager.AddToRoleAsync(user, user.Group.GroupType.IdentityRole.Name);
+            var role = await  this._roleManager.FindByIdAsync(user.Group.GroupType.IdentityRoleId.ToString());
+            await this._userManager.AddToRoleAsync(user, role.Name);
         }
 
         public async Task DePromotion(string username)
         {
             var leader = await _userManager.FindByNameAsync(username);
-            await this._userManager.RemoveFromRoleAsync(leader, leader.Group.GroupType.IdentityRole.Name);
+            var role = await this._roleManager.FindByIdAsync(leader.Group.GroupType.IdentityRoleId.ToString());
+            await this._userManager.RemoveFromRoleAsync(leader, role.Name);
         }
 
         public async Task<bool> PromotionBy(string lead_username, string promo_username)
         {
             var leader = await this._userManager.FindByNameAsync(lead_username);
             var user = await this._userManager.FindByNameAsync(promo_username);
-            var group = leader.Group;
+            var group = await this._unitOfWork.Groups.Get(leader.GroupRef.Value);
 
             if (leader == null | user == null | group == null)
                 throw new Exception("Invalid information.");
-            if (leader.GroupRef != leader.Id)
+            if (group.LeaderId != leader.Id)
                 throw new Exception("Permission not allowed.");
             if (group.Id != user.GroupRef)
                 throw new Exception(promo_username + "  is not a member of " + group.Name);
+            await this._unitOfWork.Users.Load(u => u.IsActived);
 
+            var temp = leader.ParentN;
             leader.ParentN = user;
+            user.ParentN = temp;
             group.LeaderId = user.Id;
-
-            await this._userManager.RemoveFromRoleAsync(leader, group.GroupType.IdentityRole.Name);
-            await this._userManager.AddToRoleAsync(user, group.GroupType.IdentityRole.Name);
+            leader.DateModified = DateTime.UtcNow;
+            user.DateModified = DateTime.UtcNow;
+            group.DateModified = DateTime.UtcNow;
+            await this._unitOfWork.GroupTypes.Load(u => u.Id == group.GroupTypeFk);
+            var role = await this._roleManager.FindByIdAsync(group.GroupType.IdentityRoleId.ToString());
+            await this._userManager.RemoveFromRoleAsync(leader, role.Name);
+            await this._userManager.AddToRoleAsync(user, role.Name);
+            await this._unitOfWork.Complete();
             return true;
         }
 
@@ -225,7 +239,7 @@ namespace ProjectManagerAPI.Persistence.Services
             if (listError.Count != 0)
                 return listError;
 
-            var result = await _userManager.CreateAsync(user, request.Password);   
+            var result = await _userManager.CreateAsync(user, request.Password);
             if (result.Succeeded)
             {
                 var u = await _unitOfWork.Users.GetUser(user.UserName);
@@ -235,11 +249,11 @@ namespace ProjectManagerAPI.Persistence.Services
 
             throw new Exception("Error while creating user account.");
         }
-        
+
         public async Task<List<User>> SearchUser(string key)
         {
             var users = new List<User>();
-            
+
             Guid guidOutput;
             User user;
             bool isValid = Guid.TryParse(key, out guidOutput);

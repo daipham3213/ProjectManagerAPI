@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -10,12 +7,15 @@ using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Resources;
 using ProjectManagerAPI.Core.ServiceResource;
 using ProjectManagerAPI.Core.Services;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-   // [Authorize(Roles = RoleNames.RoleUser)]
+    // [Authorize(Roles = RoleNames.RoleUser)]
     public class UserController : Controller
     {
         private readonly IUserService _userService;
@@ -34,7 +34,7 @@ namespace ProjectManagerAPI.Controllers
 
         [HttpPost("authenticate")]
         [AllowAnonymous]
-  
+
         public async Task<IActionResult> Authenticate([FromBody] LoginRequest request)
         {
             var response = await _userService.Authenticate(request);
@@ -42,13 +42,13 @@ namespace ProjectManagerAPI.Controllers
                 throw new Exception("Username or Password incorrect.");
             if (!response.IsActivated)
             {
-                var callbackurl = _configuration["HostUrl:local"]+ "/api/User/sendActivationEmail?username="+request.Username;
+                var callbackurl = _configuration["HostUrl:local"] + "/api/User/sendActivationEmail?username=" + request.Username;
                 throw new Exception(
                     "Account have not activated. Please click the link below to recive your activation email.\n url: " +
                     callbackurl
                 );
             }
-                
+
             return Ok(response);
         }
 
@@ -56,7 +56,7 @@ namespace ProjectManagerAPI.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] RegisterRequest user)
         {
-            
+
             var errors = await _userService.Register(user);
             var error = new
             {
@@ -120,7 +120,7 @@ namespace ProjectManagerAPI.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> SendChangeEmailRequest(string username, string newEmail)
         {
-            var callbackurl = _configuration["HostUrl:local"] +"/api/User/confirmChangeEmail";
+            var callbackurl = _configuration["HostUrl:local"] + "/api/User/confirmChangeEmail";
 
             await _userService.SendChangeEmailRequest(username, newEmail, callbackurl);
 
@@ -146,7 +146,7 @@ namespace ProjectManagerAPI.Controllers
                 return BadRequest();
 
             var result = await _userService.ConfirmChangeEmail(username, newEmail, token);
-            
+
             if (result)
                 return Ok(new JsonResult("Account Email Changed Successfully.") { StatusCode = 200, ContentType = "application/json" });
 
@@ -167,7 +167,7 @@ namespace ProjectManagerAPI.Controllers
             {
                 user.IsActived = true;
                 await _unitOfWork.Complete();
-                return Ok(new JsonResult("Account Activation Success."){StatusCode = 200, ContentType = "application/json" });
+                return Ok(new JsonResult("Account Activation Success.") { StatusCode = 200, ContentType = "application/json" });
             }
 
             return Problem(detail: "Failed.", statusCode: 400);

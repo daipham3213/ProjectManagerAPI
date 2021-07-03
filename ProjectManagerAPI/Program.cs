@@ -1,4 +1,3 @@
-using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Persistence;
+using System;
 using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI

@@ -1,6 +1,6 @@
 ﻿
-using System.Threading.Tasks;
 using ProjectManagerAPI.Core.ServiceResource;
+using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Core.Services
 {

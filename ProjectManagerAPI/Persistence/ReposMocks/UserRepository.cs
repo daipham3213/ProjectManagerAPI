@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using ProjectManagerAPI.Core.Models;
+using ProjectManagerAPI.Core.Repositories;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using ProjectManagerAPI.Core.Models;
-using ProjectManagerAPI.Core.Repositories;
 using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI.Persistence.ReposMocks

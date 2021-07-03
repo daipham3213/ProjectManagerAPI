@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Authentication;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Resources;
 using ProjectManagerAPI.Core.ServiceResource;
 using ProjectManagerAPI.Core.Services;
-using Task = System.Threading.Tasks.Task;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Controllers
 {
@@ -46,7 +43,7 @@ namespace ProjectManagerAPI.Controllers
             var grouptype = await _unitOfWork.GroupTypes.Get(group.GroupTypeFk);
             if (grouptype == null)
                 throw new Exception("Invalid Group type.");
-           
+
             var entity = new Group
             {
                 Name = group.Name,
@@ -78,7 +75,8 @@ namespace ProjectManagerAPI.Controllers
             lead.DateModified = DateTime.Now;
             await this._userService.Promotion(lead.UserName);
             await _unitOfWork.Complete();
-            return Ok(new JsonResult(_mapper.Map<CreatedGroup>(entity)) {
+            return Ok(new JsonResult(_mapper.Map<CreatedGroup>(entity))
+            {
                 StatusCode = Ok().StatusCode
             });
         }
@@ -96,8 +94,11 @@ namespace ProjectManagerAPI.Controllers
         {
             //Get user claims from token
             var user = await _tokenParser.GetUserByToken();
-            var result = await _unitOfWork.Groups.GetGroupListValidated(user.Id);
+            await this._unitOfWork.Users.Load(u => u.IsActived & !u.IsDeleted);
+            Guid leader;
+            leader = user.ParentN?.Id ?? user.Id;
 
+            var result = await _unitOfWork.Groups.GetGroupListValidated(leader);
             return Ok(_mapper.Map<IEnumerable<GroupViewResource>>(result));
         }
 
@@ -106,6 +107,7 @@ namespace ProjectManagerAPI.Controllers
         {
             //Get user claims from token
             var userM = await _tokenParser.GetUserByToken();
+            await this._unitOfWork.Users.Load(u => u.Id == userM.ParentNId);
             ICollection<Group> result;
             if (userM.ParentN != null)
                 result = await _unitOfWork.Groups.GetGroupListValidated(userM.ParentN.Id);
@@ -158,7 +160,7 @@ namespace ProjectManagerAPI.Controllers
             var group = await _unitOfWork.Groups.FindGroupByName(resource.GroupName);
             if (group == null)
                 throw new Exception("Invalid group name.");
-           
+
             //Get user claims from token
             var userM = await _tokenParser.GetUserByToken();
             var list = await _unitOfWork.Groups.GetGroupListValidated(userM.Id);
@@ -172,6 +174,8 @@ namespace ProjectManagerAPI.Controllers
                     throw new Exception(username + " is an invalid username.");
                 if (!group.Users.Contains(user))
                     throw new Exception(username + " is not member of " + group.Name);
+                if (user.Id == group.LeaderId)
+                    throw new Exception("Can not remove leader from group.");
                 _unitOfWork.Groups.RemoveUserFromGroup(user.Id, group.Id);
             }
             await _unitOfWork.Complete();

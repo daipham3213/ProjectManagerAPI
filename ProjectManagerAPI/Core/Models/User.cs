@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using Microsoft.AspNetCore.Identity;
 
 namespace ProjectManagerAPI.Core.Models
 {
@@ -29,6 +29,7 @@ namespace ProjectManagerAPI.Core.Models
         [DefaultValue(false)]
         public bool IsDeleted { get; set; }
         public User? ParentN { get; set; }
+        public Guid? ParentNId { get; set; }
         [DefaultValue(false)]
         public bool IsSuperuser { get; set; }
         public Guid? GroupRef { get; set; }

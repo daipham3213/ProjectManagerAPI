@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Authentication;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Org.BouncyCastle.Asn1;
 using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Resources;
 using ProjectManagerAPI.Core.ServiceResource;
 using ProjectManagerAPI.Core.Services;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ProjectManagerAPI.Controllers
 {
@@ -20,7 +18,7 @@ namespace ProjectManagerAPI.Controllers
     public class GroupTypeController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork _unitOfWork;  
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ITokenManager _tokenParser;
 
         public GroupTypeController(IMapper mapper, IUnitOfWork unitOfWork, ITokenManager tokenParser)
@@ -69,7 +67,7 @@ namespace ProjectManagerAPI.Controllers
             if (!ModelState.IsValid)
                 throw new Exception(ModelState.ToString());
             var user = await _tokenParser.GetUserByToken();
-           
+
             if (user == null)
                 throw new Exception("Authentication credentials is not provided");
             var parentN = _unitOfWork.GroupTypes.Find(c => c.Id == groupType.ParentN.Id);
