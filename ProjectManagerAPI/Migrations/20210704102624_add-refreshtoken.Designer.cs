@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjectManagerAPI.Persistence;
 
 namespace ProjectManagerAPI.Migrations
 {
     [DbContext(typeof(ProjectManagerDbContext))]
-    partial class ProjectManagerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210704102624_add-refreshtoken")]
+    partial class addrefreshtoken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -249,7 +251,9 @@ namespace ProjectManagerAPI.Migrations
 
                     b.HasIndex("GroupTypeFk");
 
-                    b.HasIndex("Name");
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasFilter("[Name] IS NOT NULL");
 
                     b.ToTable("Groups");
                 });
@@ -295,7 +299,9 @@ namespace ProjectManagerAPI.Migrations
 
                     b.HasIndex("IdentityRoleId");
 
-                    b.HasIndex("Name");
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasFilter("[Name] IS NOT NULL");
 
                     b.HasIndex("ParentNid");
 
@@ -346,7 +352,9 @@ namespace ProjectManagerAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name");
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasFilter("[Name] IS NOT NULL");
 
                     b.HasIndex("ReportId");
 
@@ -394,7 +402,9 @@ namespace ProjectManagerAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name");
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasFilter("[Name] IS NOT NULL");
 
                     b.ToTable("Projects");
                 });
@@ -451,7 +461,9 @@ namespace ProjectManagerAPI.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.HasIndex("Name");
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasFilter("[Name] IS NOT NULL");
 
                     b.HasIndex("ProjectId");
 
@@ -467,7 +479,7 @@ namespace ProjectManagerAPI.Migrations
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 7, 4, 10, 38, 56, 351, DateTimeKind.Utc).AddTicks(7727));
+                        .HasDefaultValue(new DateTime(2021, 7, 4, 10, 26, 24, 282, DateTimeKind.Utc).AddTicks(3984));
 
                     b.Property<bool>("IsSeeded")
                         .ValueGeneratedOnAdd()
@@ -483,7 +495,7 @@ namespace ProjectManagerAPI.Migrations
                     b.Property<DateTime>("UpdateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 7, 4, 10, 38, 56, 351, DateTimeKind.Utc).AddTicks(9180));
+                        .HasDefaultValue(new DateTime(2021, 7, 4, 10, 26, 24, 282, DateTimeKind.Utc).AddTicks(5024));
 
                     b.HasKey("Id");
 
@@ -543,7 +555,9 @@ namespace ProjectManagerAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name");
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasFilter("[Name] IS NOT NULL");
 
                     b.HasIndex("PhaseId");
 

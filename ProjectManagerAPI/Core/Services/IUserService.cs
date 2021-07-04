@@ -8,7 +8,7 @@ namespace ProjectManagerAPI.Core.Services
 {
     public interface IUserService
     {
-        public Task<LoginResponse> Authenticate(LoginRequest request);
+        public Task<LoginResponse> Authenticate(LoginRequest request, string ipAddress);
         public Task<IList<string>> Register(RegisterRequest request);
         public Task<User> GetUser(string userName);
         public Task<List<User>> SearchUser(string key);
@@ -21,5 +21,7 @@ namespace ProjectManagerAPI.Core.Services
         Task<bool> PromotionBy(string lead_username, string promo_username);
         Task Promotion(string username);
         Task DePromotion(string username);
+        Task<LoginResponse> RefreshToken(string token, string ipAddress);
+        Task<bool> RevokeToken(string token, string ipAddress);
     }
 }

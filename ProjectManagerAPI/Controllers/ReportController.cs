@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ProjectManagerAPI.Core.ServiceResource;
+using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI.Controllers
 {
@@ -129,6 +131,10 @@ namespace ProjectManagerAPI.Controllers
             throw new Exception("Invalid request.");
         }
 
-
+        [HttpDelete]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            return null;
+        }
     }
 }

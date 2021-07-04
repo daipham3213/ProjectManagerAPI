@@ -16,7 +16,7 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
             builder.Property(x => x.DateCreated)
                 .HasDefaultValueSql("getdate()")
                 .ValueGeneratedOnAdd();
-            builder.HasIndex(x => x.Name).IsUnique();
+            builder.HasIndex(x => x.Name);
             builder.Property(x => x.DateModified)
                 .HasDefaultValueSql("getdate()")
                 .ValueGeneratedOnAddOrUpdate();
