@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using Newtonsoft.Json;
+using ProjectManagerAPI.Core.ServiceResource;
 
 namespace ProjectManagerAPI.Core.Models
 {
@@ -13,13 +15,15 @@ namespace ProjectManagerAPI.Core.Models
             IsSuperuser = false;
             Tasks = new List<Task>();
             Avatars = new List<Avatar>();
+            RefreshTokens = new List<RefreshToken>();
+
             //DateCreated = DateTime.Now;
             //DateModified = DateTime.Now;
         }
         public override Guid Id
         {
-            get { return base.Id; }
-            set { base.Id = value; }
+            get => base.Id;
+            set => base.Id = value;
         }
         public string Name { get; set; }
         public string? Bio { get; set; }
@@ -40,5 +44,8 @@ namespace ProjectManagerAPI.Core.Models
         public virtual ICollection<IdentityUserLogin<Guid>> Logins { get; set; }
         public virtual ICollection<IdentityUserToken<Guid>> Tokens { get; set; }
         public virtual ICollection<IdentityUserRole<Guid>> UserRoles { get; set; }
+        [JsonIgnore]
+        public List<RefreshToken> RefreshTokens { get; set; }
+
     }
 }

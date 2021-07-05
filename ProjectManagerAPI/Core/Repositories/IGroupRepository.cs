@@ -9,7 +9,7 @@ namespace ProjectManagerAPI.Core.Repositories
     {
         public Task<Group> FindGroupByName(string name);
         public Task<ICollection<User>> GetUserList(string groupname);
-        public Task<User> GetLeader(string groupname);
+        public Task<User> GetLeader(string groupName);
         public Task<Group> GetGroupByLeaderId(Guid id);
         public Task<ICollection<Group>> GetGroupListValidated(Guid id);
         public void AddUserToGroup(Guid userId, Guid groupId);

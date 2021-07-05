@@ -146,12 +146,16 @@ namespace ProjectManagerAPI
             })
                .AddJwtBearer(opt =>
                {
+                   opt.RequireHttpsMetadata = false;
+                   opt.SaveToken = true;
                    opt.TokenValidationParameters = new TokenValidationParameters
                    {
                        ValidateIssuerSigningKey = true,
                        IssuerSigningKey = key,
                        ValidateIssuer = false,
                        ValidateAudience = false,
+                       // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
+                       ClockSkew = TimeSpan.Zero
                    };
                });
 

@@ -15,13 +15,14 @@ namespace ProjectManagerAPI.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class WorkingStageController : ControllerBase
+    public class PhaseController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITokenManager _tokenParser;
         private readonly IMapper _mapper;
 
-        public WorkingStageController(IUnitOfWork unitOfWork, ITokenManager tokenParser, IMapper mapper)
+
+        public PhaseController(IUnitOfWork unitOfWork, ITokenManager tokenParser, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _tokenParser = tokenParser;
@@ -46,7 +47,7 @@ namespace ProjectManagerAPI.Controllers
 
             var report = await _unitOfWork.Reports.Get(WorkingStage.ReportID);
             if (report == null) {
-                throw new Exception("Invalib Report");
+                throw new Exception("Invalid Report");
             }
             var entity = new Phase
             {

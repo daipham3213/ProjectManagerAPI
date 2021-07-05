@@ -40,8 +40,8 @@ namespace ProjectManagerAPI.Controllers
             //Get user claims from token
             var user = await _tokenParser.GetUserByToken();
             //Create new group
-            var grouptype = await _unitOfWork.GroupTypes.Get(group.GroupTypeFk);
-            if (grouptype == null)
+            var groupType = await _unitOfWork.GroupTypes.Get(group.GroupTypeFk);
+            if (groupType == null)
                 throw new Exception("Invalid Group type.");
 
             var entity = new Group
@@ -50,7 +50,7 @@ namespace ProjectManagerAPI.Controllers
                 Remark = group.Remark,
                 UserCreated = user.Id,
                 GroupTypeFk = group.GroupTypeFk,
-                GroupType = grouptype,
+                GroupType = groupType,
             };
             if (group.LeaderId == Guid.Empty | group.LeaderId == null) entity.LeaderId = user.Id;
             else
@@ -95,8 +95,7 @@ namespace ProjectManagerAPI.Controllers
             //Get user claims from token
             var user = await _tokenParser.GetUserByToken();
             await this._unitOfWork.Users.Load(u => u.IsActived & !u.IsDeleted);
-            Guid leader;
-            leader = user.ParentN?.Id ?? user.Id;
+            var leader = user.ParentN?.Id ?? user.Id;
 
             var result = await _unitOfWork.Groups.GetGroupListValidated(leader);
             return Ok(_mapper.Map<IEnumerable<GroupViewResource>>(result));

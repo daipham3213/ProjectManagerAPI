@@ -48,9 +48,9 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             return result;
         }
 
-        public async Task<User> GetLeader(string groupname)
+        public async Task<User> GetLeader(string groupName)
         {
-            var group = FindGroupByName(groupname);
+            var group = FindGroupByName(groupName);
             return await _context.Users.FindAsync(group.Result.LeaderId);
         }
 

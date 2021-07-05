@@ -42,8 +42,7 @@ namespace ProjectManagerAPI.Persistence.Services
 
         public async Task<User> GetUserByToken()
         {
-            LoginResponse response = new LoginResponse();
-            response = GetValues();
+            var response = GetValues();
             var user = await _unitOfWork.Users.GetUser(response.UserName);
 
             return user;
@@ -62,10 +61,12 @@ namespace ProjectManagerAPI.Persistence.Services
             };
             var claims = handler.ValidateToken(GetCurrentAsync(), validations, out var tokenSecure);
 
-            LoginResponse response = new LoginResponse();
-            response.UserName = claims.Claims.First(c => c.Type == ClaimTypes.Name).Value;
-            response.DisplayName = claims.Claims.First(c => c.Type == ClaimTypes.GivenName).Value;
-            response.RoleName = claims.Claims.First(c => c.Type == ClaimTypes.Role).Value;
+            LoginResponse response = new LoginResponse
+            {
+                UserName = claims.Claims.First(c => c.Type == ClaimTypes.Name).Value,
+                DisplayName = claims.Claims.First(c => c.Type == ClaimTypes.GivenName).Value,
+                RoleName = claims.Claims.First(c => c.Type == ClaimTypes.Role).Value
+            };
             return response;
         }
     }
