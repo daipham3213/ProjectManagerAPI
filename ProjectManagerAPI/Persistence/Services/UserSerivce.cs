@@ -61,6 +61,7 @@ namespace ProjectManagerAPI.Persistence.Services
             if (!isActivated)
                 return new LoginResponse(user, null, null, null, null);
 
+
             //get roles
             var roles = await _userManager.GetRolesAsync(user);
 
@@ -68,25 +69,17 @@ namespace ProjectManagerAPI.Persistence.Services
             if (name == null)
                 name = "undefined";
             //create claims
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Email,user.Email),
-                new Claim(ClaimTypes.GivenName, user.Name),
-                new Claim(ClaimTypes.Name,user.UserName)
-            };
-            foreach (var i in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, i));
-            }
+            var claims = await GetClaims(user);
 
             //create tokens
-            var finalToken = generateJwtToken(user);
+            var finalToken = generateJwtToken(user, claims);
             var refreshToken = generateRefreshToken(ipAddress);
             user.Tokens ??= new List<IdentityUserToken<Guid>>();
             if (user.Tokens.Any(u => u.Name == user.UserName))
                 user.Tokens.Remove(user.Tokens.FirstOrDefault(u => u.Name == user.UserName));
             await _unitOfWork.Complete();
+
+            //Save token to DB
             user.Tokens.Add(new IdentityUserToken<Guid>()
             {
                 LoginProvider = "JWT Barer",
@@ -95,7 +88,7 @@ namespace ProjectManagerAPI.Persistence.Services
                 Value = finalToken
             });
             user.RefreshTokens.Add(refreshToken);
-
+            await _unitOfWork.Complete();
             //Load Avatar
             await _unitOfWork.Avatars.Load(a => a.UserId == user.Id && a.IsMain);
 
@@ -106,7 +99,6 @@ namespace ProjectManagerAPI.Persistence.Services
                 path = avatar.Path;
 
             var loginResponse = new LoginResponse(user, finalToken, refreshToken.Token, path, roles.FirstOrDefault());
-            await _unitOfWork.Complete();
             return loginResponse;
         }
 
@@ -368,7 +360,7 @@ namespace ProjectManagerAPI.Persistence.Services
                 Console.WriteLine(e);
             }
         }
-        private string generateJwtToken(User user)
+        private string generateJwtToken(User user, IEnumerable<Claim> claims)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_config["Tokens:Key"]);
@@ -381,6 +373,7 @@ namespace ProjectManagerAPI.Persistence.Services
                 Expires = DateTime.UtcNow.AddMinutes(15),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
+            tokenDescriptor.Subject.AddClaims(claims);
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
@@ -427,8 +420,9 @@ namespace ProjectManagerAPI.Persistence.Services
                 path = avatar.Path;
 
             var roles = await _userManager.GetRolesAsync(user);
+
             // generate new jwt
-            var jwtToken = generateJwtToken(user);
+            var jwtToken = generateJwtToken(user,await GetClaims(user));
 
             return new LoginResponse(user, jwtToken, newRefreshToken.Token, path, roles.FirstOrDefault());
         }
@@ -452,6 +446,33 @@ namespace ProjectManagerAPI.Persistence.Services
 
             await _unitOfWork.Complete();
             return true;
+        }
+
+        public async Task<IList<Claim>> GetRoleClaimsAsync(IList<string> roles)
+        {
+            List<Claim> claims = new List<Claim>();
+            foreach (var identityRole in roles)
+            {
+                var role =await _roleManager.FindByNameAsync(identityRole);
+                claims.AddRange(await this._roleManager.GetClaimsAsync(role).ConfigureAwait(false));
+            }
+            return claims;
+        }
+
+        public async Task<IEnumerable<Claim>> GetClaims(User user)
+        {
+            //get roles
+            var roles = await _userManager.GetRolesAsync(user);
+            var userRoles = roles.Select(r => new Claim(ClaimTypes.Role, r)).ToArray();
+            var userClaims = await _userManager.GetClaimsAsync(user).ConfigureAwait(false);
+            var roleClaims = await GetRoleClaimsAsync(roles).ConfigureAwait(false);
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Email,user.Email),
+                new Claim(ClaimTypes.GivenName, user.Name),
+                new Claim(ClaimTypes.Name,user.UserName)
+            }.Union(userClaims).Union(roleClaims).Union(userRoles);
+            return claims;
         }
     }
 }

@@ -5,6 +5,8 @@ using ProjectManagerAPI.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
+using ProjectManagerAPI.Core.Permission;
 using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI
@@ -41,11 +43,69 @@ namespace ProjectManagerAPI
             var roleDep = new IdentityRole<Guid>(RoleNames.DepartmentLead);
             var roleTeam = new IdentityRole<Guid>(RoleNames.TeamLead);
 
-            //Add some user
             await roleManager.CreateAsync(roleUser);
             await roleManager.CreateAsync(roleAdmin);
             await roleManager.CreateAsync(roleDep);
             await roleManager.CreateAsync(roleTeam);
+
+            //Init base permissions.
+            //Admin Has FULL permission
+            roleAdmin =await roleManager.FindByNameAsync(RoleNames.RoleUser);
+            await roleManager.AddClaimAsync(roleAdmin, new Claim(PermissionType.Permission, UserPermissions.Full));
+            await roleManager.AddClaimAsync(roleAdmin, new Claim(PermissionType.Permission, AvatarPermission.Full));
+            await roleManager.AddClaimAsync(roleAdmin, new Claim(PermissionType.Permission, GroupTypePermission.Full));
+            await roleManager.AddClaimAsync(roleAdmin, new Claim(PermissionType.Permission, GroupPermission.Full));
+            await roleManager.AddClaimAsync(roleAdmin, new Claim(PermissionType.Permission, ReportPermission.Full));
+            await roleManager.AddClaimAsync(roleAdmin, new Claim(PermissionType.Permission, PhasePermission.Full));
+            await roleManager.AddClaimAsync(roleAdmin, new Claim(PermissionType.Permission, TaskPermission.Full));
+            await roleManager.AddClaimAsync(roleAdmin, new Claim(PermissionType.Permission, ProjectPermission.Full));
+
+            //Department leader
+            roleDep = await roleManager.FindByNameAsync(RoleNames.DepartmentLead);
+            await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, UserPermissions.FullSelf));
+            await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, AvatarPermission.FullSelf));
+            await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, GroupTypePermission.View));
+                //Group permissions
+            await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, GroupPermission.FullSelf));
+            await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, GroupPermission.EditLeader));
+            await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, GroupPermission.EditMember));
+            await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, ReportPermission.FullSelf));
+            await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, PhasePermission.FullSelf));
+            await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, TaskPermission.FullSelf));
+            await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, ProjectPermission.FullSelf));
+            await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, ProjectPermission.View));
+
+            //Team leader
+            roleTeam = await roleManager.FindByNameAsync(RoleNames.TeamLead);
+            await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, UserPermissions.FullSelf));
+            await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, AvatarPermission.FullSelf));
+            await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, GroupTypePermission.View));
+            //Group permissions
+            await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, GroupPermission.FullSelf));
+            await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, GroupPermission.EditLeader));
+            await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, GroupPermission.EditMember));
+            await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, ReportPermission.FullSelf));
+            await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, PhasePermission.FullSelf));
+            await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, TaskPermission.FullSelf));
+            await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, ProjectPermission.View));
+
+            //Member
+            roleUser = await roleManager.FindByNameAsync(RoleNames.TeamLead);
+            await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, UserPermissions.FullSelf));
+            await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, AvatarPermission.FullSelf));
+            await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, GroupTypePermission.View));
+            //Group permissions
+            await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, GroupPermission.View));
+            await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, ReportPermission.View));
+            await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, PhasePermission.View));
+            await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, TaskPermission.View));
+            await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, TaskPermission.Edit));
+            await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, TaskPermission.Add));
+            await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, TaskPermission.RemoveSelf));
+            await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, ProjectPermission.View));
+
+
+            //Add users
             var users = new List<User>{
                     new User
                     {

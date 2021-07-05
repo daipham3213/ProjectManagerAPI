@@ -45,9 +45,8 @@ namespace ProjectManagerAPI.Controllers
             if (!response.IsActivated)
             {
                 var callbackurl = _configuration["HostUrl:local"] + "/api/User/sendActivationEmail?username=" + request.Username;
-                throw new Exception(
-                    "Account have not activated. Please click the link below to receive your activation email.\n url: " +
-                    callbackurl
+                return BadRequest(new 
+                    {message = "Account have not activated. Please click the link below to receive your activation email.", url = callbackurl}
                 );
             }
             SetTokenCookie(response.RefreshToken);
@@ -155,7 +154,7 @@ namespace ProjectManagerAPI.Controllers
             var result = await _userService.ConfirmChangeEmail(username, newEmail, token);
 
             if (result)
-                return Ok(new JsonResult("Account Email Changed Successfully.") { StatusCode = 200, ContentType = "application/json" });
+                return Ok(new {message = "Account Email Changed Successfully." });
 
             return Problem(detail: "Failed.", statusCode: 400);
         }
@@ -174,7 +173,7 @@ namespace ProjectManagerAPI.Controllers
             {
                 user.IsActived = true;
                 await _unitOfWork.Complete();
-                return Ok(new JsonResult("Account Activation Success.") { StatusCode = 200, ContentType = "application/json" });
+                return Ok(new {message = "Account Activation Success." });
             }
 
             return Problem(detail: "Failed.", statusCode: 400);
@@ -204,7 +203,7 @@ namespace ProjectManagerAPI.Controllers
             var result = await this._userService.ChangePassword(user.UserName, updatePasswordResource.CurrentPassword, updatePasswordResource.NewPassword);
 
             if (result == true)
-                return Ok();
+                return Ok(new {message = "Password changed successfully."});
 
             return Problem();
         }

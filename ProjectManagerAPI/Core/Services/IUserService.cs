@@ -1,7 +1,10 @@
-﻿using ProjectManagerAPI.Core.Models;
+﻿using System;
+using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.ServiceResource;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI.Core.Services
@@ -23,5 +26,6 @@ namespace ProjectManagerAPI.Core.Services
         Task DePromotion(string username);
         Task<LoginResponse> RefreshToken(string token, string ipAddress);
         Task<bool> RevokeToken(string token, string ipAddress);
+        Task<IList<Claim>> GetRoleClaimsAsync(IList<string> roles);
     }
 }
