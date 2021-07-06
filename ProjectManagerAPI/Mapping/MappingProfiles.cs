@@ -54,10 +54,10 @@ namespace ProjectManagerAPI.Mapping
                 .ForMember(u => u.ProjectUrl, opt => opt.MapFrom(u => "api/Project/" + u.ProjectId))
                 .ForMember(u => u.UserCreated, opt => opt.MapFrom(u => "api/user/profile?key=" + u.UserCreated));
 
-            //Working-stage
+            //phase
             CreateMap<Phase, CreatedPhase>();
             CreateMap<Phase, PhaseViewResource>().ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Phase/" + u.Id));
-
+            CreateMap<Phase, PhaseResource>().ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Phase/" + u.Id));
         }
 
         private void MapParentGroup(GroupType domain, GroupTypeResource resource)
