@@ -74,15 +74,15 @@ namespace ProjectManagerAPI.Persistence.Services
             //create tokens
             var finalToken = generateJwtToken(user, claims);
             var refreshToken = generateRefreshToken(ipAddress);
+            await this._userManager.RemoveAuthenticationTokenAsync(user, "Bearer", user.UserName);
             user.Tokens ??= new List<IdentityUserToken<Guid>>();
-            if (user.Tokens.Any(u => u.Name == user.UserName))
-                user.Tokens.Remove(user.Tokens.FirstOrDefault(u => u.Name == user.UserName));
+            
             await _unitOfWork.Complete();
 
             //Save token to DB
             user.Tokens.Add(new IdentityUserToken<Guid>()
             {
-                LoginProvider = "JWT Barer",
+                LoginProvider = "Bearer",
                 Name = user.UserName,
                 UserId = user.Id,
                 Value = finalToken
@@ -160,7 +160,7 @@ namespace ProjectManagerAPI.Persistence.Services
         {
             var leader = await this._userManager.FindByNameAsync(lead_username);
             var user = await this._userManager.FindByNameAsync(promo_username);
-            var group = await this._unitOfWork.Groups.Get(leader.GroupRef.Value);
+            var group = await this._unitOfWork.Groups.GetGroupByLeaderId(leader.Id);
 
             if (leader == null | user == null | group == null)
                 throw new Exception("Invalid information.");
@@ -168,7 +168,8 @@ namespace ProjectManagerAPI.Persistence.Services
                 throw new Exception("Permission not allowed.");
             if (group.Id != user.GroupRef)
                 throw new Exception(promo_username + "  is not a member of " + group.Name);
-            await this._unitOfWork.Users.Load(u => u.IsActived);
+
+            await this._unitOfWork.Users.Load(u => u.ParentNId == leader.ParentNId | u.ParentNId == user.ParentNId);
 
             var temp = leader.ParentN;
             leader.ParentN = user;
@@ -363,12 +364,13 @@ namespace ProjectManagerAPI.Persistence.Services
         private string generateJwtToken(User user, IEnumerable<Claim> claims)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_config["Tokens:Key"]);
+            var key = Encoding.UTF8.GetBytes(_config["Tokens:Key"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.Name, user.Id.ToString())
+                    new Claim("groupId", user.GroupRef.ToString()),
+                    new Claim("leaderId", user.ParentNId.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(15),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -470,7 +472,8 @@ namespace ProjectManagerAPI.Persistence.Services
             {
                 new Claim(ClaimTypes.Email,user.Email),
                 new Claim(ClaimTypes.GivenName, user.Name),
-                new Claim(ClaimTypes.Name,user.UserName)
+                new Claim(ClaimTypes.Name,user.UserName),
+                new Claim("ID",user.Id.ToString()),
             }.Union(userClaims).Union(roleClaims).Union(userRoles);
             return claims;
         }

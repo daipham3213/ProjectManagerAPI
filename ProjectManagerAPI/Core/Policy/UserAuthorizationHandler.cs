@@ -20,20 +20,51 @@ namespace ProjectManagerAPI.Core.Policy
             User user
             )
         {
+            var isAdmin = context.User.IsInRole(RoleNames.RoleAdmin);
+            if (isAdmin)
+                context.Succeed(requirement);
+            //Check if user has full permission
+            if (context.User.HasClaim(u => u.Value.Equals(UserPermissions.Full)))
+                context.Succeed(requirement);
+            //Check if user has FULL Self permission
+            if (context.User.HasClaim(u => u.Value.Equals(UserPermissions.FullSelf))
+                & !UserPermissions.SpecialPerm.Contains(requirement.Name))
+            {
+                if (context.User.Claims.Any(u => u.Value ==user.UserName & u.Type == ClaimTypes.Name))
+                    context.Succeed(requirement);
+            }
             //Edit user permission
             if (requirement.Name == UserPermissions.Edit)
             {
-                var is_admin = context.User.IsInRole(RoleNames.RoleAdmin);
-                if (is_admin) 
-                    context.Succeed(requirement);
-                else
+                if (context.User.HasClaim(u => u.Value == user.UserName)) 
+                        context.Succeed(requirement);
+            }
+
+            //Delete
+            if (requirement.Name == UserPermissions.Delete)
+            {
+                if (context.User.HasClaim(u => u.Value == UserPermissions.Delete))
                 {
-                    var username = context.User.Claims.First(c => c.Type == ClaimTypes.Name).Value;
-                    if (username == user.UserName) 
                         context.Succeed(requirement);
                 }
             }
-            return null;
+            //Edit role
+            if (requirement.Name == UserPermissions.EditRole)
+            {
+                if (context.User.HasClaim(u => u.Value == UserPermissions.EditRole))
+                {
+                    context.Succeed(requirement);
+                }
+            }
+            //View 
+            if (requirement.Name == UserPermissions.View 
+                & context.User.HasClaim(u => u.Value == UserPermissions.View))
+            {
+                context.Succeed(requirement);
+            }
+            return Task.CompletedTask;
         }
+
+
     }
 }

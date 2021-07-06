@@ -21,6 +21,8 @@ using ProjectManagerAPI.Persistence.Services;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
+using ProjectManagerAPI.Core.Policy;
 
 namespace ProjectManagerAPI
 {
@@ -96,6 +98,11 @@ namespace ProjectManagerAPI
             services.AddScoped<IProjectRepository, ProjectRepository>();
             services.AddScoped<IReportRepository, ReportRepository>();
             services.AddScoped<IPhaseRepository,  PhaseRepository>();
+
+            //Inject Authorizations
+            services.AddTransient<IAuthorizationHandler, GroupAuthorizationHandler>();
+            services.AddTransient<IAuthorizationHandler, GroupTypeAuthorizationHandler>();
+            services.AddTransient<IAuthorizationHandler, UserAuthorizationHandler>();
 
             services.AddSwaggerGen(c =>
             {

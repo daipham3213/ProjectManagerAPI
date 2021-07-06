@@ -50,7 +50,7 @@ namespace ProjectManagerAPI
 
             //Init base permissions.
             //Admin Has FULL permission
-            roleAdmin =await roleManager.FindByNameAsync(RoleNames.RoleUser);
+            roleAdmin =await roleManager.FindByNameAsync(RoleNames.RoleAdmin);
             await roleManager.AddClaimAsync(roleAdmin, new Claim(PermissionType.Permission, UserPermissions.Full));
             await roleManager.AddClaimAsync(roleAdmin, new Claim(PermissionType.Permission, AvatarPermission.Full));
             await roleManager.AddClaimAsync(roleAdmin, new Claim(PermissionType.Permission, GroupTypePermission.Full));
@@ -90,7 +90,7 @@ namespace ProjectManagerAPI
             await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, ProjectPermission.View));
 
             //Member
-            roleUser = await roleManager.FindByNameAsync(RoleNames.TeamLead);
+            roleUser = await roleManager.FindByNameAsync(RoleNames.RoleUser);
             await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, UserPermissions.FullSelf));
             await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, AvatarPermission.FullSelf));
             await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, GroupTypePermission.View));
