@@ -1,4 +1,6 @@
-﻿namespace ProjectManagerAPI.Core.Permission
+﻿using System.Collections.Generic;
+
+namespace ProjectManagerAPI.Core.Permission
 {
     public static partial class UserPermissions
     {
@@ -8,5 +10,11 @@
         public const string Full = "user.full";
         public const string FullSelf = "user.full.self";
         public const string EditRole = "users.edit.role";
+        public const string Delete = "users.delete";
+
+        public static readonly List<string> SpecialPerm = new List<string>()
+        {
+            Full, Delete, Add, EditRole
+        };
     }
 }

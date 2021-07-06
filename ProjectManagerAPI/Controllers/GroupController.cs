@@ -10,6 +10,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
+using Microsoft.AspNetCore.JsonPatch.Operations;
+using ProjectManagerAPI.Core.Permission;
+using ProjectManagerAPI.Core.Policy;
 
 namespace ProjectManagerAPI.Controllers
 {
@@ -22,13 +26,15 @@ namespace ProjectManagerAPI.Controllers
         private readonly ITokenManager _tokenParser;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
+        private readonly IAuthorizationService _authorizationService;
 
-        public GroupController(IUnitOfWork unitOfWork, ITokenManager tokenParser, IMapper mapper, IUserService userService)
+        public GroupController(IUnitOfWork unitOfWork, ITokenManager tokenParser, IMapper mapper, IUserService userService, IAuthorizationService authorizationService)
         {
             _unitOfWork = unitOfWork;
             _tokenParser = tokenParser;
             _mapper = mapper;
             _userService = userService;
+            _authorizationService = authorizationService;
         }
 
         [HttpPost]
@@ -53,20 +59,13 @@ namespace ProjectManagerAPI.Controllers
                 GroupType = groupType,
             };
             if (group.LeaderId == Guid.Empty | group.LeaderId == null) entity.LeaderId = user.Id;
-            else
-            {
-                var leader = _unitOfWork.Users.SearchUserById(group.LeaderId.Value);
-                if (leader.Result != null)
-                {
-                    if (leader.Result.GroupRef != null)
-                        throw new Exception("You already have a group!");
-                    entity.LeaderId = group.LeaderId.Value;
-                }
-                else throw new Exception("Leader ID is invalid.");
-
-            }
+            else entity.LeaderId = group.LeaderId.Value;
+            //validation
+            await this._authorizationService.AuthorizeAsync(User, entity, Operations.GroupCreate);
+            //add new
             await _unitOfWork.Groups.Add(entity);
             await _unitOfWork.Complete();
+
             //Set user's group id
             var lead = await _unitOfWork.Users.SearchUserById(entity.LeaderId);
             entity = await _unitOfWork.Groups.FindGroupByName(group.Name);
@@ -74,6 +73,7 @@ namespace ProjectManagerAPI.Controllers
             lead.GroupRef = entity.Id;
             lead.DateModified = DateTime.Now;
             await this._userService.Promotion(lead.UserName);
+
             await _unitOfWork.Complete();
             return Ok(new JsonResult(_mapper.Map<CreatedGroup>(entity))
             {
@@ -107,20 +107,13 @@ namespace ProjectManagerAPI.Controllers
             //Get user claims from token
             var userM = await _tokenParser.GetUserByToken();
             await this._unitOfWork.Users.Load(u => u.Id == userM.ParentNId);
-            ICollection<Group> result;
-            if (userM.ParentN != null)
-                result = await _unitOfWork.Groups.GetGroupListValidated(userM.ParentN.Id);
-            else result = await _unitOfWork.Groups.GetGroupListValidated(userM.Id);
+            
+            var group = await this._unitOfWork.Groups.Get(id);
 
-            foreach (var group in result)
-                if (group.Id == id)
-                {
-                    //foreach (var user in group.Users)
-                    //    await this._unitOfWork.Users.Load(c => c.Id == user.Id);
-                    return Ok(_mapper.Map<GroupResource>(group));
-                }
-
-            throw new Exception("Invalid Group ID.");
+            await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupRead);
+            if (group == null)
+                throw new Exception("Invalid group ID");
+            return Ok(_mapper.Map<GroupResource>(group));
         }
 
         [HttpPost("addmember")]
@@ -129,14 +122,8 @@ namespace ProjectManagerAPI.Controllers
             var group = await _unitOfWork.Groups.FindGroupByName(resource.GroupName);
             if (group == null)
                 throw new Exception("Invalid group name.");
-            //Get user claims from token
-            var userM = await _tokenParser.GetUserByToken();
-            var list = await _unitOfWork.Groups.GetGroupListValidated(userM.Id);
-            if (!list.Contains(group))
-                return BadRequest(new JsonResult("Permission not allowed.")
-                {
-                    StatusCode = BadRequest().StatusCode
-                });
+            //Check perm
+            await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupMemberUpdate);
             List<User> users = new List<User>();
             foreach (var username in resource.Usernames)
             {
@@ -160,11 +147,8 @@ namespace ProjectManagerAPI.Controllers
             if (group == null)
                 throw new Exception("Invalid group name.");
 
-            //Get user claims from token
-            var userM = await _tokenParser.GetUserByToken();
-            var list = await _unitOfWork.Groups.GetGroupListValidated(userM.Id);
-            if (!list.Contains(group))
-                throw new Exception("Permission not allowed.");
+            //Check perm
+            await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupMemberUpdate);
             List<User> users = new List<User>();
             foreach (var username in resource.Usernames)
             {
@@ -185,13 +169,8 @@ namespace ProjectManagerAPI.Controllers
         public async Task<IActionResult> RemoveGroup(Guid id)
         {
             var group = await _unitOfWork.Groups.Get(id);
-            if (group == null)
-                throw new Exception("Group id is invalid");
-            //Get user claims from token
-            var userM = await _tokenParser.GetUserByToken();
-            var list = await _unitOfWork.Groups.GetGroupListValidated(userM.Id);
-            if (!list.Contains(group))
-                throw new Exception("Permission not allowed.");
+            await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupDelete);
+
             var leader = this._unitOfWork.Users.Find(u => u.Id == group.LeaderId).FirstOrDefault();
             foreach (var user in group.Users)
                 _unitOfWork.Groups.RemoveUserFromGroup(id, user.Id);
@@ -206,6 +185,8 @@ namespace ProjectManagerAPI.Controllers
         {
             var user = await this._tokenParser.GetUserByToken();
             var new_leader = await this._userService.GetUser(username);
+            var group = await this._unitOfWork.Groups.GetGroupByLeaderId(user.Id);
+            await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupLeaderUpdate);
             await this._userService.PromotionBy(user.UserName, new_leader.UserName);
             return Ok();
         }

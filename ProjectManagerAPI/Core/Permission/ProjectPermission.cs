@@ -1,4 +1,6 @@
-﻿namespace ProjectManagerAPI.Core.Permission
+﻿using System.Collections.Generic;
+
+namespace ProjectManagerAPI.Core.Permission
 {
     public static class ProjectPermission
     {
@@ -9,5 +11,9 @@
         public const string View = "projects.view";
         public const string Full = "projects.full";
         public const string FullSelf = "projects.full.self";
+        public static List<string> SpecialPerm = new List<string>()
+        {
+            Full, Add
+        };
     }
 }
