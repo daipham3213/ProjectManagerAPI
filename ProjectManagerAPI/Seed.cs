@@ -65,7 +65,8 @@ namespace ProjectManagerAPI
             await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, UserPermissions.FullSelf));
             await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, AvatarPermission.FullSelf));
             await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, GroupTypePermission.View));
-                //Group permissions
+        
+            //Group permissions
             await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, GroupPermission.FullSelf));
             await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, GroupPermission.EditLeader));
             await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, GroupPermission.EditMember));
@@ -80,6 +81,7 @@ namespace ProjectManagerAPI
             await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, UserPermissions.FullSelf));
             await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, AvatarPermission.FullSelf));
             await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, GroupTypePermission.View));
+           
             //Group permissions
             await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, GroupPermission.FullSelf));
             await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, GroupPermission.EditLeader));
@@ -88,12 +90,14 @@ namespace ProjectManagerAPI
             await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, PhasePermission.FullSelf));
             await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, TaskPermission.FullSelf));
             await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, ProjectPermission.View));
+           
 
             //Member
             roleUser = await roleManager.FindByNameAsync(RoleNames.TeamLead);
             await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, UserPermissions.FullSelf));
             await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, AvatarPermission.FullSelf));
             await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, GroupTypePermission.View));
+       
             //Group permissions
             await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, GroupPermission.View));
             await roleManager.AddClaimAsync(roleUser, new Claim(PermissionType.Permission, ReportPermission.View));

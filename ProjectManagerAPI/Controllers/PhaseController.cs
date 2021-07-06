@@ -37,6 +37,22 @@ namespace ProjectManagerAPI.Controllers
             return Ok(_mapper.Map<IEnumerable<PhaseViewResource>>(result));
         }
 
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetPhase(Guid id)
+        {
+            await this._unitOfWork.Phases.GetAll();
+            var phase = await _unitOfWork.Phases.Get(id);
+            if (phase == null)
+            {
+                throw new Exception("Provided information is invalid");
+            }
+
+            var result = _mapper.Map<Phase, PhaseResource>(phase);
+            return Ok(result);
+        }
+
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreatedPhase WorkingStage)
         {
