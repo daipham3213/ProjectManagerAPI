@@ -103,6 +103,11 @@ namespace ProjectManagerAPI
             services.AddTransient<IAuthorizationHandler, GroupAuthorizationHandler>();
             services.AddTransient<IAuthorizationHandler, GroupTypeAuthorizationHandler>();
             services.AddTransient<IAuthorizationHandler, UserAuthorizationHandler>();
+            services.AddTransient<IAuthorizationHandler, AvatarAuthorizationHandler>();
+            services.AddTransient<IAuthorizationHandler, ProjectAuthorizationHandler>();
+            services.AddTransient<IAuthorizationHandler, PhaseAuthorizationHandler>();
+            services.AddTransient<IAuthorizationHandler, ReportAuthorizationHandler>();
+            services.AddTransient<IAuthorizationHandler, TaskAuthorizationHandler>();
 
             services.AddSwaggerGen(c =>
             {

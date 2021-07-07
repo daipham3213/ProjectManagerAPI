@@ -11,5 +11,6 @@ namespace ProjectManagerAPI.Core.Resources
         public Guid? ParentNid { get; set; }
 #nullable enable
         public GroupTypeResource? ParentN { get; set; }
+        public Guid IdentityRoleId { get; set; }
     }
 }
