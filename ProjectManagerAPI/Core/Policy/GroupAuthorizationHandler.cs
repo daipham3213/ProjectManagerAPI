@@ -28,12 +28,12 @@ namespace ProjectManagerAPI.Core.Policy
             OperationAuthorizationRequirement requirement,
             Group resource)
         {
-            
+            var Utils = new AuthorizeUtils(this._unitOfWork);
             var isAdmin = context.User.IsInRole(RoleNames.RoleAdmin);
-            var isLeader = await IsLeader(context.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name)?.Value);
+            var isLeader = await Utils.IsLeader(context.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name)?.Value);
             if (isAdmin)
                 context.Succeed(requirement);
-            var groups = await GetValidatedGroups(context);
+            var groups = await Utils.GetValidatedGroups(context);
             //Check if user has full permission
             if (context.User.HasClaim(u => u.Value.Equals(GroupPermission.Full)))
                 context.Succeed(requirement);
@@ -93,24 +93,6 @@ namespace ProjectManagerAPI.Core.Policy
             return Task.CompletedTask;
         }
 
-        private async Task<IEnumerable<Group>> GetValidatedGroups(AuthorizationHandlerContext context)
-        {
-            var username = context.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name)?.Value;
-            var user = await this._unitOfWork.Users.GetUser(username);
-            var leader = user.ParentN?.Id ?? user.Id;
-            var groups = await this._unitOfWork.Groups.GetGroupListValidated(leader);
-            return groups;
-        }
-
-        private async Task<bool> IsLeader(string username)
-        {
-            if (username == null)
-                return false;
-            var user = await this._unitOfWork.Users.GetUser(username);
-            var group = await this._unitOfWork.Groups.GetGroupByLeaderId(user.Id);
-            if (group == null)
-                return false;
-            return true;
-        }
+        
     }
 }

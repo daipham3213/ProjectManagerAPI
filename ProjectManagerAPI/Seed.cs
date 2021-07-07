@@ -60,6 +60,7 @@ namespace ProjectManagerAPI
             await roleManager.AddClaimAsync(roleAdmin, new Claim(PermissionType.Permission, TaskPermission.Full));
             await roleManager.AddClaimAsync(roleAdmin, new Claim(PermissionType.Permission, ProjectPermission.Full));
 
+            
             //Department leader
             roleDep = await roleManager.FindByNameAsync(RoleNames.DepartmentLead);
             await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, UserPermissions.FullSelf));
@@ -76,6 +77,7 @@ namespace ProjectManagerAPI
             await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, ProjectPermission.FullSelf));
             await roleManager.AddClaimAsync(roleDep, new Claim(PermissionType.Permission, ProjectPermission.View));
 
+            
             //Team leader
             roleTeam = await roleManager.FindByNameAsync(RoleNames.TeamLead);
             await roleManager.AddClaimAsync(roleTeam, new Claim(PermissionType.Permission, UserPermissions.FullSelf));

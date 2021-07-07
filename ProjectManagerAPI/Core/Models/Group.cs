@@ -10,7 +10,7 @@ namespace ProjectManagerAPI.Core.Models
         public ICollection<User> Users { get; set; }
         public ICollection<Report> Reports { get; set; }
         public Guid LeaderId { get; set; }
-
+        public Group ParentN { get; set; }
         public Group()
         {
             Users = new List<User>();

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
+using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Permission;
 
 namespace ProjectManagerAPI.Core.Policy
@@ -23,7 +26,7 @@ namespace ProjectManagerAPI.Core.Policy
         public static OperationAuthorizationRequirement GroupDelete =
             new OperationAuthorizationRequirement { Name = GroupPermission.Remove};
 
-        //User
+        //User CRUD
         public static OperationAuthorizationRequirement UserCreate =
             new OperationAuthorizationRequirement { Name = UserPermissions.Add };
         public static OperationAuthorizationRequirement UserRead =
