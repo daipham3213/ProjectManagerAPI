@@ -33,7 +33,7 @@ namespace ProjectManagerAPI.Core.Policy
                 if (context.User.Claims.Any(u => u.Value ==user.UserName & u.Type == ClaimTypes.Name))
                     context.Succeed(requirement);
             }
-            //Edit user permission
+            //Edit
             if (requirement.Name == UserPermissions.Edit)
             {
                 if (context.User.HasClaim(u => u.Value == user.UserName)) 

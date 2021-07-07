@@ -14,7 +14,7 @@ namespace ProjectManagerAPI.Core.Permission
         public const string FullSelf = "task.full.self";
         public static List<string> SpecialPerm = new List<string>()
         {
-            Full
+            Full, RemoveSelf
         };
     }
 }

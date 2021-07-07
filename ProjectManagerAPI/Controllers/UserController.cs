@@ -36,7 +36,6 @@ namespace ProjectManagerAPI.Controllers
 
         [HttpPost("authenticate")]
         [AllowAnonymous]
-
         public async Task<IActionResult> Authenticate([FromBody] LoginRequest request)
         {
             var response = await _userService.Authenticate(request, IpAddress());
