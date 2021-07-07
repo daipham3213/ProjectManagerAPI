@@ -19,33 +19,22 @@ namespace ProjectManagerAPI.Core.Policy
             OperationAuthorizationRequirement requirement,
             GroupType resource)
         {
-            //Admin could do all
-            if (context.User.IsInRole(RoleNames.RoleAdmin))
+            //Admin or has Full perm could do all
+            if (context.User.IsInRole(RoleNames.RoleAdmin) 
+                | context.User.HasClaim(u => u.Value == GroupTypePermission.Full))
                 context.Succeed(requirement);
-            //Check Full Perm
-            if (context.User.HasClaim(u => u.Value == GroupTypePermission.Full))
-                context.Succeed(requirement);
+
             //View Permission
             if (requirement.Name == GroupTypePermission.View
-                & context.User.HasClaim(u => u.Value == GroupTypePermission.View))
+                & context.User.HasClaim(u => u.Value == requirement.Name))
             {
                 context.Succeed(requirement);
             }
-            //Add
-            if (requirement.Name == GroupTypePermission.Add
-                & context.User.HasClaim(u => u.Value == GroupTypePermission.Add))
-            {
-                context.Succeed(requirement);
-            }
-            //Edit
-            if (requirement.Name == GroupTypePermission.Edit
-                & context.User.HasClaim(u => u.Value == GroupTypePermission.Edit))
-            {
-                context.Succeed(requirement);
-            }
-            //Delete
-            if (requirement.Name == GroupTypePermission.Remove
-                & context.User.HasClaim(u => u.Value == GroupTypePermission.Remove))
+            //Add Edit Delete
+            if ((requirement.Name == GroupTypePermission.Add 
+                | requirement.Name == GroupTypePermission.Edit 
+                | requirement.Name == GroupTypePermission.Remove)
+                & context.User.HasClaim(u => u.Value == requirement.Name))
             {
                 context.Succeed(requirement);
             }

@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ProjectManagerAPI.Core.Policy;
 
 namespace ProjectManagerAPI.Controllers
 {
@@ -17,16 +18,20 @@ namespace ProjectManagerAPI.Controllers
     [ApiController]
     public class AvatarController : Controller
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
-        private readonly IPhotoService _photoService;
-
-        public AvatarController(IUnitOfWork unitOfWork, IMapper mapper, IPhotoService photoService)
+        public AvatarController(IUnitOfWork unitOfWork, IMapper mapper, IPhotoService photoService, IAuthorizationService authorization)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _photoService = photoService;
+            _authorization = authorization;
         }
+
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        private readonly IPhotoService _photoService;
+        private readonly IAuthorizationService _authorization;
+
+        
 
         [HttpGet]
         public async Task<IActionResult> Get(string userName)
@@ -64,10 +69,8 @@ namespace ProjectManagerAPI.Controllers
         [Authorize]
         public async Task<IActionResult> UploadAvatar(string userName, IFormFile file)
         {
-
             if (file == null)
                 return BadRequest("no file");
-
             var user = await _unitOfWork.Users.GetUser(userName);
             if (user == null)
                 return NotFound("User can not be found");
@@ -121,6 +124,8 @@ namespace ProjectManagerAPI.Controllers
 
             if (avatar.IsMain)
                 return BadRequest("Can not delete main avatar");
+
+            await this._authorization.AuthorizeAsync(User, avatar, Operations.AvatarDelete);
 
             // Delete photo from cloud service
             var photo = await _unitOfWork.Avatars.Get(photoId);
