@@ -5,7 +5,7 @@ using ProjectManagerAPI.Core.Models;
 namespace ProjectManagerAPI.Persistence.EntityConfigurations
 {
     public abstract class BaseConfiguration<TBase> : IEntityTypeConfiguration<TBase>
-    where TBase : BaseModel
+        where TBase : BaseModel
     {
         public virtual void Configure(EntityTypeBuilder<TBase> builder)
         {

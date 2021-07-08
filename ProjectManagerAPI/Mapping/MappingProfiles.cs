@@ -30,7 +30,7 @@ namespace ProjectManagerAPI.Mapping
                 .ForMember(u => u.AvatarUrl, opt => opt.MapFrom(p => p.Avatars.FirstOrDefault(a => a.IsMain) != null ? p.Avatars.FirstOrDefault(a => a.IsMain).Path : null));
 
             //Group
-            CreateMap<Group, CreatedGroup>();
+            CreateMap<Group, CreatedDepartment>();
             CreateMap<Group, GroupViewResource>()
                 .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Group/" + u.Id))
                 .ForMember(u => u.Users, opt => opt.MapFrom(g => g.Users.Count));
@@ -58,6 +58,14 @@ namespace ProjectManagerAPI.Mapping
             CreateMap<Phase, CreatedPhase>();
             CreateMap<Phase, PhaseViewResource>().ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Phase/" + u.Id));
             CreateMap<Phase, PhaseResource>().ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Phase/" + u.Id));
+
+            //Request
+            CreateMap<Request,CreatedRequest>();
+            CreateMap<Request, RequestResource>()
+                .ForMember(u => u.url_true,
+                    opt => opt.MapFrom(u => "api/Request/activegroup?requestId=" + u.Id + "&isActive=true"))
+                .ForMember(u => u.url_false,
+                    opt => opt.MapFrom(u => "api/Request/activegroup?requestId=" + u.Id + "&isActive=false"));
         }
 
         private void MapParentGroup(GroupType domain, GroupTypeResource resource)

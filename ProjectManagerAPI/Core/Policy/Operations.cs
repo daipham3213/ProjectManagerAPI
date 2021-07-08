@@ -99,5 +99,9 @@ namespace ProjectManagerAPI.Core.Policy
             new OperationAuthorizationRequirement { Name = TaskPermission.Remove };
         public static OperationAuthorizationRequirement TaskSelfDelete =
             new OperationAuthorizationRequirement { Name = TaskPermission.RemoveSelf };
+
+        //Request
+        public static OperationAuthorizationRequirement RequestGroupActivation =
+            new OperationAuthorizationRequirement { Name = RequestPermission.ActiveGroup };
     }
 }

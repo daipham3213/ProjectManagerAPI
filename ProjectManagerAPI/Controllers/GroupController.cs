@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using ProjectManagerAPI.Core.Permission;
 using ProjectManagerAPI.Core.Policy;
+using ProjectManagerAPI.StaticValue;
+using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI.Controllers
 {
@@ -37,8 +39,8 @@ namespace ProjectManagerAPI.Controllers
             _authorizationService = authorizationService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] CreatedGroup group)
+        [HttpPost("department")]
+        public async Task<IActionResult> Post([FromBody] CreatedDepartment group)
         {
             if (!ModelState.IsValid)
                 throw new Exception("Provided information is invalid");
@@ -46,17 +48,20 @@ namespace ProjectManagerAPI.Controllers
             //Get user claims from token
             var user = await _tokenParser.GetUserByToken();
             //Create new group
-            var groupType = await _unitOfWork.GroupTypes.Get(group.GroupTypeFk);
-            if (groupType == null)
-                throw new Exception("Invalid Group type.");
-
+            var groupType = _unitOfWork.GroupTypes
+                .Find(u => u.Name == "Department")
+                .FirstOrDefault();
+            var parent = await this._unitOfWork.Groups.FindGroupByName("System Admin");
             var entity = new Group
             {
                 Name = group.Name,
                 Remark = group.Remark,
                 UserCreated = user.Id,
-                GroupTypeFk = group.GroupTypeFk,
+                GroupTypeFk = groupType.Id,
                 GroupType = groupType,
+                IsActived = false,
+                ParentN = parent,
+                ParentNId = parent.Id,
             };
             if (group.LeaderId == Guid.Empty | group.LeaderId == null) entity.LeaderId = user.Id;
             else entity.LeaderId = group.LeaderId.Value;
@@ -66,20 +71,71 @@ namespace ProjectManagerAPI.Controllers
             await _unitOfWork.Groups.Add(entity);
             await _unitOfWork.Complete();
 
-            //Set user's group id
-            var lead = await _unitOfWork.Users.SearchUserById(entity.LeaderId);
-            entity = await _unitOfWork.Groups.FindGroupByName(group.Name);
-            lead.Group = entity;
-            lead.GroupRef = entity.Id;
-            lead.DateModified = DateTime.Now;
-            await this._userService.Promotion(lead.UserName);
-
-            await _unitOfWork.Complete();
-            return Ok(new JsonResult(_mapper.Map<CreatedGroup>(entity))
+            var n = await this._unitOfWork.Groups.SingleOrDefault(u => u.Name == entity.Name);
+            //Send request to admin to active group
+            var request = new CreatedRequest()
+            {
+                Name = RequestNames.CreateGroup,
+                Remark = groupType.Name,
+                To = parent.Id, //Sent to Admin group
+                Value = n.Id.ToString() //Group need to activate
+            };
+            await this._unitOfWork.Requests.CreateRequest(request, user);
+            
+            return Ok(new JsonResult(_mapper.Map<CreatedDepartment>(entity))
             {
                 StatusCode = Ok().StatusCode
             });
         }
+
+        [HttpPost("Team")]
+        public async Task<IActionResult> Post([FromBody] CreatedTeam group)
+        {
+            if (!ModelState.IsValid)
+                throw new Exception("Provided information is invalid");
+
+            //Get user claims from token
+            var user = await _tokenParser.GetUserByToken();
+            //Create new group
+            var groupType = _unitOfWork.GroupTypes
+                .Find(u => u.Name == "Group")
+                .FirstOrDefault();
+            var parent = await this._unitOfWork.Groups.Get(group.parentNId);
+            var entity = new Group
+            {
+                Name = group.Name,
+                Remark = group.Remark,
+                UserCreated = user.Id,
+                GroupTypeFk = groupType.Id,
+                GroupType = groupType,
+                IsActived = false,
+                ParentN = parent,
+                ParentNId = parent.Id,
+            };
+            if (group.LeaderId == Guid.Empty | group.LeaderId == null) entity.LeaderId = user.Id;
+            else entity.LeaderId = group.LeaderId.Value;
+            //validation
+            await this._authorizationService.AuthorizeAsync(User, entity, Operations.GroupCreate);
+            //add new
+            await _unitOfWork.Groups.Add(entity);
+            await _unitOfWork.Complete();
+
+            //Send request to admin to active group
+            var request = new CreatedRequest()
+            {
+                Name = RequestNames.CreateGroup,
+                Remark = entity.GroupType.Name,
+                To = parent.Id, //Sent to Admin group
+                Value = entity.Id.ToString() //Group need to activate
+            };
+            await this._unitOfWork.Requests.CreateRequest(request, user);
+            
+            return Ok(new JsonResult(_mapper.Map<CreatedDepartment>(entity))
+            {
+                StatusCode = Ok().StatusCode
+            });
+        }
+
         [HttpGet("all")]
         [Authorize(Roles = RoleNames.RoleAdmin)]
         public async Task<IActionResult> GetGroups()
@@ -90,7 +146,7 @@ namespace ProjectManagerAPI.Controllers
             return Ok(_mapper.Map<IEnumerable<GroupViewResource>>(result));
         }
         [HttpGet]
-        public async Task<IActionResult> GetGroupsValidated()
+        public async Task<IActionResult> GetGroupsValidated(string? type)
         {
             //Get user claims from token
             var user = await _tokenParser.GetUserByToken();
@@ -98,6 +154,11 @@ namespace ProjectManagerAPI.Controllers
             var leader = user.ParentN?.Id ?? user.Id;
 
             var result = await _unitOfWork.Groups.GetGroupListValidated(leader);
+            if (type != null & type != "")
+            {
+                var gt = await this._unitOfWork.GroupTypes.GetTypeByName(type);
+                result = result.Where(u => u.GroupTypeFk == gt.Id).ToList();
+            }
             return Ok(_mapper.Map<IEnumerable<GroupViewResource>>(result));
         }
 
@@ -198,5 +259,6 @@ namespace ProjectManagerAPI.Controllers
             await this._unitOfWork.Users.LeaveGroup(user.Id);
             return Ok();
         }
+
     }
 }

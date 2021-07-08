@@ -6,7 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 using ProjectManagerAPI.Core.Permission;
+using ProjectManagerAPI.StaticValue;
 using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI
@@ -168,13 +170,33 @@ namespace ProjectManagerAPI
 
             context.GroupTypes.Add(types[0]);
             await context.SaveChangesAsync();
-            types[1].ParentN = context.GroupTypes.FirstOrDefault(u => u.Name == types[0].Name);
+            types[1].ParentN = context.GroupTypes
+                .FirstOrDefault(u => u.Name == types[0].Name);
             context.GroupTypes.Add(types[1]);
             await context.SaveChangesAsync();
-            types[2].ParentN = context.GroupTypes.FirstOrDefault(u => u.Name == types[1].Name);
+            types[2].ParentN = context.GroupTypes
+                .FirstOrDefault(u => u.Name == types[1].Name);
             context.GroupTypes.Add(types[2]);
             await context.SaveChangesAsync();
-
+            admin = await userManager.FindByNameAsync("admin");
+            var adminGroup = new Group()
+            {
+                GroupType = types[1].ParentN,
+                GroupTypeFk = types[1].ParentN.Id,
+                IsActived = true,
+                LeaderId = admin.Id,
+                Name = "System Admin Group",
+                Remark = "Highest Privilege Group.",
+                ParentN = null,
+                ParentNId = null,
+                UserCreated = admin.Id
+            };
+            adminGroup.Users.Add(admin);
+            context.Groups.Add(adminGroup);
+            await context.SaveChangesAsync();
+            adminGroup = await context.Groups.FirstOrDefaultAsync(u => u.Name == adminGroup.Name);
+            admin.Group = adminGroup;
+            await context.SaveChangesAsync();
         }
     }
 }

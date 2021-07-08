@@ -14,7 +14,7 @@ namespace ProjectManagerAPI.Persistence
 
         public IUserRepository Users { get; private set; }
 
-
+        public IRequestRepository Requests { get; private set; }
         public IGroupRepository Groups { get; private set; }
         public IReportRepository Reports { get; private set; }
 
@@ -28,7 +28,8 @@ namespace ProjectManagerAPI.Persistence
             IUserRepository users,
             IGroupRepository groups,
             IReportRepository reports,
-            IPhaseRepository phases
+            IPhaseRepository phases,
+            IRequestRepository requests
             )
         {
             _context = context;
@@ -39,6 +40,7 @@ namespace ProjectManagerAPI.Persistence
             Groups = groups;
             Reports = reports;
             Phases = phases;
+            Requests = requests;
         }
         public async Task<int> Complete()
         {
