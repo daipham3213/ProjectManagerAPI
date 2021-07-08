@@ -20,12 +20,17 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
 
         public async Task<Group> FindGroupByName(string name)
         {
-            return await _context.Groups.FirstOrDefaultAsync(u => u.Name.ToLower().Trim().Contains(name.ToLower().Trim()));
+            return await _context.Groups
+                .FirstOrDefaultAsync(u => u.Name.ToLower().Trim().Contains(name.ToLower().Trim()) 
+                                          & u.IsActived);
         }
 
         public async Task<Group> GetGroupByLeaderId(Guid id)
         {
-            return await _context.Groups.FirstOrDefaultAsync(u => u.LeaderId == id & u.IsDeleted == false);
+            return await _context.Groups
+                .FirstOrDefaultAsync(u => u.LeaderId == id
+                                          & !u.IsDeleted
+                                          & u.IsActived);
         }
 
         public async Task<ICollection<Group>> GetGroupListValidated(Guid leaderId)
@@ -35,8 +40,11 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             var mainGroup = await GetGroupByLeaderId(leaderId);
             if (mainGroup == null)
                 throw new Exception("No group were found.");
-            var type = await _context.GroupTypes.FirstOrDefaultAsync(u => u.ParentN == mainGroup.GroupType & u.IsDeleted == false);
-            var childGroup = await _context.Groups.Where(u => u.GroupType == type & u.IsDeleted == false).ToListAsync();
+            var childGroup = await _context.Groups
+                .Where(u => u.ParentNId == mainGroup.Id 
+                            & u.IsDeleted == false 
+                            & u.IsActived)
+                .ToListAsync();
             List<Group> result = new List<Group>();
             if (!result.Exists(u => u == mainGroup))
                 result.Add(mainGroup);
@@ -50,8 +58,8 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
 
         public async Task<User> GetLeader(string groupName)
         {
-            var group = FindGroupByName(groupName);
-            return await _context.Users.FindAsync(group.Result.LeaderId);
+            var group = await FindGroupByName(groupName);
+            return await _context.Users.FindAsync(group.LeaderId);
         }
 
         public async Task<ICollection<User>> GetUserList(string groupname)
@@ -63,6 +71,8 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
         public async void AddUserToGroup(Guid userId, Guid groupId)
         {
             var group = await Get(groupId);
+            if (!group.IsActived)
+                throw new Exception("This group has not been activated.");
             var user = await _context.Users.FindAsync(userId);
             var leader = await _context.Users.FindAsync(group.LeaderId);
             group.Users.Add(user);

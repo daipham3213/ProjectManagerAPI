@@ -1,4 +1,4 @@
-﻿namespace ProjectManagerAPI.Core.ServiceResource
+﻿namespace ProjectManagerAPI.StaticValue
 {
     public class RoleNames
     {

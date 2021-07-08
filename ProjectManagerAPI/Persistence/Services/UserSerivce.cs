@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using ProjectManagerAPI.StaticValue;
 using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI.Persistence.Services
@@ -51,6 +52,7 @@ namespace ProjectManagerAPI.Persistence.Services
             var user = await _userManager.FindByNameAsync(request.Username);
             if (user == null)
                 throw new Exception("Username don't exist.");
+            await this._unitOfWork.Groups.Load(u => u.Id == user.GroupRef);
 
             //check password
             var result = await _signInManager.PasswordSignInAsync(user, request.Password, request.RememberMe, true);
@@ -145,6 +147,7 @@ namespace ProjectManagerAPI.Persistence.Services
                 throw new Exception("Invalid information.");
             if (user.Group == null)
                 throw new Exception("User's group is invalid.");
+            await this._unitOfWork.GroupTypes.Load(u => u.Id == user.Group.GroupTypeFk);
             var role = await  this._roleManager.FindByIdAsync(user.Group.GroupType.IdentityRoleId.ToString());
             await this._userManager.AddToRoleAsync(user, role.Name);
         }
@@ -370,7 +373,8 @@ namespace ProjectManagerAPI.Persistence.Services
                 Subject = new ClaimsIdentity(new Claim[]
                 {
                     new Claim("groupId", user.GroupRef.ToString()),
-                    new Claim("leaderId", user.ParentNId.ToString())
+                    new Claim("leaderId", user.ParentNId.ToString()),
+                    new Claim("GroupName", user.Group.Name)
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(15),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

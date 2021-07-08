@@ -1,9 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-using System;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ProjectManagerAPI.Migrations
 {
-    public partial class init : Migration
+    public partial class add_parentgroup : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -42,14 +42,36 @@ namespace ProjectManagerAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Requests",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsAccepted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDenied = table.Column<bool>(type: "bit", nullable: false),
+                    IsGroup = table.Column<bool>(type: "bit", nullable: false),
+                    To = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Remark = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
+                    DateModified = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
+                    UserCreated = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsActived = table.Column<bool>(type: "bit", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Requests", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ServerInfos",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: false, defaultValue: "API Server"),
                     IsSeeded = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: new DateTime(2021, 7, 3, 9, 28, 28, 213, DateTimeKind.Utc).AddTicks(2333)),
-                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: new DateTime(2021, 7, 3, 9, 28, 28, 213, DateTimeKind.Utc).AddTicks(4042))
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: new DateTime(2021, 7, 7, 15, 2, 47, 438, DateTimeKind.Utc).AddTicks(370)),
+                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: new DateTime(2021, 7, 7, 15, 2, 47, 438, DateTimeKind.Utc).AddTicks(1742))
                 },
                 constraints: table =>
                 {
@@ -116,6 +138,7 @@ namespace ProjectManagerAPI.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     GroupTypeFk = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     LeaderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ParentNId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Remark = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
@@ -127,6 +150,11 @@ namespace ProjectManagerAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Groups", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Groups_Groups_ParentNId",
+                        column: x => x.ParentNId,
+                        principalTable: "Groups",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Groups_GroupTypes_GroupTypeFk",
                         column: x => x.GroupTypeFk,
@@ -323,6 +351,31 @@ namespace ProjectManagerAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RefreshToken",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Token = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Expires = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedByIp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Revoked = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    RevokedByIp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ReplacedByToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshToken", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RefreshToken_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Phases",
                 columns: table => new
                 {
@@ -446,9 +499,12 @@ namespace ProjectManagerAPI.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Groups_Name",
                 table: "Groups",
-                column: "Name",
-                unique: true,
-                filter: "[Name] IS NOT NULL");
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Groups_ParentNId",
+                table: "Groups",
+                column: "ParentNId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GroupTypes_IdentityRoleId",
@@ -458,9 +514,7 @@ namespace ProjectManagerAPI.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_GroupTypes_Name",
                 table: "GroupTypes",
-                column: "Name",
-                unique: true,
-                filter: "[Name] IS NOT NULL");
+                column: "Name");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GroupTypes_ParentNid",
@@ -470,9 +524,7 @@ namespace ProjectManagerAPI.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Phases_Name",
                 table: "Phases",
-                column: "Name",
-                unique: true,
-                filter: "[Name] IS NOT NULL");
+                column: "Name");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Phases_ReportId",
@@ -482,9 +534,12 @@ namespace ProjectManagerAPI.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Projects_Name",
                 table: "Projects",
-                column: "Name",
-                unique: true,
-                filter: "[Name] IS NOT NULL");
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreshToken_UserId",
+                table: "RefreshToken",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reports_GroupId",
@@ -494,14 +549,17 @@ namespace ProjectManagerAPI.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Reports_Name",
                 table: "Reports",
-                column: "Name",
-                unique: true,
-                filter: "[Name] IS NOT NULL");
+                column: "Name");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reports_ProjectId",
                 table: "Reports",
                 column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Requests_Name",
+                table: "Requests",
+                column: "Name");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ServerInfos_Name",
@@ -512,9 +570,7 @@ namespace ProjectManagerAPI.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_Name",
                 table: "Tasks",
-                column: "Name",
-                unique: true,
-                filter: "[Name] IS NOT NULL");
+                column: "Name");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_PhaseId",
@@ -546,6 +602,12 @@ namespace ProjectManagerAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Avatars");
+
+            migrationBuilder.DropTable(
+                name: "RefreshToken");
+
+            migrationBuilder.DropTable(
+                name: "Requests");
 
             migrationBuilder.DropTable(
                 name: "ServerInfos");

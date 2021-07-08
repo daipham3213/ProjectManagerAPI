@@ -15,6 +15,7 @@ namespace ProjectManagerAPI.Persistence
         public DbSet<Group> Groups { get; set; }
         public DbSet<Phase> Phases { get; set; }
         public DbSet<Project> Projects { get; set; }
+        public DbSet<Request> Requests { get; set; }
         public DbSet<Task> Tasks { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Avatar> Avatars { get; set; }
@@ -37,6 +38,7 @@ namespace ProjectManagerAPI.Persistence
             builder.ApplyConfiguration(new TaskConfiguration());
             builder.ApplyConfiguration(new UserConfiguration());
             builder.ApplyConfiguration(new ServerInfoConfiguration());
+            builder.ApplyConfiguration(new RequestConfiguration());
             builder.Ignore<BaseModel>();
             builder.Entity<BaseModel>().ToTable("BaseModel", t => t.ExcludeFromMigrations());
         }

@@ -10,8 +10,8 @@ using ProjectManagerAPI.Persistence;
 namespace ProjectManagerAPI.Migrations
 {
     [DbContext(typeof(ProjectManagerDbContext))]
-    [Migration("20210706024050_initDB")]
-    partial class initDB
+    [Migration("20210707150248_add_parentgroup")]
+    partial class add_parentgroup
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -241,6 +241,9 @@ namespace ProjectManagerAPI.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<Guid?>("ParentNId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Remark")
                         .HasColumnType("nvarchar(max)");
 
@@ -252,6 +255,8 @@ namespace ProjectManagerAPI.Migrations
                     b.HasIndex("GroupTypeFk");
 
                     b.HasIndex("Name");
+
+                    b.HasIndex("ParentNId");
 
                     b.ToTable("Groups");
                 });
@@ -460,6 +465,56 @@ namespace ProjectManagerAPI.Migrations
                     b.ToTable("Reports");
                 });
 
+            modelBuilder.Entity("ProjectManagerAPI.Core.Models.Request", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DateCreated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getdate()");
+
+                    b.Property<DateTime?>("DateModified")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getdate()");
+
+                    b.Property<bool>("IsAccepted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsActived")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDenied")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsGroup")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Remark")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("To")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserCreated")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name");
+
+                    b.ToTable("Requests");
+                });
+
             modelBuilder.Entity("ProjectManagerAPI.Core.Models.ServerInfo", b =>
                 {
                     b.Property<Guid>("Id")
@@ -469,7 +524,7 @@ namespace ProjectManagerAPI.Migrations
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 7, 6, 2, 40, 50, 162, DateTimeKind.Utc).AddTicks(2026));
+                        .HasDefaultValue(new DateTime(2021, 7, 7, 15, 2, 47, 438, DateTimeKind.Utc).AddTicks(370));
 
                     b.Property<bool>("IsSeeded")
                         .ValueGeneratedOnAdd()
@@ -485,7 +540,7 @@ namespace ProjectManagerAPI.Migrations
                     b.Property<DateTime>("UpdateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 7, 6, 2, 40, 50, 162, DateTimeKind.Utc).AddTicks(2751));
+                        .HasDefaultValue(new DateTime(2021, 7, 7, 15, 2, 47, 438, DateTimeKind.Utc).AddTicks(1742));
 
                     b.HasKey("Id");
 
@@ -725,7 +780,14 @@ namespace ProjectManagerAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ProjectManagerAPI.Core.Models.Group", "ParentN")
+                        .WithMany()
+                        .HasForeignKey("ParentNId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("GroupType");
+
+                    b.Navigation("ParentN");
                 });
 
             modelBuilder.Entity("ProjectManagerAPI.Core.Models.GroupType", b =>

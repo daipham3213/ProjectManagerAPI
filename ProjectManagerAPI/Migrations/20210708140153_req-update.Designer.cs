@@ -10,8 +10,8 @@ using ProjectManagerAPI.Persistence;
 namespace ProjectManagerAPI.Migrations
 {
     [DbContext(typeof(ProjectManagerDbContext))]
-    [Migration("20210703092828_init")]
-    partial class init
+    [Migration("20210708140153_req-update")]
+    partial class requpdate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -241,6 +241,9 @@ namespace ProjectManagerAPI.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<Guid?>("ParentNId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Remark")
                         .HasColumnType("nvarchar(max)");
 
@@ -251,9 +254,9 @@ namespace ProjectManagerAPI.Migrations
 
                     b.HasIndex("GroupTypeFk");
 
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("[Name] IS NOT NULL");
+                    b.HasIndex("Name");
+
+                    b.HasIndex("ParentNId");
 
                     b.ToTable("Groups");
                 });
@@ -299,9 +302,7 @@ namespace ProjectManagerAPI.Migrations
 
                     b.HasIndex("IdentityRoleId");
 
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("[Name] IS NOT NULL");
+                    b.HasIndex("Name");
 
                     b.HasIndex("ParentNid");
 
@@ -352,9 +353,7 @@ namespace ProjectManagerAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("[Name] IS NOT NULL");
+                    b.HasIndex("Name");
 
                     b.HasIndex("ReportId");
 
@@ -402,9 +401,7 @@ namespace ProjectManagerAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("[Name] IS NOT NULL");
+                    b.HasIndex("Name");
 
                     b.ToTable("Projects");
                 });
@@ -461,13 +458,64 @@ namespace ProjectManagerAPI.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("[Name] IS NOT NULL");
+                    b.HasIndex("Name");
 
                     b.HasIndex("ProjectId");
 
                     b.ToTable("Reports");
+                });
+
+            modelBuilder.Entity("ProjectManagerAPI.Core.Models.Request", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DateCreated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getdate()");
+
+                    b.Property<DateTime?>("DateModified")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getdate()");
+
+                    b.Property<bool>("IsAccepted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsActived")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDenied")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsGroup")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Remark")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("To")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserCreated")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name");
+
+                    b.ToTable("Requests");
                 });
 
             modelBuilder.Entity("ProjectManagerAPI.Core.Models.ServerInfo", b =>
@@ -479,7 +527,7 @@ namespace ProjectManagerAPI.Migrations
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 7, 3, 9, 28, 28, 213, DateTimeKind.Utc).AddTicks(2333));
+                        .HasDefaultValue(new DateTime(2021, 7, 8, 14, 1, 52, 932, DateTimeKind.Utc).AddTicks(2437));
 
                     b.Property<bool>("IsSeeded")
                         .ValueGeneratedOnAdd()
@@ -495,7 +543,7 @@ namespace ProjectManagerAPI.Migrations
                     b.Property<DateTime>("UpdateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 7, 3, 9, 28, 28, 213, DateTimeKind.Utc).AddTicks(4042));
+                        .HasDefaultValue(new DateTime(2021, 7, 8, 14, 1, 52, 932, DateTimeKind.Utc).AddTicks(3948));
 
                     b.HasKey("Id");
 
@@ -555,9 +603,7 @@ namespace ProjectManagerAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("[Name] IS NOT NULL");
+                    b.HasIndex("Name");
 
                     b.HasIndex("PhaseId");
 
@@ -737,7 +783,14 @@ namespace ProjectManagerAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ProjectManagerAPI.Core.Models.Group", "ParentN")
+                        .WithMany()
+                        .HasForeignKey("ParentNId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("GroupType");
+
+                    b.Navigation("ParentN");
                 });
 
             modelBuilder.Entity("ProjectManagerAPI.Core.Models.GroupType", b =>
@@ -816,9 +869,51 @@ namespace ProjectManagerAPI.Migrations
                         .WithMany()
                         .HasForeignKey("ParentNId");
 
+                    b.OwnsMany("ProjectManagerAPI.Core.ServiceResource.RefreshToken", "RefreshTokens", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<DateTime>("Created")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<string>("CreatedByIp")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<DateTime>("Expires")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<string>("ReplacedByToken")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<DateTime?>("Revoked")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<string>("RevokedByIp")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("Token")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("UserId");
+
+                            b1.ToTable("RefreshToken");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+                        });
+
                     b.Navigation("Group");
 
                     b.Navigation("ParentN");
+
+                    b.Navigation("RefreshTokens");
                 });
 
             modelBuilder.Entity("ProjectManagerAPI.Core.Models.Group", b =>

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization.Infrastructure;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Permission;
 using ProjectManagerAPI.Core.ServiceResource;
+using ProjectManagerAPI.StaticValue;
 using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI.Core.Policy
