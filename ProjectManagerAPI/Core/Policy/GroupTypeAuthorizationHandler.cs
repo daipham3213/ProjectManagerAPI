@@ -34,8 +34,7 @@ namespace ProjectManagerAPI.Core.Policy
             //Add Edit Delete
             if ((requirement.Name == GroupTypePermission.Add 
                 | requirement.Name == GroupTypePermission.Edit 
-                | requirement.Name == GroupTypePermission.Remove)
-                & context.User.HasClaim(u => u.Value == requirement.Name))
+                | requirement.Name == GroupTypePermission.Remove)  & context.User.HasClaim(u => u.Value == requirement.Name))
             {
                 context.Succeed(requirement);
             }

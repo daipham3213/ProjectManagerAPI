@@ -145,6 +145,7 @@ namespace ProjectManagerAPI.Controllers
             var result = await _unitOfWork.Groups.GetAll();
             return Ok(_mapper.Map<IEnumerable<GroupViewResource>>(result));
         }
+
         [HttpGet]
         public async Task<IActionResult> GetGroupsValidated(string? type)
         {
