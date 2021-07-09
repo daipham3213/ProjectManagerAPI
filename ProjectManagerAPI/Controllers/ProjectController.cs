@@ -77,6 +77,9 @@ namespace ProjectManagerAPI.Controllers
             if (project == null)
                 return BadRequest();
 
+            //RemoveAllChildren with Bug
+            this._unitOfWork.Projects.RemoveAllChildren(idPro);
+          
             this._unitOfWork.Projects.Remove(project);
             await this._unitOfWork.Complete();
 

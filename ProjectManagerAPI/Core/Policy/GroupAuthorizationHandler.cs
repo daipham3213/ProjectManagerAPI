@@ -62,7 +62,7 @@ namespace ProjectManagerAPI.Core.Policy
                         if (leader is { GroupRef: null }) context.Succeed(requirement);
                 }
             }
-            //Read
+         
             if (requirement.Name == GroupPermission.View)
             {
                 if (groups.Contains(resource))
