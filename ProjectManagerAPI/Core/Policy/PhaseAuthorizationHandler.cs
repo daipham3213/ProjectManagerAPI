@@ -40,6 +40,11 @@ namespace ProjectManagerAPI.Core.Policy
             if (context.User.HasClaim(u => u.Value.Equals(ProjectPermission.FullSelf)))
                 context.Succeed(requirement);
 
+           if (requirement.Name == PhasePermission.View
+           & context.User.HasClaim(u => u.Value == requirement.Name))
+            {
+                context.Succeed(requirement);
+            }
 
             //Edit leader and TeamLead
             //create leader and TeamLead
