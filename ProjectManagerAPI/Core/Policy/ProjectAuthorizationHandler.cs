@@ -57,7 +57,7 @@ namespace ProjectManagerAPI.Core.Policy
                 | requirement.Name == ProjectPermission.Remove)
             {
 
-                if (isLeader | context.User.HasClaim(u => u.Value.Equals(requirement.Name))) 
+                if (isLeader | context.User.IsInRole(RoleNames.DepartmentLead)) 
 
                     context.Succeed(requirement);
             }
