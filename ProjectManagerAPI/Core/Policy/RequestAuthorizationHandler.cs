@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using ProjectManagerAPI.Core.Models;
@@ -13,7 +14,14 @@ namespace ProjectManagerAPI.Core.Policy
     public class RequestAuthorizationHandler
         : AuthorizationHandler<OperationAuthorizationRequirement, Request>
     {
-        protected override Task HandleRequirementAsync(
+        protected readonly IUnitOfWork _unitOfWork;
+
+        public RequestAuthorizationHandler(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        protected override async Task<IAsyncResult> HandleRequirementAsync(
             AuthorizationHandlerContext context,
             OperationAuthorizationRequirement requirement,
             Request resource)
@@ -24,6 +32,12 @@ namespace ProjectManagerAPI.Core.Policy
             {
                 var is_admin = context.User.HasClaim(u => u.Value == resource.To.ToString());
                 if (is_admin)
+                    context.Succeed(requirement);
+            }
+
+            if (requirement.Name == RequestPermission.View)
+            {
+                if (context.User.HasClaim(u => u.Value == resource.To.ToString()))
                     context.Succeed(requirement);
             }
             return Task.CompletedTask;

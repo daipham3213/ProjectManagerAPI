@@ -8,6 +8,7 @@ using ProjectManagerAPI.Core.ServiceResource;
 using ProjectManagerAPI.Core.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ProjectManagerAPI.StaticValue;
 
@@ -44,6 +45,8 @@ namespace ProjectManagerAPI.Controllers
             {
                 return NotFound();
             }
+
+            type = type.Where(u => u.IsActived == true);
             return Ok(_mapper.Map<IEnumerable<GroupTypeViewResource>>(type));
         }
 

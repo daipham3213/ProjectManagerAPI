@@ -13,6 +13,7 @@ namespace ProjectManagerAPI.Core.Repositories
         Task<IEnumerable<Request>> GetRequestList(Guid userId);
         Task<IEnumerable<Request>> GetOldRequestList(Guid userId);
         Task<IEnumerable<Request>> GetNewRequestList(Guid userId);
+        Task<IEnumerable<Request>> GetSentRequestList(Guid userId);
         Task<int> CountNewRequest(Guid userId);
         Task<Request> CreateRequest(CreatedRequest request, User user);
         Task ProcessRequest(Guid id, bool isAccepted = false, bool isDenied = false);

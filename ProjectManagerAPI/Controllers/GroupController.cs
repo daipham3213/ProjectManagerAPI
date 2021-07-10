@@ -51,7 +51,7 @@ namespace ProjectManagerAPI.Controllers
             var groupType = _unitOfWork.GroupTypes
                 .Find(u => u.Name == "Department")
                 .FirstOrDefault();
-            var parent = await this._unitOfWork.Groups.FindGroupByName("System Admin");
+            var parent = await this._unitOfWork.Groups.FindGroupByName("System Admin Group");
             var entity = new Group
             {
                 Name = group.Name,
@@ -151,7 +151,8 @@ namespace ProjectManagerAPI.Controllers
         {
             //Get user claims from token
             var user = await _tokenParser.GetUserByToken();
-            await this._unitOfWork.Users.Load(u => u.IsActived & !u.IsDeleted);
+            await this._unitOfWork.Users.Load(u => u.Id == user.ParentNId);
+            // await this._unitOfWork.Groups.Load(u => u.Id == user.GroupRef);
             var leader = user.ParentN?.Id ?? user.Id;
 
             var result = await _unitOfWork.Groups.GetGroupListValidated(leader);

@@ -8,5 +8,6 @@ namespace ProjectManagerAPI.Core.Permission
     public class RequestPermission
     {
         public const string ActiveGroup = "Active.Group";
+        public const string View = "View.Request";
     }
 }

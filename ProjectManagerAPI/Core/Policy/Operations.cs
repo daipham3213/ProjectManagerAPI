@@ -103,5 +103,7 @@ namespace ProjectManagerAPI.Core.Policy
         //Request
         public static OperationAuthorizationRequirement RequestGroupActivation =
             new OperationAuthorizationRequirement { Name = RequestPermission.ActiveGroup };
+        public static OperationAuthorizationRequirement RequestRead =
+            new OperationAuthorizationRequirement { Name = RequestPermission.View };
     }
 }
