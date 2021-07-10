@@ -52,7 +52,7 @@ namespace ProjectManagerAPI.Persistence.Services
             var user = await _userManager.FindByNameAsync(request.Username);
             if (user == null)
                 throw new Exception("Username don't exist.");
-            await this._unitOfWork.Groups.Load(u => u.Id == user.GroupRef);
+            
 
             //check password
             var result = await _signInManager.PasswordSignInAsync(user, request.Password, request.RememberMe, true);
@@ -74,7 +74,7 @@ namespace ProjectManagerAPI.Persistence.Services
             var claims = await GetClaims(user);
 
             //create tokens
-            var finalToken = generateJwtToken(user, claims);
+            var finalToken = await generateJwtToken(user, claims);
             var refreshToken = generateRefreshToken(ipAddress);
             await this._userManager.RemoveAuthenticationTokenAsync(user, "Bearer", user.UserName);
             user.Tokens ??= new List<IdentityUserToken<Guid>>();
@@ -178,9 +178,9 @@ namespace ProjectManagerAPI.Persistence.Services
             leader.ParentN = user;
             user.ParentN = temp;
             group.LeaderId = user.Id;
-            leader.DateModified = DateTime.UtcNow;
-            user.DateModified = DateTime.UtcNow;
-            group.DateModified = DateTime.UtcNow;
+            leader.DateModified = DateTime.UtcNow.AddHours(Convert.ToInt32(_config["Tokens:UTC"]));
+            user.DateModified = DateTime.UtcNow.AddHours(Convert.ToInt32(_config["Tokens:UTC"]));
+            group.DateModified = DateTime.UtcNow.AddHours(Convert.ToInt32(_config["Tokens:UTC"]));
             await this._unitOfWork.GroupTypes.Load(u => u.Id == group.GroupTypeFk);
             var role = await this._roleManager.FindByIdAsync(group.GroupType.IdentityRoleId.ToString());
             await this._userManager.RemoveFromRoleAsync(leader, role.Name);
@@ -219,8 +219,8 @@ namespace ProjectManagerAPI.Persistence.Services
                 Name = request.Name,
                 PhoneNumber = request.PhoneNumber,
                 Email = request.Email,
-                DateCreated = DateTime.Now,
-                DateModified = DateTime.Now,
+                DateCreated = DateTime.Now.AddHours(Convert.ToInt32(_config["Tokens:UTC"])),
+                DateModified = DateTime.Now.AddHours(Convert.ToInt32(_config["Tokens:UTC"])),
                 SecurityStamp = Guid.NewGuid().ToString()
             };
             if (listError.Count != 0)
@@ -364,21 +364,24 @@ namespace ProjectManagerAPI.Persistence.Services
                 Console.WriteLine(e);
             }
         }
-        private string generateJwtToken(User user, IEnumerable<Claim> claims)
+        private async Task<string> generateJwtToken(User user, IEnumerable<Claim> claims)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_config["Tokens:Key"]);
+            await this._unitOfWork.Groups.Load(u => u.Id == user.GroupRef);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
                     new Claim("groupId", user.GroupRef.ToString()),
                     new Claim("leaderId", user.ParentNId.ToString()),
-                    new Claim("GroupName", user.Group.Name)
                 }),
-                Expires = DateTime.UtcNow.AddMinutes(15),
+                Expires = DateTime.UtcNow
+                    .AddHours(Convert.ToInt32(_config["Tokens:UTC"]))
+                    .AddMinutes(Convert.ToInt32(_config["Tokens:TimeExp"])),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
+            tokenDescriptor.Subject.AddClaim(new Claim("GroupName", user.Group?.Name ?? string.Empty));
             tokenDescriptor.Subject.AddClaims(claims);
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
@@ -393,8 +396,11 @@ namespace ProjectManagerAPI.Persistence.Services
                 return new RefreshToken
                 {
                     Token = Convert.ToBase64String(randomBytes),
-                    Expires = DateTime.UtcNow.AddDays(Convert.ToInt32(_config["Token:TimeExp"])),
-                    Created = DateTime.UtcNow,
+                    Expires = DateTime.UtcNow
+                        .AddHours(Convert.ToInt32(_config["Tokens:UTC"]))
+                        .AddMinutes(Convert.ToInt32(_config["Tokens:TimeExp"])),
+                    Created = DateTime.UtcNow
+                        .AddHours(Convert.ToInt32(_config["Tokens:UTC"])),
                     CreatedByIp = ipAddress
                 };
             }
@@ -413,7 +419,7 @@ namespace ProjectManagerAPI.Persistence.Services
 
             // replace old refresh token with a new one and save
             var newRefreshToken = generateRefreshToken(ipAddress);
-            refreshToken.Revoked = DateTime.UtcNow;
+            refreshToken.Revoked = DateTime.UtcNow.AddHours(Convert.ToInt32(_config["Tokens:UTC"]));
             refreshToken.RevokedByIp = ipAddress;
             refreshToken.ReplacedByToken = newRefreshToken.Token;
             user.RefreshTokens.Add(newRefreshToken);
@@ -428,7 +434,7 @@ namespace ProjectManagerAPI.Persistence.Services
             var roles = await _userManager.GetRolesAsync(user);
 
             // generate new jwt
-            var jwtToken = generateJwtToken(user,await GetClaims(user));
+            var jwtToken = await generateJwtToken(user,await GetClaims(user));
 
             return new LoginResponse(user, jwtToken, newRefreshToken.Token, path, roles.FirstOrDefault());
         }
@@ -447,7 +453,7 @@ namespace ProjectManagerAPI.Persistence.Services
             if (!refreshToken.IsActive) return false;
 
             // revoke token and save
-            refreshToken.Revoked = DateTime.UtcNow;
+            refreshToken.Revoked = DateTime.UtcNow.AddHours(Convert.ToInt32(_config["Tokens:UTC"]));
             refreshToken.RevokedByIp = ipAddress;
 
             await _unitOfWork.Complete();

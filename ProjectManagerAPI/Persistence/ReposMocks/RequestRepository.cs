@@ -49,6 +49,11 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             return result.Where(u => !u.IsDenied & !u.IsAccepted);
         }
 
+        public Task<IEnumerable<Request>> GetSentRequestList(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<int> CountNewRequest(Guid userId)
         {
             var requests = await GetNewRequestList(userId);

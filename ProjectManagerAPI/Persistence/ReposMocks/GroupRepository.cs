@@ -39,7 +39,7 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
            
             var mainGroup = await GetGroupByLeaderId(leaderId);
             if (mainGroup == null)
-                throw new Exception("No group were found.");
+                return null;
             var childGroup = await _context.Groups
                 .Where(u => u.ParentNId == mainGroup.Id 
                             & u.IsDeleted == false 

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using ProjectManagerAPI.Core;
+using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Policy;
 using ProjectManagerAPI.Core.Resources;
 using ProjectManagerAPI.Core.Services;
@@ -47,20 +48,16 @@ namespace ProjectManagerAPI.Controllers
             await this._authorizationService.AuthorizeAsync(User, request, Operations.RequestGroupActivation);
             var entity = await this._unitOfWork.Groups.Get(Guid.Parse(request.Value));
             //Update request
-            if (isAccept)
-                request.IsAccepted = true;
-            else
-            {
-                request.IsDenied = true;
-                this._unitOfWork.Groups.Remove(entity);
-                await this._unitOfWork.Complete();
-                return Ok(new { messsgae = "Group Activation Denied Success" });
-            }
+            var isAccepted = true && isAccept;
+            await this._unitOfWork.Requests.ProcessRequest(requestId, isAccepted, !isAccepted);
+
             //Set user's group id
             var lead = await _unitOfWork.Users.SearchUserById(entity.LeaderId);
             lead.Group = entity;
             lead.GroupRef = entity.Id;
             lead.DateModified = DateTime.Now;
+            await this._unitOfWork.Groups.Load(u => u.Id == entity.ParentNId);
+            lead.ParentNId = entity.ParentN?.LeaderId;
             await this._userService.Promotion(lead.UserName);
             entity.IsActived = true;
             await _unitOfWork.Complete();
@@ -68,12 +65,18 @@ namespace ProjectManagerAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetRequest(string userName)
+        public async Task<IActionResult> GetRequest()
         {
-            var user = await this._userService.GetUser(userName);
+            var user = await this._userService.GetUser(User.Identity.Name);
             if (user == null)
                 throw new Exception("Username invalid.");
             var requests = await this._unitOfWork.Requests.GetNewRequestList(user.Id);
+            foreach (var request in await _unitOfWork.Requests.GetOldRequestList(user.Id))
+                requests.Append<Request>(request);
+
+            if (!requests.Any())
+                throw new Exception("No new request");
+            await this._authorizationService.AuthorizeAsync(User, requests.First(), Operations.RequestRead);
             return Ok(_mapper.Map<IEnumerable<RequestResource>>(requests));
         }
     }
