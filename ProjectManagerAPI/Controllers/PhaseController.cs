@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjectManagerAPI.Core;
 using ProjectManagerAPI.Core.Models;
+using ProjectManagerAPI.Core.Policy;
 using ProjectManagerAPI.Core.Resources;
 using ProjectManagerAPI.Core.Services;
 using System;
@@ -20,13 +21,15 @@ namespace ProjectManagerAPI.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITokenManager _tokenParser;
         private readonly IMapper _mapper;
+        private readonly IAuthorizationService _authorizationService;
 
 
-        public PhaseController(IUnitOfWork unitOfWork, ITokenManager tokenParser, IMapper mapper)
+        public PhaseController(IUnitOfWork unitOfWork, ITokenManager tokenParser, IMapper mapper, IAuthorizationService authorizationService)
         {
             _unitOfWork = unitOfWork;
             _tokenParser = tokenParser;
             _mapper = mapper;
+            _authorizationService = authorizationService;
         }
 
         [HttpGet("all")]
@@ -76,9 +79,11 @@ namespace ProjectManagerAPI.Controllers
                 ReportId = WorkingStage.ReportID,
                 Report = report,
             };
-
+            //validation
+            await this._authorizationService.AuthorizeAsync(User, entity, Operations.PhaseCreate);
+            
             await _unitOfWork.Phases.Add(entity);
-            await _unitOfWork.Complete();
+         
 
             entity = await this._unitOfWork.Phases.SearchPhaneByName(entity.Name);
             await _unitOfWork.Complete();
@@ -96,6 +101,8 @@ namespace ProjectManagerAPI.Controllers
             if (phase == null) {
                 throw new Exception("Phase id is invalid");
             }
+            //validation
+            await this._authorizationService.AuthorizeAsync(User, phase, Operations.PhaseDelete);
             this._unitOfWork.Phases.Remove(phase);
             await _unitOfWork.Complete();
             return Ok(new JsonResult(phase.Name + "removed successfully")

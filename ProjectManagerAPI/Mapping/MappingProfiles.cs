@@ -66,6 +66,13 @@ namespace ProjectManagerAPI.Mapping
                     opt => opt.MapFrom(u => "api/Request/activegroup?requestId=" + u.Id + "&isActive=true"))
                 .ForMember(u => u.url_false,
                     opt => opt.MapFrom(u => "api/Request/activegroup?requestId=" + u.Id + "&isActive=false"));
+
+            //Task
+            CreateMap<Task, CreatedTask>();
+            CreateMap<Task, TaskViewResource>()
+                .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Task/" + u.Id))
+                .ForMember(u => u.PhaseName, opt => opt.MapFrom(g => g.Phase.Name))
+                 .ForMember(u => u.UserName, opt => opt.MapFrom(g => g.User.Name));
         }
 
         private void MapParentGroup(GroupType domain, GroupTypeResource resource)

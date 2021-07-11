@@ -14,6 +14,7 @@ namespace ProjectManagerAPI.Core
         IReportRepository Reports { get; }
         IPhaseRepository Phases { get;  }
         IRequestRepository Requests { get; }
+        ITaskRepository Tasks { get; }
         Task<int> Complete();
     }
 }

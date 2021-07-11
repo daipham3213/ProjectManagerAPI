@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ProjectManagerAPI.StaticValue;
-
+using ProjectManagerAPI.Core.Policy;
 
 namespace ProjectManagerAPI.Controllers
 {
@@ -24,12 +24,14 @@ namespace ProjectManagerAPI.Controllers
         private readonly ITokenManager _tokenParser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IAuthorizationService _authorizationService;
 
-        public ProjectController(ITokenManager tokenParser, IMapper mapper, IUnitOfWork unitOfWork)
+        public ProjectController(ITokenManager tokenParser, IMapper mapper, IUnitOfWork unitOfWork, IAuthorizationService authorizationService)
         {
             _tokenParser = tokenParser;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
+            _authorizationService = authorizationService;
         }
 
 
@@ -77,6 +79,7 @@ namespace ProjectManagerAPI.Controllers
             if (project == null)
                 return BadRequest();
 
+            await this._authorizationService.AuthorizeAsync(User, project, Operations.ProjectDelete);
             //RemoveAllChildren with Bug
             this._unitOfWork.Projects.RemoveAllChildren(idPro);
           
@@ -103,11 +106,14 @@ namespace ProjectManagerAPI.Controllers
 
             try
             {
-                await this._unitOfWork.Projects.Add(entity);
-                await this._unitOfWork.Complete();
+          
+                await this._authorizationService.AuthorizeAsync(User, entity, Operations.ProjectCreate);
 
+                await this._unitOfWork.Projects.Add(entity);
+                
 
                 entity = await this._unitOfWork.Projects.SearchProjectByName(entity.Name);
+                await this._unitOfWork.Complete();
 
                 var result = this._mapper.Map<Project, CreateProject>(entity);
                 return Ok(result);
