@@ -64,7 +64,7 @@ namespace ProjectManagerAPI.Controllers
             {
                 return NotFound();
             }
-
+            await this._authorizationService.AuthorizeAsync(User, project, Operations.ProjectRead);
             var result = _mapper.Map<Project, ProjectResource>(project);
             return Ok(result);
         }

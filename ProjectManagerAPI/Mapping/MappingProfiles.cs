@@ -73,6 +73,13 @@ namespace ProjectManagerAPI.Mapping
                 .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Task/" + u.Id))
                 .ForMember(u => u.PhaseName, opt => opt.MapFrom(g => g.Phase.Name))
                  .ForMember(u => u.UserName, opt => opt.MapFrom(g => g.User.Name));
+            CreateMap<Task, TaskResourcecs>()
+                .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Task/" + u.Id))
+                .ForMember(u => u.PhaseName, opt => opt.MapFrom(g => g.Phase.Name))
+                .ForMember(u => u.UserName, opt => opt.MapFrom(g => g.User.Name))
+                .ForMember(u => u.PhaseUrl, opt => opt.MapFrom(u => "api/Task/" + u.PhaseId))
+                .ForMember(u => u.UserUrl, opt => opt.MapFrom(u => "api/Task/" + u.UserId));
+                //.ForMember(u => u.UserCreated, opt => opt.MapFrom(u => "api/user/profile?key=" + u.UserCreated));
         }
 
         private void MapParentGroup(GroupType domain, GroupTypeResource resource)

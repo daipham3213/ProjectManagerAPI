@@ -86,8 +86,7 @@ namespace ProjectManagerAPI.Controllers
                 User = checkUser
             };
 
-            // validation
-            // no code yet :))
+            await this._authorizationService.AuthorizeAsync(User, entity, Operations.TaskCreate);
 
             await this._unitOfWork.Tasks.Add(entity);
             await this._unitOfWork.Complete();
@@ -98,5 +97,16 @@ namespace ProjectManagerAPI.Controllers
             });
         }
 
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetTaskId(Guid id) {
+            await this._unitOfWork.Tasks.GetAll();
+              var task = await this._unitOfWork.Tasks.Get(id);
+            if (task == null)
+                throw new Exception("Invalid Task ID.");
+            await this._authorizationService.AuthorizeAsync(User, task, Operations.TaskRead);
+            var result = _mapper.Map<Core.Models.Task, TaskResourcecs>(task);
+            return Ok(result);
+        }
     }
 }
