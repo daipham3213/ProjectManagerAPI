@@ -16,6 +16,6 @@ namespace ProjectManagerAPI.Core.Resources
         public bool IsDeleted { get; set; }
         public DateTime? DueDate { get; set; }
         public DateTime? StartDate { get; set; }
-        public ICollection<Project> Project { get; set; }
+        public ICollection<Report> Reports { get; set; }
     }
 }

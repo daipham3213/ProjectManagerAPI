@@ -99,6 +99,7 @@ namespace ProjectManagerAPI
             services.AddScoped<IReportRepository, ReportRepository>();
             services.AddScoped<IPhaseRepository,  PhaseRepository>();
             services.AddScoped<IRequestRepository, RequestRepository>();
+            services.AddScoped<ITaskRepository, TaskRepository>();
 
             //Inject Authorizations
             services.AddTransient<IAuthorizationHandler, GroupAuthorizationHandler>();
