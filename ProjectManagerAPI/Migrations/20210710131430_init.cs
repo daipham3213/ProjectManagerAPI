@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ProjectManagerAPI.Migrations
 {
-    public partial class project : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -71,8 +71,8 @@ namespace ProjectManagerAPI.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: false, defaultValue: "API Server"),
                     IsSeeded = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: new DateTime(2021, 7, 9, 9, 34, 19, 208, DateTimeKind.Utc).AddTicks(181)),
-                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: new DateTime(2021, 7, 9, 9, 34, 19, 208, DateTimeKind.Utc).AddTicks(1792))
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: new DateTime(2021, 7, 10, 13, 14, 30, 18, DateTimeKind.Utc).AddTicks(6759)),
+                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: new DateTime(2021, 7, 10, 13, 14, 30, 18, DateTimeKind.Utc).AddTicks(7860))
                 },
                 constraints: table =>
                 {
