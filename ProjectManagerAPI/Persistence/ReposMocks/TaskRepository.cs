@@ -22,5 +22,16 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
         {
             return await this._context.Tasks.Where(u => u.IsDeleted == false).ToListAsync();
         }
+
+        public async Task<Core.Models.Task> SearchTaskByName(string nameTask)
+        {
+            var task = await _context.Tasks.SingleOrDefaultAsync(u => u.Name == nameTask);
+            return task;
+        }
+
+        public async Task<IList<Core.Models.Task>> TaskSearchByPhaseId(Guid phaseId)
+        {
+            return await this._context.Tasks.Where(u => u.PhaseId == phaseId).ToListAsync();
+        }
     }
 }

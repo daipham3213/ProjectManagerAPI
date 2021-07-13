@@ -122,9 +122,6 @@ namespace ProjectManagerAPI.Controllers
             {
                 return BadRequest(e.Message);
             }
-
         }
-
-
     }
 }

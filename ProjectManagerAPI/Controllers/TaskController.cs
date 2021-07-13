@@ -108,5 +108,42 @@ namespace ProjectManagerAPI.Controllers
             var result = _mapper.Map<Core.Models.Task, TaskResourcecs>(task);
             return Ok(result);
         }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var task = await this._unitOfWork.Tasks.Get(id);
+            if(task == null)
+                throw new Exception("Invalid id");
+            await this._authorizationService.AuthorizeAsync(User, task, Operations.TaskDelete);
+            _unitOfWork.Tasks.Remove(task);
+            await this._unitOfWork.Complete();
+            return Ok(new { message = "Delete task: " + task.Name + " success." });
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Edit(Guid id, [FromBody] TaskViewResource task) 
+        {
+            if (ModelState.IsValid) 
+            {
+                var result = await this._unitOfWork.Tasks.Get(id);
+                var phase = await this._unitOfWork.Phases.SearchPhaneByName(task.PhaseName);
+                var user = await this._unitOfWork.Users.SearchUserByUsername(task.UserName);
+                result.PhaseId = phase.Id;
+             // result.Name = task.Name;
+                result.DueDate = task.DueDate;
+                result.StartDate = task.StartDate;
+                result.Percent = task.Percent;
+                result.UserId = user.Id;
+                result.DateModified = DateTime.UtcNow;
+                await this._authorizationService.AuthorizeAsync(User, result, Operations.ReportUpdate);
+                await this._unitOfWork.Complete();
+                return Ok(new { message = "Update task" + task.Name + "success." });
+            }
+            throw new Exception("Invalid information.");
+        }
+
+
+
     }
 }

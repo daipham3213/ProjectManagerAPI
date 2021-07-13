@@ -53,7 +53,7 @@ namespace ProjectManagerAPI.Core.Policy
             }
 
             // user removeSeft
-
+         
             if (requirement.Name == TaskPermission.RemoveSelf) {
                 if (context.User.IsInRole(RoleNames.RoleUser))
                     context.Succeed(requirement);

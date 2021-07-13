@@ -12,7 +12,7 @@ namespace ProjectManagerAPI.Core.Resources
         public string Remark { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime DueDate { get; set; }
-        public float Progress { get; set; }
+        public float Percent { get; set; }
         public string PhaseName { get; set; }
         public string UserName { get; set; }
     }
