@@ -24,14 +24,12 @@ namespace ProjectManagerAPI.Controllers
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
-        private readonly ITokenManager _tokenManager;
-        public UserController(IUserService userService, IMapper mapper, IUnitOfWork unitOfWork, IConfiguration configuration, ITokenManager tokenManager)
+        public UserController(IUserService userService, IMapper mapper, IUnitOfWork unitOfWork, IConfiguration configuration)
         {
             _userService = userService;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _configuration = configuration;
-            _tokenManager = tokenManager;
         }
 
         [HttpPost("authenticate")]

@@ -525,7 +525,7 @@ namespace ProjectManagerAPI.Migrations
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 7, 9, 9, 34, 19, 208, DateTimeKind.Utc).AddTicks(181));
+                        .HasDefaultValue(new DateTime(2021, 7, 10, 13, 14, 30, 18, DateTimeKind.Utc).AddTicks(6759));
 
                     b.Property<bool>("IsSeeded")
                         .ValueGeneratedOnAdd()
@@ -541,7 +541,7 @@ namespace ProjectManagerAPI.Migrations
                     b.Property<DateTime>("UpdateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 7, 9, 9, 34, 19, 208, DateTimeKind.Utc).AddTicks(1792));
+                        .HasDefaultValue(new DateTime(2021, 7, 10, 13, 14, 30, 18, DateTimeKind.Utc).AddTicks(7860));
 
                     b.HasKey("Id");
 
