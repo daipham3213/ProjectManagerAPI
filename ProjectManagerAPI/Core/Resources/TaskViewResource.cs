@@ -7,6 +7,7 @@ namespace ProjectManagerAPI.Core.Resources
 {
     public class TaskViewResource
     {
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public string Url { get; set; }
         public string Remark { get; set; }

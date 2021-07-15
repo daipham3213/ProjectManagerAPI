@@ -101,6 +101,18 @@ namespace ProjectManagerAPI.Controllers
             return Ok(result);
         }
 
+        [HttpGet("available")]
+        [Authorize]
+        public async Task<IActionResult> NoGroup()
+        {
+            var users = _unitOfWork.Users.Find(u => u.GroupRef == null);
+
+            var result = _mapper.Map<IEnumerable<User>, IEnumerable<SearchUserResource>>(users);
+
+            return Ok(result);
+        }
+
+
         [HttpGet("profile")]
         [Authorize]
         public async Task<IActionResult> GetUserProfile(string key)
@@ -110,8 +122,6 @@ namespace ProjectManagerAPI.Controllers
             if (Guid.TryParse(key, out guid))
                 user = await _unitOfWork.Users.Get(guid);
             else user = await _unitOfWork.Users.GetUser(key);
-
-
             if (user == null)
                 throw new Exception("Account could not be found");
             var result = _mapper.Map<User, UserResource>(user);
@@ -252,9 +262,10 @@ namespace ProjectManagerAPI.Controllers
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Expires = DateTime.UtcNow.AddDays(7)
+                Expires = DateTime.UtcNow.AddHours(7).AddMinutes(int.Parse(_configuration["Tokens:TimeExp"]))
             };
             Response.Cookies.Append("refreshToken", token, cookieOptions);
+            return;
         }
 
         private string IpAddress()

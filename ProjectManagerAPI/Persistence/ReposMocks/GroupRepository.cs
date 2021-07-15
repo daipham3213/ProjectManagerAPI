@@ -81,6 +81,7 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             user.GroupRef = groupId;
             user.ParentN = leader;
             user.DateModified = DateTime.Now;
+            await this._context.SaveChangesAsync();
         }
 
         public async void RemoveUserFromGroup(Guid userId, Guid groupId)
@@ -94,6 +95,7 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             user.GroupRef = null;
             user.ParentN = null;
             user.DateModified = DateTime.Now;
+            await this._context.SaveChangesAsync();
         }
     }
 }

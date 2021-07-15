@@ -6,6 +6,7 @@ namespace ProjectManagerAPI.Core.Resources
 {
     public class ProjectResource
     {
+        public Guid Id { get; set; }
         public string url { get; set; }
         public string Name { get; set; }
         public string? Remark { get; set; }

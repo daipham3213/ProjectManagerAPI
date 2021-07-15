@@ -101,6 +101,7 @@ namespace ProjectManagerAPI.Persistence.Services
                 path = avatar.Path;
 
             var loginResponse = new LoginResponse(user, finalToken, refreshToken.Token, path, roles.FirstOrDefault());
+            loginResponse.Id = user.Id;
             return loginResponse;
         }
 
@@ -163,7 +164,7 @@ namespace ProjectManagerAPI.Persistence.Services
         {
             var leader = await this._userManager.FindByNameAsync(lead_username);
             var user = await this._userManager.FindByNameAsync(promo_username);
-            var group = await this._unitOfWork.Groups.GetGroupByLeaderId(leader.Id);
+            var group = await this._unitOfWork.Groups.Get(leader.GroupRef ?? Guid.Empty);
 
             if (leader == null | user == null | group == null)
                 throw new Exception("Invalid information.");

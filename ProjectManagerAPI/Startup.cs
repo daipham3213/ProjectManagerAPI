@@ -22,6 +22,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using ProjectManagerAPI.Core.Policy;
 
 namespace ProjectManagerAPI
@@ -63,7 +65,13 @@ namespace ProjectManagerAPI
                 options.SuppressModelStateInvalidFilter = true;
             });
 
-            services.AddControllers().AddNewtonsoftJson();
+            services.AddControllers()
+                .AddNewtonsoftJson(options =>
+                {
+                    // Use the default property (Pascal) casing
+                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                });
 
             services.AddDbContext<ProjectManagerDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("LocalDB")));
             services.AddIdentity<User, IdentityRole<Guid>>(opt =>

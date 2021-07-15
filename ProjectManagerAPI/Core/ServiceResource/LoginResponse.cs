@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 using ProjectManagerAPI.Core.Models;
 
@@ -6,6 +7,7 @@ namespace ProjectManagerAPI.Core.ServiceResource
 {
     public class LoginResponse
     {
+        public Guid Id { get; set; }
         public string UserName { get; set; }
         public string Token { get; set; }
         public string DisplayName { get; set; }

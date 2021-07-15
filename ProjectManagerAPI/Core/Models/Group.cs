@@ -9,6 +9,7 @@ namespace ProjectManagerAPI.Core.Models
         public Guid GroupTypeFk { get; set; }
         public ICollection<User> Users { get; set; }
         public ICollection<Report> Reports { get; set; }
+        public virtual User  Leader { get; set; }
         public Guid LeaderId { get; set; }
         public Group? ParentN { get; set; }
         public Guid? ParentNId { get; set; }

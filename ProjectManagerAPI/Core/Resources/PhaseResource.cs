@@ -8,6 +8,7 @@ namespace ProjectManagerAPI.Core.Resources
 {
     public class PhaseResource
     {
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public string Remark { get; set; }
         public string Url { get; set; }

@@ -160,6 +160,10 @@ namespace ProjectManagerAPI.Controllers
             {
                 var gt = await this._unitOfWork.GroupTypes.GetTypeByName(type);
                 result = result.Where(u => u.GroupTypeFk == gt.Id).ToList();
+                foreach (var res in result)
+                {
+                    await this._unitOfWork.Users.Load(u => u.Id == res.LeaderId);
+                }
             }
             return Ok(_mapper.Map<IEnumerable<GroupViewResource>>(result));
         }
@@ -174,6 +178,7 @@ namespace ProjectManagerAPI.Controllers
             var group = await this._unitOfWork.Groups.Get(id);
 
             await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupRead);
+            await this._unitOfWork.Users.Load(u => u.GroupRef == group.Id);
             if (group == null)
                 throw new Exception("Invalid group ID");
             return Ok(_mapper.Map<GroupResource>(group));
@@ -190,7 +195,7 @@ namespace ProjectManagerAPI.Controllers
             List<User> users = new List<User>();
             foreach (var username in resource.Usernames)
             {
-                var user = await _unitOfWork.Users.SearchUserByUsername(username);
+                var user = await _unitOfWork.Users.Get(username);
                 if (user == null)
                     throw new Exception(username + " is an invalid username.");
                 if (group.Users.Contains(user))
@@ -215,16 +220,16 @@ namespace ProjectManagerAPI.Controllers
             List<User> users = new List<User>();
             foreach (var username in resource.Usernames)
             {
-                var user = await _unitOfWork.Users.SearchUserByUsername(username);
+                var user = await _unitOfWork.Users.Get(username);
                 if (user == null)
-                    throw new Exception(username + " is an invalid username.");
+                    throw new Exception(username + " is an invalid user.");
                 if (!group.Users.Contains(user))
                     throw new Exception(username + " is not member of " + group.Name);
                 if (user.Id == group.LeaderId)
                     throw new Exception("Can not remove leader from group.");
                 _unitOfWork.Groups.RemoveUserFromGroup(user.Id, group.Id);
             }
-            await _unitOfWork.Complete();
+            //await _unitOfWork.Complete();
             return Ok(new JsonResult(_mapper.Map<GroupResource>(group)) { StatusCode = Ok().StatusCode });
         }
 
@@ -239,7 +244,7 @@ namespace ProjectManagerAPI.Controllers
                 _unitOfWork.Groups.RemoveUserFromGroup(id, user.Id);
             _unitOfWork.Groups.Remove(group);
             await this._userService.DePromotion(leader.UserName);
-            await _unitOfWork.Complete();
+            //await _unitOfWork.Complete();
             return Ok(new JsonResult(group.Name + " removed successfully.") { StatusCode = Ok().StatusCode });
         }
 
