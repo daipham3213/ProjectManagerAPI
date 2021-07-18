@@ -46,7 +46,7 @@ namespace ProjectManagerAPI.Controllers
         public async Task<IActionResult> GetList()
         {
             var task = await _unitOfWork.Tasks.LoadValidated();
-            if (task.Count() == 0)
+            if (!task.Any())
             {
                 return NotFound();
             }
@@ -73,6 +73,10 @@ namespace ProjectManagerAPI.Controllers
                 throw new Exception("Invalid user id");
             }
 
+            var checkP = await _unitOfWork.Tasks.Get(task.ParentNId ?? Guid.Empty);
+            if (checkP == null)
+                throw new Exception("Invalid parent task id");
+
             var entity = new Core.Models.Task
             {
                 Name = task.Name,
@@ -83,7 +87,8 @@ namespace ProjectManagerAPI.Controllers
                 PhaseId = task.PhaseId,
                 Phase = phase,
                 UserId = task.UserId,
-                User = checkUser
+                User = checkUser,
+                ParentN = checkP,
             };
 
             await this._authorizationService.AuthorizeAsync(User, entity, Operations.TaskCreate);
@@ -105,7 +110,7 @@ namespace ProjectManagerAPI.Controllers
             if (task == null)
                 throw new Exception("Invalid Task ID.");
             await this._authorizationService.AuthorizeAsync(User, task, Operations.TaskRead);
-            var result = _mapper.Map<Core.Models.Task, TaskResourcecs>(task);
+            var result = _mapper.Map<Core.Models.Task, TaskResources>(task);
             return Ok(result);
         }
 
@@ -122,20 +127,19 @@ namespace ProjectManagerAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Edit(Guid id, [FromBody] TaskViewResource task) 
+        public async Task<IActionResult> Edit(Guid id, [FromBody] CreatedTask task) 
         {
             if (ModelState.IsValid) 
             {
                 var result = await this._unitOfWork.Tasks.Get(id);
-                var phase = await this._unitOfWork.Phases.SearchPhaneByName(task.PhaseName);
-                var user = await this._unitOfWork.Users.SearchUserByUsername(task.UserName);
-                result.PhaseId = phase.Id;
-             // result.Name = task.Name;
+                result.PhaseId = task.PhaseId;
+                result.Name = task.Name;
                 result.DueDate = task.DueDate;
                 result.StartDate = task.StartDate;
                 result.Percent = task.Percent;
-                result.UserId = user.Id;
-                result.DateModified = DateTime.UtcNow;
+                result.UserId = task.UserId;
+                result.DateModified = DateTime.UtcNow.AddHours(7);
+                result.ParentN = await this._unitOfWork.Tasks.Get(task.ParentNId ?? Guid.Empty);
                 await this._authorizationService.AuthorizeAsync(User, result, Operations.ReportUpdate);
                 await this._unitOfWork.Complete();
                 return Ok(new { message = "Update task" + task.Name + "success." });

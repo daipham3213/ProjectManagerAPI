@@ -14,10 +14,10 @@ namespace ProjectManagerAPI.Core.ServiceResource
         public string AvatarUrl { get; set; }
         public string RoleName { get; set; }
         public bool IsActivated { get; set; }
-        [JsonIgnore] // refresh token is returned in http only cookie
         public string RefreshToken { get; set; }
+        public DateTime ExpTime { get; set; }
 
-        public LoginResponse(User user, string token, string refreshToken, string avatarUrl , string roleName)
+        public LoginResponse(User user, string token, string refreshToken, string avatarUrl , string roleName, DateTime time)
         {
             UserName = user.UserName;
             Token = token;
@@ -26,6 +26,7 @@ namespace ProjectManagerAPI.Core.ServiceResource
             RoleName = roleName;
             IsActivated = user.IsActived;
             RefreshToken = refreshToken;
+            ExpTime = time;
         }
 
         public LoginResponse()

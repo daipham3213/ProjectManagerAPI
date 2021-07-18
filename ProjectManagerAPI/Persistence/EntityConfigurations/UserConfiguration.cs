@@ -19,7 +19,8 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
                 .ValueGeneratedOnAddOrUpdate();
             builder.HasOne(u => u.Group)
                 .WithMany(e => e.Users)
-                .HasForeignKey(k => k.GroupRef);
+                .HasForeignKey(k => k.GroupRef)
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(u => u.ParentN)
                 .WithMany()

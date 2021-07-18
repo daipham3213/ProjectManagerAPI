@@ -31,6 +31,7 @@ namespace ProjectManagerAPI
     public class Startup
     {
         private readonly string _myAllowSpecificOrigins = "AllowSpecficOrigins";
+        private readonly string _signalr = "signalr";
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -47,13 +48,19 @@ namespace ProjectManagerAPI
                 options.AddPolicy(name: _myAllowSpecificOrigins,
                     builder =>
                     {
-                        builder.WithOrigins("http://localhost:5000", "http://localhost:3000")
+                        builder.WithOrigins("http://localhost:5000", "http://localhost:3000", "https://localhost:5001", "https://daipham3213-001-site1.htempurl.com",
+                                "https://prj-manager.herokuapp.com/")
                             .AllowAnyOrigin()
                             .AllowAnyMethod()
                             .AllowAnyHeader()
                             .WithExposedHeaders("Content-Range");
-
                     });
+                options.AddPolicy(_signalr,
+                    builder => builder
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials()
+                        .SetIsOriginAllowed(hostName => true));
             });
 
             services.Configure<SecurityStampValidatorOptions>(options =>
@@ -194,6 +201,7 @@ namespace ProjectManagerAPI
             }
 
             app.UseCors(_myAllowSpecificOrigins);
+            app.UseCors(_signalr);
 
             app.UseStaticFiles();
 

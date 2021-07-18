@@ -28,6 +28,7 @@ namespace ProjectManagerAPI.Persistence.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMailService _mailService;
         private readonly IConfiguration _config;
+        private DateTime expDateTime;
 
         public UserSerivce(
             UserManager<User> userManager,
@@ -44,10 +45,14 @@ namespace ProjectManagerAPI.Persistence.Services
             _mailService = mailService;
             _config = config;
             _roleManager = roleManager;
+            expDateTime = DateTime.UtcNow
+                .AddHours(Convert.ToInt32(_config["Tokens:UTC"]))
+                .AddMinutes(Convert.ToInt32(_config["Tokens:TimeExp"]));
         }
 
         public async Task<LoginResponse> Authenticate(LoginRequest request,string ipAddress)
         {
+            
             // check user exitst
             var user = await _userManager.FindByNameAsync(request.Username);
             if (user == null)
@@ -61,7 +66,7 @@ namespace ProjectManagerAPI.Persistence.Services
 
             var isActivated = user.IsActived;
             if (!isActivated)
-                return new LoginResponse(user, null, null, null, null);
+                return new LoginResponse(user, null, null, null, null, expDateTime);
 
 
             //get roles
@@ -99,8 +104,8 @@ namespace ProjectManagerAPI.Persistence.Services
 
             if (avatar != null)
                 path = avatar.Path;
-
-            var loginResponse = new LoginResponse(user, finalToken, refreshToken.Token, path, roles.FirstOrDefault());
+            
+            var loginResponse = new LoginResponse(user, finalToken, refreshToken.Token, path, roles.FirstOrDefault(), expDateTime);
             loginResponse.Id = user.Id;
             return loginResponse;
         }
@@ -377,9 +382,7 @@ namespace ProjectManagerAPI.Persistence.Services
                     new Claim("groupId", user.GroupRef.ToString()),
                     new Claim("leaderId", user.ParentNId.ToString()),
                 }),
-                Expires = DateTime.UtcNow
-                    .AddHours(Convert.ToInt32(_config["Tokens:UTC"]))
-                    .AddMinutes(Convert.ToInt32(_config["Tokens:TimeExp"])),
+                Expires = this.expDateTime,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             tokenDescriptor.Subject.AddClaim(new Claim("GroupName", user.Group?.Name ?? string.Empty));
@@ -397,9 +400,7 @@ namespace ProjectManagerAPI.Persistence.Services
                 return new RefreshToken
                 {
                     Token = Convert.ToBase64String(randomBytes),
-                    Expires = DateTime.UtcNow
-                        .AddHours(Convert.ToInt32(_config["Tokens:UTC"]))
-                        .AddMinutes(Convert.ToInt32(_config["Tokens:TimeExp"])),
+                    Expires = this.expDateTime,
                     Created = DateTime.UtcNow
                         .AddHours(Convert.ToInt32(_config["Tokens:UTC"])),
                     CreatedByIp = ipAddress
@@ -425,6 +426,9 @@ namespace ProjectManagerAPI.Persistence.Services
             refreshToken.ReplacedByToken = newRefreshToken.Token;
             user.RefreshTokens.Add(newRefreshToken);
             await this._unitOfWork.Complete();
+            DateTime expDateTime = DateTime.UtcNow
+                .AddHours(Convert.ToInt32(_config["Tokens:UTC"]))
+                .AddMinutes(Convert.ToInt32(_config["Tokens:TimeExp"]));
 
             var avatar = user.Avatars.FirstOrDefault(a => a.IsMain);
             string path = null;
@@ -437,7 +441,7 @@ namespace ProjectManagerAPI.Persistence.Services
             // generate new jwt
             var jwtToken = await generateJwtToken(user,await GetClaims(user));
 
-            return new LoginResponse(user, jwtToken, newRefreshToken.Token, path, roles.FirstOrDefault());
+            return new LoginResponse(user, jwtToken, newRefreshToken.Token, path, roles.FirstOrDefault(), expDateTime);
         }
 
         public async Task<bool> RevokeToken(string token, string ipAddress)

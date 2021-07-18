@@ -14,7 +14,7 @@ namespace ProjectManagerAPI.Core.Policy
     public class RequestAuthorizationHandler
         : AuthorizationHandler<OperationAuthorizationRequirement, Request>
     {
-        protected readonly IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         public RequestAuthorizationHandler(IUnitOfWork unitOfWork)
         {

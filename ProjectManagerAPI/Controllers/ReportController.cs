@@ -68,7 +68,7 @@ namespace ProjectManagerAPI.Controllers
                 await this._unitOfWork.Reports.Add(newRp);
                 await this._unitOfWork.Complete();
             }
-            catch (Microsoft.EntityFrameworkCore.DbUpdateException e)
+            catch (Exception)
             {
                 throw new Exception("This name is already taken.");
             }
@@ -82,7 +82,7 @@ namespace ProjectManagerAPI.Controllers
             var user = await _tokenParser.GetUserByToken();
             if (user == null)
                 throw new Exception("Credential information not provided.");
-            await this._unitOfWork.Users.Load(u => u.Id == user.ParentNId);
+            await this._unitOfWork.Users.Load(u => u.Id == (user.ParentNId ?? Guid.Empty));
             if (projectId != null & projectId != Guid.Empty)
             {
                 var project = await this._unitOfWork.Projects.Get(projectId.Value);

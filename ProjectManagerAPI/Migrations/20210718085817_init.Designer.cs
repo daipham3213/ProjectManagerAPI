@@ -10,7 +10,7 @@ using ProjectManagerAPI.Persistence;
 namespace ProjectManagerAPI.Migrations
 {
     [DbContext(typeof(ProjectManagerDbContext))]
-    [Migration("20210710131430_init")]
+    [Migration("20210718085817_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -527,7 +527,7 @@ namespace ProjectManagerAPI.Migrations
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 7, 10, 13, 14, 30, 18, DateTimeKind.Utc).AddTicks(6759));
+                        .HasDefaultValue(new DateTime(2021, 7, 18, 8, 58, 17, 404, DateTimeKind.Utc).AddTicks(2639));
 
                     b.Property<bool>("IsSeeded")
                         .ValueGeneratedOnAdd()
@@ -543,7 +543,7 @@ namespace ProjectManagerAPI.Migrations
                     b.Property<DateTime>("UpdateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 7, 10, 13, 14, 30, 18, DateTimeKind.Utc).AddTicks(7860));
+                        .HasDefaultValue(new DateTime(2021, 7, 18, 8, 58, 17, 404, DateTimeKind.Utc).AddTicks(4206));
 
                     b.HasKey("Id");
 
@@ -582,6 +582,9 @@ namespace ProjectManagerAPI.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<Guid?>("ParentNId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<float>("Percent")
                         .HasColumnType("real");
 
@@ -604,6 +607,8 @@ namespace ProjectManagerAPI.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Name");
+
+                    b.HasIndex("ParentNId");
 
                     b.HasIndex("PhaseId");
 
@@ -842,6 +847,11 @@ namespace ProjectManagerAPI.Migrations
 
             modelBuilder.Entity("ProjectManagerAPI.Core.Models.Task", b =>
                 {
+                    b.HasOne("ProjectManagerAPI.Core.Models.Task", "ParentN")
+                        .WithMany("ChildTasks")
+                        .HasForeignKey("ParentNId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("ProjectManagerAPI.Core.Models.Phase", "Phase")
                         .WithMany("Tasks")
                         .HasForeignKey("PhaseId")
@@ -854,6 +864,8 @@ namespace ProjectManagerAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("ParentN");
+
                     b.Navigation("Phase");
 
                     b.Navigation("User");
@@ -863,7 +875,8 @@ namespace ProjectManagerAPI.Migrations
                 {
                     b.HasOne("ProjectManagerAPI.Core.Models.Group", "Group")
                         .WithMany("Users")
-                        .HasForeignKey("GroupRef");
+                        .HasForeignKey("GroupRef")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("ProjectManagerAPI.Core.Models.User", "ParentN")
                         .WithMany()
@@ -941,6 +954,11 @@ namespace ProjectManagerAPI.Migrations
             modelBuilder.Entity("ProjectManagerAPI.Core.Models.Report", b =>
                 {
                     b.Navigation("Phases");
+                });
+
+            modelBuilder.Entity("ProjectManagerAPI.Core.Models.Task", b =>
+                {
+                    b.Navigation("ChildTasks");
                 });
 
             modelBuilder.Entity("ProjectManagerAPI.Core.Models.User", b =>

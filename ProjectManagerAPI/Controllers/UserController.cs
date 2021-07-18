@@ -216,9 +216,9 @@ namespace ProjectManagerAPI.Controllers
         }
         [AllowAnonymous]
         [HttpPost("refresh-token")]
-        public async Task<IActionResult> RefreshToken()
+        public async Task<IActionResult> RefreshToken(string token)
         {
-            var refreshToken = Request.Cookies["refreshToken"];
+            var refreshToken = token?? Request.Cookies["refreshToken"];
             var response = await _userService.RefreshToken(refreshToken, IpAddress());
 
             if (response == null)
@@ -262,7 +262,10 @@ namespace ProjectManagerAPI.Controllers
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Expires = DateTime.UtcNow.AddHours(7).AddMinutes(int.Parse(_configuration["Tokens:TimeExp"]))
+                Expires = DateTime.UtcNow.AddHours(7).AddMinutes(int.Parse(_configuration["Tokens:TimeExp"])),
+                IsEssential = true,
+                SameSite = SameSiteMode.None,
+                Secure = true,
             };
             Response.Cookies.Append("refreshToken", token, cookieOptions);
             return;

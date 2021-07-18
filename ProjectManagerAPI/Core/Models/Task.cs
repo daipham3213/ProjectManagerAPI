@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace ProjectManagerAPI.Core.Models
@@ -20,5 +21,7 @@ namespace ProjectManagerAPI.Core.Models
         public Guid PhaseId { get; set; }
         public User User { get; set; }
         public Guid UserId { get; set; }
+        public virtual Task ParentN { get; set; }
+        public virtual ICollection<Task> ChildTasks { get; set; }
     }
 }

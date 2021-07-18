@@ -156,9 +156,13 @@ namespace ProjectManagerAPI.Controllers
             var leader = user.ParentN?.Id ?? user.Id;
 
             var result = await _unitOfWork.Groups.GetGroupListValidated(leader);
+            var adminType = await this._unitOfWork.GroupTypes.GetTypeByName("System Admin");
+            result = result.Where(u => u.GroupTypeFk != adminType.Id).ToList();
+
             if (type != null & type != "")
             {
                 var gt = await this._unitOfWork.GroupTypes.GetTypeByName(type);
+               
                 result = result.Where(u => u.GroupTypeFk == gt.Id).ToList();
                 foreach (var res in result)
                 {
@@ -173,9 +177,8 @@ namespace ProjectManagerAPI.Controllers
         {
             //Get user claims from token
             var userM = await _tokenParser.GetUserByToken();
-            await this._unitOfWork.Users.Load(u => u.Id == userM.ParentNId);
-            
             var group = await this._unitOfWork.Groups.Get(id);
+            await this._unitOfWork.Users.Load(u => u.Id == group.LeaderId);
 
             await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupRead);
             await this._unitOfWork.Users.Load(u => u.GroupRef == group.Id);
@@ -204,7 +207,6 @@ namespace ProjectManagerAPI.Controllers
                     throw new Exception(username + " is already a member of a group.");
                 _unitOfWork.Groups.AddUserToGroup(user.Id, group.Id);
             }
-            await _unitOfWork.Complete();
             return Ok(new JsonResult(_mapper.Map<GroupResource>(group)) { StatusCode = Ok().StatusCode });
         }
 

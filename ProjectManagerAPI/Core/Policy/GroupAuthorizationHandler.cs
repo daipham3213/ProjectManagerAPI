@@ -31,10 +31,14 @@ namespace ProjectManagerAPI.Core.Policy
         {
             var Utils = new AuthorizeUtils(this._unitOfWork);
             var isAdmin = context.User.IsInRole(RoleNames.RoleAdmin);
-            var isLeader = await Utils.IsLeader(context.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name)?.Value);
+            
             if (isAdmin)
                 context.Succeed(requirement);
+
+            var useName = context.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name);
+            var isLeader = isAdmin || await Utils.IsLeader(useName?.Value);
             var groups = await Utils.GetValidatedGroups(context);
+
             //Check if user has full permission
             if (context.User.HasClaim(u => u.Value.Equals(GroupPermission.Full)))
                 context.Succeed(requirement);

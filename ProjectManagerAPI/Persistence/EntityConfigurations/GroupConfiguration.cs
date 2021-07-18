@@ -11,10 +11,13 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
             builder.HasOne(x => x.GroupType)
                 .WithMany(e => e.Group)
                 .HasForeignKey(f => f.GroupTypeFk);
-            builder.HasOne(u => u.ParentN).WithMany()
+
+            builder.HasOne(u => u.ParentN)
+                .WithMany()
                 .HasForeignKey(u => u.ParentNId)
                 .OnDelete(DeleteBehavior.NoAction)
                 .IsRequired(false);
+
             base.Configure(builder);
         }
     }

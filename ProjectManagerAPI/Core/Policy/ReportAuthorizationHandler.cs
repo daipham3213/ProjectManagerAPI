@@ -30,7 +30,8 @@ namespace ProjectManagerAPI.Core.Policy
             if (isAdmin)
                 context.Succeed(requirement);
             var groups = await utils.GetValidatedGroups(context);
-            var isLeader = await utils.IsLeader(context.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name)?.Value);
+            var useName = context.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name);
+            var isLeader = isAdmin? true : await utils.IsLeader(useName?.Value);
             //Check if user has full permission
             if (context.User.HasClaim(u => u.Value.Equals(ReportPermission.Full)))
                 context.Succeed(requirement);

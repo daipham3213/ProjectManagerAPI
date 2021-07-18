@@ -16,5 +16,6 @@ namespace ProjectManagerAPI.Core.Resources
         public float Percent { get; set; }
         public Guid PhaseId { get; set; }
         public Guid UserId { get; set; }
+        public Guid? ParentNId { get; set; }
     }
 }

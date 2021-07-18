@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ProjectManagerAPI.Core.Models;
 
 namespace ProjectManagerAPI.Persistence.EntityConfigurations
@@ -17,6 +18,11 @@ namespace ProjectManagerAPI.Persistence.EntityConfigurations
             builder.HasOne(u => u.User)
                 .WithMany(t => t.Tasks)
                 .HasForeignKey(k => k.UserId);
+
+            builder.HasOne(u => u.ParentN)
+                .WithMany(u => u.ChildTasks)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.NoAction);
             base.Configure(builder);
         }
     }

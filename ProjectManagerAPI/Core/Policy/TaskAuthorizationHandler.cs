@@ -4,8 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
+using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Permission;
+using ProjectManagerAPI.Core.Resources;
 using ProjectManagerAPI.StaticValue;
+using Task = ProjectManagerAPI.Core.Models.Task;
 
 namespace ProjectManagerAPI.Core.Policy
 {
@@ -31,7 +34,8 @@ namespace ProjectManagerAPI.Core.Policy
             if (context.User.HasClaim(u => u.Value.Equals(ReportPermission.Full)))
                 context.Succeed(requirement);
 
-            if (context.User.HasClaim(u => u.Value.Equals(TaskPermission.FullSelf)) & !TaskPermission.SpecialPerm.Contains(requirement.Name))
+            if (context.User.HasClaim(u => u.Value.Equals(TaskPermission.FullSelf)) 
+                & !TaskPermission.SpecialPerm.Contains(requirement.Name))
                 context.Succeed(requirement);
 
 
@@ -40,31 +44,27 @@ namespace ProjectManagerAPI.Core.Policy
                          context.Succeed(requirement);
             }
 
-            // team lead and deplead add
-            //  team lead and deplead edit
-            // team lead and deplead remost
+      
             if (requirement.Name == TaskPermission.Edit
                 | requirement.Name == TaskPermission.Add
                 | requirement.Name == TaskPermission.Remove)
             {
-             
-                    if (context.User.IsInRole(RoleNames.TeamLead) | context.User.IsInRole(RoleNames.DepartmentLead))
-                        context.Succeed(requirement);
-            }
-
-            // user removeSeft
-         
-            if (requirement.Name == TaskPermission.RemoveSelf) {
-                if (context.User.IsInRole(RoleNames.RoleUser))
+                if (context.User.IsInRole(RoleNames.TeamLead) 
+                    | context.User.IsInRole(RoleNames.DepartmentLead)
+                    | context.User.HasClaim(u => u.Value == requirement.Name))
                     context.Succeed(requirement);
             }
 
-           
-            return Task.CompletedTask;
+            // user removeSeft
+            if (requirement.Name == TaskPermission.RemoveSelf)
+            {
+                var isOwner = context.User.HasClaim(u => u.Value == resource.UserCreated.ToString());
+                if (isOwner)
+                    context.Succeed(requirement);
+            }
 
-
-
-
+            return System.Threading.Tasks.Task.CompletedTask;
         }
+
     }
 }

@@ -71,9 +71,12 @@ namespace ProjectManagerAPI.Mapping
             CreateMap<Task, CreatedTask>();
             CreateMap<Task, TaskViewResource>()
                 .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Task/" + u.Id))
-                .ForMember(u => u.PhaseName, opt => opt.MapFrom(g => g.Phase.Name))
-                 .ForMember(u => u.UserName, opt => opt.MapFrom(g => g.User.Name));
-            CreateMap<Task, TaskResourcecs>()
+                .ForMember(u => u.ChildTasks, opt => opt.Ignore())
+                .AfterMap((p, u) =>
+                {
+                    MapChildrenTask(p,u);
+                });
+            CreateMap<Task, TaskResources>()
                 .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Task/" + u.Id))
                 .ForMember(u => u.PhaseName, opt => opt.MapFrom(g => g.Phase.Name))
                 .ForMember(u => u.UserName, opt => opt.MapFrom(g => g.User.Name))
@@ -104,6 +107,30 @@ namespace ProjectManagerAPI.Mapping
             resource.ParentN = parentN;
         }
 
+        private void MapChildrenTask(Task parent, TaskViewResource mapped)
+        {
+            //basic mapping
+            mapped.Id = parent.Id;
+            mapped.UserName = parent.User.Name;
+            mapped.StartDate = parent.StartDate.Value;
+            mapped.DueDate = parent.DueDate.Value;
+            mapped.PhaseName = parent.Phase.Name;
+            mapped.Percent = parent.Percent;
+            mapped.Name = parent.Name;
+            mapped.Remark = parent.Remark;
 
+            //Child mapping
+            if (parent.ChildTasks.Count == 0)
+                return;
+
+            foreach (var child in parent.ChildTasks)
+            {
+                var mappedResource = new TaskViewResource();
+                MapChildrenTask(child, mappedResource);
+
+                mappedResource.ChildTasks.Add(mappedResource);
+            }
+
+        }
     }
 }

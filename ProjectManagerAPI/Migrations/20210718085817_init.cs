@@ -71,8 +71,8 @@ namespace ProjectManagerAPI.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: false, defaultValue: "API Server"),
                     IsSeeded = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: new DateTime(2021, 7, 10, 13, 14, 30, 18, DateTimeKind.Utc).AddTicks(6759)),
-                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: new DateTime(2021, 7, 10, 13, 14, 30, 18, DateTimeKind.Utc).AddTicks(7860))
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: new DateTime(2021, 7, 18, 8, 58, 17, 404, DateTimeKind.Utc).AddTicks(2639)),
+                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: new DateTime(2021, 7, 18, 8, 58, 17, 404, DateTimeKind.Utc).AddTicks(4206))
                 },
                 constraints: table =>
                 {
@@ -206,8 +206,7 @@ namespace ProjectManagerAPI.Migrations
                         name: "FK_AspNetUsers_Groups_GroupRef",
                         column: x => x.GroupRef,
                         principalTable: "Groups",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -413,6 +412,7 @@ namespace ProjectManagerAPI.Migrations
                     Percent = table.Column<float>(type: "real", nullable: false),
                     PhaseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ParentNId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Remark = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "getdate()"),
@@ -436,6 +436,11 @@ namespace ProjectManagerAPI.Migrations
                         principalTable: "Phases",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Tasks_Tasks_ParentNId",
+                        column: x => x.ParentNId,
+                        principalTable: "Tasks",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -572,6 +577,11 @@ namespace ProjectManagerAPI.Migrations
                 name: "IX_Tasks_Name",
                 table: "Tasks",
                 column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tasks_ParentNId",
+                table: "Tasks",
+                column: "ParentNId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_PhaseId",

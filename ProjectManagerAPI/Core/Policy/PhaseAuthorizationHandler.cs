@@ -32,6 +32,7 @@ namespace ProjectManagerAPI.Core.Policy
           
             if (isAdmin)
                 context.Succeed(requirement);
+
             var groups = await Utils.GetValidatedGroups(context);
             //Check if user has full permission
             if (context.User.HasClaim(u => u.Value.Equals(PhasePermission.Full)))
