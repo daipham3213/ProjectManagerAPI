@@ -16,16 +16,15 @@ namespace ProjectManagerAPI.Persistence.Services
 {
     public class TokenManager : ITokenManager
     {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IConfiguration _config;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         public TokenManager(IUnitOfWork unitOfWork, IConfiguration config, IHttpContextAccessor httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
             _config = config;
             _httpContextAccessor = httpContextAccessor;
         }
-
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IConfiguration _config;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         private string GetCurrentAsync()
         {
@@ -47,6 +46,8 @@ namespace ProjectManagerAPI.Persistence.Services
 
             return user;
         }
+
+
         protected LoginResponse GetValues()
         {
             var secret = _config["Tokens:Key"];

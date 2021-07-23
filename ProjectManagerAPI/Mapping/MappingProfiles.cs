@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Globalization;
+using AutoMapper;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Resources;
 using System.Linq;
@@ -23,9 +25,16 @@ namespace ProjectManagerAPI.Mapping
             //User
             CreateMap<Avatar, AvatarResource>();
             CreateMap<User, UserResource>()
-                .ForMember(u => u.AvatarUrl, opt => opt.MapFrom(p => p.Avatars.FirstOrDefault(a => a.IsMain) != null ? p.Avatars.FirstOrDefault(a => a.IsMain).Path : null))
+                .ForMember(u => u.AvatarUrl,
+                    opt => opt.MapFrom(p =>
+                        p.Avatars.FirstOrDefault(a => a.IsMain) != null
+                            ? p.Avatars.FirstOrDefault(a => a.IsMain).Path
+                            : null))
                 .ForMember(u => u.EmailConfirmed, opt => opt.MapFrom(a => a.IsActived))
-                .ForMember(u => u.GroupId, opt => opt.MapFrom(g => g.GroupRef));
+                .ForMember(u => u.GroupId, opt => opt.MapFrom(g => g.GroupRef))
+                .ForMember(u => u.GroupName, opt => opt.MapFrom(g => g.Group.Name))
+                .ForMember(u => u.GroupType, opt => opt.MapFrom(g => g.Group.GroupType.Name));
+                
             CreateMap<User, SearchUserResource>()
                 .ForMember(u => u.AvatarUrl, opt => opt.MapFrom(p => p.Avatars.FirstOrDefault(a => a.IsMain) != null ? p.Avatars.FirstOrDefault(a => a.IsMain).Path : null));
 
@@ -43,16 +52,12 @@ namespace ProjectManagerAPI.Mapping
             //Report
             CreateMap<Report, CreatedReport>();
             CreateMap<Report, ReportViewResource>()
-                .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Group/" + u.Id))
                 .ForMember(u => u.GroupName, opt => opt.MapFrom(g => g.Group.Name))
                 .ForMember(u => u.ProjectName, opt => opt.MapFrom(g => g.Project.Name));
             CreateMap<Report, ReportResource>()
-                .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Group/" + u.Id))
                 .ForMember(u => u.GroupName, opt => opt.MapFrom(g => g.Group.Name))
                 .ForMember(u => u.ProjectName, opt => opt.MapFrom(g => g.Project.Name))
-                .ForMember(u => u.GroupUrl, opt => opt.MapFrom(u => "api/Group/" + u.GroupId))
-                .ForMember(u => u.ProjectUrl, opt => opt.MapFrom(u => "api/Project/" + u.ProjectId))
-                .ForMember(u => u.UserCreated, opt => opt.MapFrom(u => "api/user/profile?key=" + u.UserCreated));
+                .ForMember(u => u.UserCreated, opt => opt.MapFrom(u => u.UserCreated));
 
             //phase
             CreateMap<Phase, CreatedPhase>();
@@ -71,18 +76,18 @@ namespace ProjectManagerAPI.Mapping
             CreateMap<Task, CreatedTask>();
             CreateMap<Task, TaskViewResource>()
                 .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Task/" + u.Id))
+                .ForMember(u => u.Duration, opt => opt.MapFrom(u => (u.DueDate - u.StartDate).GetValueOrDefault().Days))
                 .ForMember(u => u.ChildTasks, opt => opt.Ignore())
+                .ForMember(u => u.StartDate, opt => opt.MapFrom(u => u.StartDate.Value.ToString("yyyy-MM-dd")))
+                .ForMember(u => u.DueDate, opt => opt.MapFrom(u => u.DueDate.Value.ToString("yyyy-MM-dd")))
                 .AfterMap((p, u) =>
                 {
                     MapChildrenTask(p,u);
                 });
             CreateMap<Task, TaskResources>()
-                .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Task/" + u.Id))
                 .ForMember(u => u.PhaseName, opt => opt.MapFrom(g => g.Phase.Name))
-                .ForMember(u => u.UserName, opt => opt.MapFrom(g => g.User.Name))
-                .ForMember(u => u.PhaseUrl, opt => opt.MapFrom(u => "api/Task/" + u.PhaseId))
-                .ForMember(u => u.UserUrl, opt => opt.MapFrom(u => "api/Task/" + u.UserId));
-                //.ForMember(u => u.UserCreated, opt => opt.MapFrom(u => "api/user/profile?key=" + u.UserCreated));
+                .ForMember(u => u.UserName, opt => opt.MapFrom(g => g.User.Name));
+            //.ForMember(u => u.UserCreated, opt => opt.MapFrom(u => "api/user/profile?key=" + u.UserCreated));
         }
 
         private void MapParentGroup(GroupType domain, GroupTypeResource resource)
@@ -111,15 +116,17 @@ namespace ProjectManagerAPI.Mapping
         {
             //basic mapping
             mapped.Id = parent.Id;
-            mapped.UserName = parent.User.Name;
-            mapped.StartDate = parent.StartDate.Value;
-            mapped.DueDate = parent.DueDate.Value;
-            mapped.PhaseName = parent.Phase.Name;
+            mapped.UserName = parent.User?.Name?? null;
+            mapped.StartDate = parent.StartDate?? DateTime.Now;
+            mapped.DueDate = parent.DueDate?? DateTime.Now;
+            mapped.PhaseName = parent.Phase?.Name?? null;
             mapped.Percent = parent.Percent;
             mapped.Name = parent.Name;
             mapped.Remark = parent.Remark;
 
             //Child mapping
+            if (parent.ChildTasks == null)
+                return;
             if (parent.ChildTasks.Count == 0)
                 return;
 

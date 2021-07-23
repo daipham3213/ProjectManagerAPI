@@ -6,8 +6,9 @@ namespace ProjectManagerAPI.Core.Resources
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public string Url { get; set; }
         public string Remark { get; set; }
+        public Guid GroupId { get; set; }
+        public Guid ProjectId { get; set; }
         public string GroupName { get; set; }
         public string ProjectName { get; set; }
         public DateTime StartDate { get; set; }

@@ -5,7 +5,7 @@ namespace ProjectManagerAPI.Core.Models
 {
     public class Phase : BaseModel
     {
-        public Report Report { get; set; }
+        public virtual Report Report { get; set; }
         public Guid ReportId { get; set; }
         public DateTime? DueDate { get; set; }
         public DateTime? StartDate { get; set; }

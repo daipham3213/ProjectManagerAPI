@@ -18,8 +18,9 @@ namespace ProjectManagerAPI.Persistence
         public IGroupRepository Groups { get; private set; }
         public IReportRepository Reports { get; private set; }
 
-         public IPhaseRepository Phases { get; private set; }
+        public IPhaseRepository Phases { get; private set; }
         public ITaskRepository Tasks { get; private set; }
+        public IRefreshToken RefreshToken { get; private set; }
 
         public UnitOfWork(
             ProjectManagerDbContext context,
@@ -31,8 +32,9 @@ namespace ProjectManagerAPI.Persistence
             IReportRepository reports,
             IPhaseRepository phases,
             IRequestRepository requests,
-            ITaskRepository tasks
-            )
+            ITaskRepository tasks,
+            IRefreshToken refreshToken
+        )
         {
             _context = context;
             GroupTypes = groupTypes;
@@ -44,7 +46,9 @@ namespace ProjectManagerAPI.Persistence
             Phases = phases;
             Requests = requests;
             Tasks = tasks;
+            RefreshToken = refreshToken;
         }
+
         public async Task<int> Complete()
         {
             return await _context.SaveChangesAsync();

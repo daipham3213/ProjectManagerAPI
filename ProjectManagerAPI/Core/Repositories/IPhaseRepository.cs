@@ -6,6 +6,7 @@ namespace ProjectManagerAPI.Core.Repositories
 {
     public interface IPhaseRepository : IRepository<Phase>
     {
-        public Task<Phase> SearchPhaneByName(string name);
+        public Task<Phase> SearchPhaseByName(string name);
+        void DeletePhase(Phase phase);
     }
 }

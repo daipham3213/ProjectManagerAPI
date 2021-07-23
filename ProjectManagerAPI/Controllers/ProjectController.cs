@@ -72,7 +72,6 @@ namespace ProjectManagerAPI.Controllers
 
 
         [HttpDelete]
-        [Authorize(Roles = RoleNames.RoleAdmin)]
         public async Task<IActionResult> DeleteProject(Guid idPro)
         {
             var project = await this._unitOfWork.Projects.SingleOrDefault(c => c.Id == idPro);
@@ -80,9 +79,22 @@ namespace ProjectManagerAPI.Controllers
                 return BadRequest();
 
             await this._authorizationService.AuthorizeAsync(User, project, Operations.ProjectDelete);
-            //RemoveAllChildren with Bug
-            this._unitOfWork.Projects.RemoveAllChildren(idPro);
-          
+
+            await this._unitOfWork.Reports.Load(u => u.ProjectId == idPro);
+            foreach (var report in project.Reports)   
+            {
+                foreach (var phase in report.Phases)
+                {
+                    foreach (var task in phase.Tasks)
+                    {
+                        await this._unitOfWork.Tasks.RemoveChild(task);
+                        this._unitOfWork.Tasks.Remove(task);
+                    }
+                    this._unitOfWork.Phases.Remove(phase);
+                }
+                this._unitOfWork.Reports.Remove(report);
+            }
+
             this._unitOfWork.Projects.Remove(project);
             await this._unitOfWork.Complete();
 

@@ -13,5 +13,7 @@ namespace ProjectManagerAPI.Core.Resources
         public bool EmailConfirmed { get; set; }
         public string AvatarUrl { get; set; }
         public Guid GroupId { get; set; }
+        public string GroupName { get; set; }
+        public string GroupType { get; set; }
     }
 }

@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ProjectManagerAPI.StaticValue;
+using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI.Controllers
 {
@@ -33,13 +35,33 @@ namespace ProjectManagerAPI.Controllers
         }
 
         [HttpGet("all")]
-       // [Authorize(Roles = RoleNames.RoleAdmin)]
+        [Authorize(Roles = RoleNames.RoleAdmin)]
         public async Task<IActionResult> GetPhase()
         {
             var result = await _unitOfWork.Phases.GetAll();
             return Ok(_mapper.Map<IEnumerable<PhaseViewResource>>(result));
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetValidated(Guid? reportId)
+        {
+            if (reportId == null)
+            {
+                var user = await this._tokenParser.GetUserByToken();
+                var reports = await this._unitOfWork.Reports.FindReportByGroupId(user.GroupRef ?? Guid.Empty);
+                List<Phase> phases = new List<Phase>();
+                foreach (var report in reports)
+                {
+                    var temp =  this._unitOfWork.Phases.Find(u => u.ReportId == report.Id);
+                    phases.AddRange(temp);
+                }
+
+                return Ok(_mapper.Map<IEnumerable<PhaseViewResource>>(phases));
+            }
+
+            var result = this._unitOfWork.Phases.Find(u => reportId.GetValueOrDefault() == u.ReportId);
+            return Ok(_mapper.Map<IEnumerable<PhaseViewResource>>(result));
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPhase(Guid id)
@@ -57,26 +79,32 @@ namespace ProjectManagerAPI.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] CreatedPhase WorkingStage)
+        public async Task<IActionResult> Post([FromBody] CreatedPhase workingStage)
         {
             if (!ModelState.IsValid)
                 throw new Exception("Provided information is invalid");
 
             var user = await _tokenParser.GetUserByToken();
 
-            var report = await _unitOfWork.Reports.Get(WorkingStage.ReportID);
+            var report = await _unitOfWork.Reports.Get(workingStage.ReportID);
             if (report == null) {
                 throw new Exception("Invalid Report");
             }
+
+            if (report.DueDate < workingStage.DueDate)
+                throw new Exception("Phase end date is larger than " + report.DueDate);
+            if (report.StartDate > workingStage.StartDate)
+                throw new Exception("Phase start date is smaller than " + report.StartDate);
+
             var entity = new Phase
             {
-                Name = WorkingStage.Name,
-                Remark = WorkingStage.Remark,
+                Name = workingStage.Name,
+                Remark = workingStage.Remark,
                 UserCreated = user.Id,
-                StartDate = WorkingStage.StartDate,
-                DueDate = WorkingStage.DueDate,
+                StartDate = workingStage.StartDate,
+                DueDate = workingStage.DueDate,
 
-                ReportId = WorkingStage.ReportID,
+                ReportId = workingStage.ReportID,
                 Report = report,
             };
             //validation
@@ -85,7 +113,7 @@ namespace ProjectManagerAPI.Controllers
             await _unitOfWork.Phases.Add(entity);
          
 
-            entity = await this._unitOfWork.Phases.SearchPhaneByName(entity.Name);
+            entity = await this._unitOfWork.Phases.SearchPhaseByName(entity.Name);
             await _unitOfWork.Complete();
             return Ok(new JsonResult(_mapper.Map<CreatedPhase>(entity)) {
                 StatusCode = Ok().StatusCode
@@ -103,6 +131,11 @@ namespace ProjectManagerAPI.Controllers
             }
             //validation
             await this._authorizationService.AuthorizeAsync(User, phase, Operations.PhaseDelete);
+            foreach (var task in phase.Tasks)
+            {
+                await this._unitOfWork.Tasks.RemoveChild(task);
+                this._unitOfWork.Tasks.Remove(task);
+            }
             this._unitOfWork.Phases.Remove(phase);
             await _unitOfWork.Complete();
             return Ok(new JsonResult(phase.Name + "removed successfully")

@@ -80,12 +80,13 @@ namespace ProjectManagerAPI.Persistence.Services
 
             //create tokens
             var finalToken = await generateJwtToken(user, claims);
-            var refreshToken = generateRefreshToken(ipAddress);
+            
             await this._userManager.RemoveAuthenticationTokenAsync(user, "Bearer", user.UserName);
             user.Tokens ??= new List<IdentityUserToken<Guid>>();
             
             await _unitOfWork.Complete();
-
+            RefreshToken refreshToken;
+            var loginResponse = new LoginResponse();
             //Save token to DB
             user.Tokens.Add(new IdentityUserToken<Guid>()
             {
@@ -94,8 +95,21 @@ namespace ProjectManagerAPI.Persistence.Services
                 UserId = user.Id,
                 Value = finalToken
             });
-            user.RefreshTokens.Add(refreshToken);
-            await _unitOfWork.Complete();
+            if (user.RefreshTokens.Any(a => a.IsActive))
+            {
+                var activeRefreshToken = user.RefreshTokens.FirstOrDefault(a => a.IsActive);
+                loginResponse.RefreshToken = activeRefreshToken.Token;
+                loginResponse.ExpTime = activeRefreshToken.Expires;
+            }
+            else
+            {
+                refreshToken = generateRefreshToken(ipAddress);
+                loginResponse.RefreshToken = refreshToken.Token;
+                loginResponse.ExpTime = refreshToken.Expires;
+                user.RefreshTokens.Add(refreshToken);
+                await _unitOfWork.Complete();
+            }
+            
             //Load Avatar
             await _unitOfWork.Avatars.Load(a => a.UserId == user.Id && a.IsMain);
 
@@ -105,8 +119,12 @@ namespace ProjectManagerAPI.Persistence.Services
             if (avatar != null)
                 path = avatar.Path;
             
-            var loginResponse = new LoginResponse(user, finalToken, refreshToken.Token, path, roles.FirstOrDefault(), expDateTime);
             loginResponse.Id = user.Id;
+            loginResponse.UserName = user.UserName;
+            loginResponse.Token = finalToken;
+            loginResponse.AvatarUrl = path;
+            loginResponse.RoleName = roles.FirstOrDefault();
+            loginResponse.IsActivated = user.IsActived;
             return loginResponse;
         }
 
@@ -409,7 +427,8 @@ namespace ProjectManagerAPI.Persistence.Services
         }
         public async  Task<LoginResponse> RefreshToken(string token, string ipAddress)
         {
-            var user =await _unitOfWork.Users.SingleOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
+            await _unitOfWork.Users.Load(u => u.RefreshTokens.Count > 0);
+            var user=await _unitOfWork.Users.SingleOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
 
             // return null if no user found with token
             if (user == null) return null;
@@ -446,6 +465,7 @@ namespace ProjectManagerAPI.Persistence.Services
 
         public async Task<bool> RevokeToken(string token, string ipAddress)
         {
+            await _unitOfWork.Users.Load(u => u.RefreshTokens.Count > 0);
             var user = await _unitOfWork.Users.SingleOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
 
             // return false if no user found with token

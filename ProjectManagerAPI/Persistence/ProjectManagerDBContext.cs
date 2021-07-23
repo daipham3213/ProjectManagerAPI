@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Persistence.EntityConfigurations;
 using System;
+using ProjectManagerAPI.Core.ServiceResource;
 using Task = ProjectManagerAPI.Core.Models.Task;
 
 namespace ProjectManagerAPI.Persistence
@@ -20,6 +21,7 @@ namespace ProjectManagerAPI.Persistence
         public DbSet<Report> Reports { get; set; }
         public DbSet<Avatar> Avatars { get; set; }
         public DbSet<ServerInfo> ServerInfos { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         public ProjectManagerDbContext(DbContextOptions<ProjectManagerDbContext> options)
             : base(options)

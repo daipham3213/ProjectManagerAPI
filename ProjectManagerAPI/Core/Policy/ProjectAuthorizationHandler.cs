@@ -56,15 +56,11 @@ namespace ProjectManagerAPI.Core.Policy
                 | requirement.Name == ProjectPermission.Add
                 | requirement.Name == ProjectPermission.Remove)
             {
-
-                if (isLeader | context.User.IsInRole(RoleNames.DepartmentLead)) 
-
+                if (isLeader | context.User.IsInRole(RoleNames.DepartmentLead))
                     context.Succeed(requirement);
             }
 
             return Task.CompletedTask;
-
-   
 
         }
     }

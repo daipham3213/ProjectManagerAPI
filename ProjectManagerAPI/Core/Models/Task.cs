@@ -11,6 +11,7 @@ namespace ProjectManagerAPI.Core.Models
             //base.DateCreated = DateTime.Now;
             //base.DateModified = DateTime.Now;
             IsActived = true;
+            ChildTasks = new List<Task>();
         }
 
         public DateTime? StartDate { get; set; }
@@ -22,6 +23,6 @@ namespace ProjectManagerAPI.Core.Models
         public User User { get; set; }
         public Guid UserId { get; set; }
         public virtual Task ParentN { get; set; }
-        public virtual ICollection<Task> ChildTasks { get; set; }
+        public ICollection<Task> ChildTasks { get; set; }
     }
 }

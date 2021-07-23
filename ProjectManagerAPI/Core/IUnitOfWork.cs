@@ -15,6 +15,7 @@ namespace ProjectManagerAPI.Core
         IPhaseRepository Phases { get;  }
         IRequestRepository Requests { get; }
         ITaskRepository Tasks { get; }
+        IRefreshToken RefreshToken { get; }
         Task<int> Complete();
     }
 }

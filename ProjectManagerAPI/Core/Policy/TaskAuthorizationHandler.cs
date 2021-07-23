@@ -31,12 +31,15 @@ namespace ProjectManagerAPI.Core.Policy
             if (isAdmin)
                 context.Succeed(requirement);
 
-            if (context.User.HasClaim(u => u.Value.Equals(ReportPermission.Full)))
+            if (context.User.HasClaim(u => u.Value.Equals(TaskPermission.Full)))
                 context.Succeed(requirement);
 
-            if (context.User.HasClaim(u => u.Value.Equals(TaskPermission.FullSelf)) 
+            if (context.User.HasClaim(u => u.Value.Equals(TaskPermission.FullSelf))
                 & !TaskPermission.SpecialPerm.Contains(requirement.Name))
-                context.Succeed(requirement);
+            {
+                if (context.User.HasClaim(u => u.Value == resource.UserId.ToString()))
+                    context.Succeed(requirement);
+            }
 
 
             if (requirement.Name == TaskPermission.View & context.User.HasClaim(u => u.Value == requirement.Name))

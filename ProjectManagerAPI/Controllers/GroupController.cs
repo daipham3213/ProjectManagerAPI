@@ -146,8 +146,8 @@ namespace ProjectManagerAPI.Controllers
             return Ok(_mapper.Map<IEnumerable<GroupViewResource>>(result));
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetGroupsValidated(string? type)
+        [HttpGet("type")]
+        public async Task<IActionResult> GetGroupsValidated(string? key)
         {
             //Get user claims from token
             var user = await _tokenParser.GetUserByToken();
@@ -159,9 +159,9 @@ namespace ProjectManagerAPI.Controllers
             var adminType = await this._unitOfWork.GroupTypes.GetTypeByName("System Admin");
             result = result.Where(u => u.GroupTypeFk != adminType.Id).ToList();
 
-            if (type != null & type != "")
+            if (key != null & key != "")
             {
-                var gt = await this._unitOfWork.GroupTypes.GetTypeByName(type);
+                var gt = await this._unitOfWork.GroupTypes.GetTypeByName(key);
                
                 result = result.Where(u => u.GroupTypeFk == gt.Id).ToList();
                 foreach (var res in result)
@@ -176,7 +176,6 @@ namespace ProjectManagerAPI.Controllers
         public async Task<IActionResult> GetGroupValidated(Guid id)
         {
             //Get user claims from token
-            var userM = await _tokenParser.GetUserByToken();
             var group = await this._unitOfWork.Groups.Get(id);
             await this._unitOfWork.Users.Load(u => u.Id == group.LeaderId);
 
@@ -185,6 +184,30 @@ namespace ProjectManagerAPI.Controllers
             if (group == null)
                 throw new Exception("Invalid group ID");
             return Ok(_mapper.Map<GroupResource>(group));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetGroupByUser()
+        {
+            var user = await _tokenParser.GetUserByToken();
+            if (user.GroupRef == null)
+                throw new Exception("You haven't join a group.");
+            var group = await _unitOfWork.Groups.Get(user.GroupRef.Value);
+            if (group == null)
+                throw new Exception("Invalid group ID");
+            await this._unitOfWork.Users.Load(u => u.GroupRef == group.Id);
+            return Ok(_mapper.Map<GroupResource>(group));
+        }
+
+        [HttpGet("{id}/members")]
+        public async Task<IActionResult> GetMemberList(Guid id)
+        {
+            var group = await this._unitOfWork.Groups.Get(id);
+            if (group == null)
+                return NotFound(new {message = "Invalid group"});
+            var members = this._unitOfWork.Users.Find(u =>
+                u.GroupRef == group.Id && u.IsActived == true && u.IsDeleted == false);
+            return Ok(_mapper.Map<IEnumerable<UserResource>>(members));
         }
 
         [HttpPost("addmember")]

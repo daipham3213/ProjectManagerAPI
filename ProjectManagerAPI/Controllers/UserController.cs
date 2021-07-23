@@ -124,8 +124,14 @@ namespace ProjectManagerAPI.Controllers
             else user = await _unitOfWork.Users.GetUser(key);
             if (user == null)
                 throw new Exception("Account could not be found");
-            var result = _mapper.Map<User, UserResource>(user);
 
+            if (user.GroupRef !=  null)
+            {
+                await _unitOfWork.Groups.Load(u => u.Id == user.GroupRef);
+                await _unitOfWork.GroupTypes.Load(u => u.Id == user.Group.GroupTypeFk);
+            }
+
+            var result = _mapper.Map<User, UserResource>(user);
             return Ok(result);
         }
 
@@ -216,7 +222,7 @@ namespace ProjectManagerAPI.Controllers
         }
         [AllowAnonymous]
         [HttpPost("refresh-token")]
-        public async Task<IActionResult> RefreshToken(string token)
+        public async Task<IActionResult> RefreshToken([FromBody]string token)
         {
             var refreshToken = token?? Request.Cookies["refreshToken"];
             var response = await _userService.RefreshToken(refreshToken, IpAddress());
@@ -262,13 +268,12 @@ namespace ProjectManagerAPI.Controllers
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Expires = DateTime.UtcNow.AddHours(7).AddMinutes(int.Parse(_configuration["Tokens:TimeExp"])),
+                Expires = DateTime.UtcNow.AddHours(7).AddDays(7),
                 IsEssential = true,
                 SameSite = SameSiteMode.None,
                 Secure = true,
             };
             Response.Cookies.Append("refreshToken", token, cookieOptions);
-            return;
         }
 
         private string IpAddress()

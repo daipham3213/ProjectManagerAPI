@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Task = ProjectManagerAPI.Core.Models.Task;
 
 namespace ProjectManagerAPI.Persistence.ReposMocks
 {
@@ -17,11 +18,16 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             _context = context;
         }
 
-        public async Task<Phase> SearchPhaneByName(string name)
+        public async Task<Phase> SearchPhaseByName(string name)
         {
             return await _context.Phases.FirstOrDefaultAsync(u => u.Name.ToLower().Trim().Contains(name.ToLower().Trim()));
         }
 
-    
+        public void DeletePhase(Phase phase)
+        {
+            _context.Phases.Remove(phase);
+            _context.SaveChanges();
+        }
+        
     }
 }

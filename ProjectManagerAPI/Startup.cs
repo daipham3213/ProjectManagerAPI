@@ -115,6 +115,7 @@ namespace ProjectManagerAPI
             services.AddScoped<IPhaseRepository,  PhaseRepository>();
             services.AddScoped<IRequestRepository, RequestRepository>();
             services.AddScoped<ITaskRepository, TaskRepository>();
+            services.AddScoped<IRefreshToken, RefreshTokenRepository>();
 
             //Inject Authorizations
             services.AddTransient<IAuthorizationHandler, GroupAuthorizationHandler>();
@@ -173,6 +174,12 @@ namespace ProjectManagerAPI
                 opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
+                .AddCookie(config =>
+                {
+                    config.Cookie.Name = "refreshToken";
+                    config.Cookie.HttpOnly = true;//The cookie cannot be obtained by the front-end or the browser, and can only be modified on the server side
+                    config.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;//This cookie cannot be used as a third-party cookie under any circumstances, without exception. For example, suppose b.com sets the following cookies:
+                })
                .AddJwtBearer(opt =>
                {
                    opt.RequireHttpsMetadata = false;

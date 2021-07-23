@@ -5,28 +5,58 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ProjectManagerAPI.Core.Models;
 using ProjectManagerAPI.Core.Repositories;
+using Task = ProjectManagerAPI.Core.Models.Task;
 
 namespace ProjectManagerAPI.Persistence.ReposMocks
 {
-    public class TaskRepository : Repository<Core.Models.Task>, ITaskRepository
+    public class TaskRepository : Repository<Task>, ITaskRepository
     {
-
         private readonly ProjectManagerDbContext _context;
+
         public TaskRepository(ProjectManagerDbContext context)
             : base(context)
         {
             _context = context;
         }
 
-        public async Task<IEnumerable<Core.Models.Task>> LoadValidated()
-        {
-            return await this._context.Tasks.Where(u => u.IsDeleted == false).ToListAsync();
-        }
 
         public async Task<Core.Models.Task> SearchTaskByName(string nameTask)
         {
             var task = await _context.Tasks.SingleOrDefaultAsync(u => u.Name == nameTask);
             return task;
+        }
+
+        public async System.Threading.Tasks.Task RemoveChild(Task parent)
+        {
+            var childs = await _context.Tasks.Where(u => u.ParentN != null && u.ParentN == parent).ToListAsync();
+            if (childs == null)
+            {
+                 _context.Tasks.Remove(parent);
+                 await _context.SaveChangesAsync();
+            }
+            foreach (var child in childs)
+            {
+                await RemoveChild(child);
+            }
+        }
+
+        public async Task<IEnumerable<Task>> LoadByUser(User user)
+        {
+            return await this._context.Tasks.Where(u => u.IsDeleted == false && u.UserId == user.Id).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Task>> LoadByPhase(Phase phase)
+        {
+            return await this._context.Tasks.Where(u => u.IsDeleted == false && u.PhaseId == phase.Id).ToListAsync();
+        }
+
+        public async Task<Report> LoadByReport(Report report)
+        {
+            foreach (var phase in report.Phases)
+            {
+                await this._context.Tasks.Where(u => u.PhaseId == phase.Id).LoadAsync();
+            }
+            return report;
         }
 
         public async Task<IList<Core.Models.Task>> TaskSearchByPhaseId(Guid phaseId)
