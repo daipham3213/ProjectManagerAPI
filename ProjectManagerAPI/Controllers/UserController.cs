@@ -131,15 +131,34 @@ namespace ProjectManagerAPI.Controllers
                 await _unitOfWork.GroupTypes.Load(u => u.Id == user.Group.GroupTypeFk);
             }
 
+            await this._unitOfWork.Avatars.Load(u => u.UserId == user.Id);
             var result = _mapper.Map<User, UserResource>(user);
             return Ok(result);
         }
-
-        [HttpGet("sendChangeEmail")]
+        [HttpPut("updateProfile")]
         [AllowAnonymous]
-        public async Task<IActionResult> SendChangeEmailRequest(string username, string newEmail)
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileResource userProfileResource)
+        {
+            var user = await this._unitOfWork.Users.GetUser(userProfileResource.Username);
+            if (user == null)
+                return BadRequest();
+            var oldEmail = user.Email;
+            this._mapper.Map<UpdateProfileResource, User>(userProfileResource, user);
+            if (!user.Email.Equals(oldEmail)) user.EmailConfirmed = false;
+
+            await this._unitOfWork.Complete();
+            return Ok();
+        }
+
+        [HttpPost("sendChangeEmail")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SendChangeEmailRequest(string username, string newEmail,[FromBody] string password)
         {
             var callbackurl = _configuration["HostUrl:local"] + "/api/User/confirmChangeEmail";
+            
+            var user = await this._userService.CheckPassword(username, password);
+            if (!user)
+                throw new Exception("Current password is incorrect.");
 
             await _userService.SendChangeEmailRequest(username, newEmail, callbackurl);
 

@@ -15,5 +15,7 @@ namespace ProjectManagerAPI.Core.Resources
         public Guid GroupId { get; set; }
         public string GroupName { get; set; }
         public string GroupType { get; set; }
+        public bool IsActived { get; set; }
+        public DateTime DateCreated { get; set; }
     }
 }

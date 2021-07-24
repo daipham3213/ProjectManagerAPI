@@ -39,7 +39,7 @@ namespace ProjectManagerAPI.Controllers
 
             var user = await _unitOfWork.Users.GetUser(userName);
             if (user == null)
-                return NotFound();
+                throw new Exception("Username can not be found.");
 
             var avatars = await _unitOfWork.Avatars.GetAvatars(userName);
 
@@ -55,11 +55,11 @@ namespace ProjectManagerAPI.Controllers
         {
             var user = await _unitOfWork.Users.GetUser(userName);
             if (user == null)
-                return NotFound(Json("User can not be found."));
+                 throw new Exception("User can not be found.");
 
             var avatar = await _unitOfWork.Avatars.SingleOrDefault(a => a.UserId == user.Id && a.IsMain);
             if (avatar == null)
-                return NotFound(Json("Main Avatar can not be found."));
+                 throw new Exception("Main Avatar can not be found.");
 
             var result = _mapper.Map<Avatar, AvatarResource>(avatar);
             return Ok(result);
@@ -70,10 +70,10 @@ namespace ProjectManagerAPI.Controllers
         public async Task<IActionResult> UploadAvatar(string userName, IFormFile file)
         {
             if (file == null)
-                return BadRequest("no file");
+                throw new Exception("no file");
             var user = await _unitOfWork.Users.GetUser(userName);
             if (user == null)
-                return NotFound("User can not be found");
+                throw new Exception("User can not be found");
 
             //Get main avatar of user
             var oldAvatar = await _unitOfWork.Avatars.SingleOrDefault(a => a.UserId == user.Id && a.IsMain);
@@ -120,10 +120,10 @@ namespace ProjectManagerAPI.Controllers
 
             var avatar = user.Avatars.FirstOrDefault(a => a.Id == photoId);
             if (avatar == null)
-                return NotFound(Json("Avatar can not be found"));
+                throw new Exception("Avatar can not be found");
 
             if (avatar.IsMain)
-                return BadRequest("Can not delete main avatar");
+                throw new Exception("Can not delete main avatar");
 
             await this._authorization.AuthorizeAsync(User, avatar, Operations.AvatarDelete);
 
@@ -140,7 +140,7 @@ namespace ProjectManagerAPI.Controllers
 
             await _unitOfWork.Complete();
 
-            return Ok(Json("Deleted successfully."));
+            return Ok(new {message = "Deleted successfully."});
         }
     }
 }

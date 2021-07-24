@@ -34,9 +34,13 @@ namespace ProjectManagerAPI.Mapping
                 .ForMember(u => u.GroupId, opt => opt.MapFrom(g => g.GroupRef))
                 .ForMember(u => u.GroupName, opt => opt.MapFrom(g => g.Group.Name))
                 .ForMember(u => u.GroupType, opt => opt.MapFrom(g => g.Group.GroupType.Name));
-                
+            CreateMap<User,UpdateProfileResource>()
+                .ForMember(u => u.Username, opt => opt.Ignore());
             CreateMap<User, SearchUserResource>()
                 .ForMember(u => u.AvatarUrl, opt => opt.MapFrom(p => p.Avatars.FirstOrDefault(a => a.IsMain) != null ? p.Avatars.FirstOrDefault(a => a.IsMain).Path : null));
+
+            //Avatar
+            CreateMap<Avatar, AvatarResource>();
 
             //Group
             CreateMap<Group, CreatedDepartment>();
