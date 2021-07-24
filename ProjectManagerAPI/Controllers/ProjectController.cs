@@ -118,11 +118,9 @@ namespace ProjectManagerAPI.Controllers
 
             try
             {
-          
                 await this._authorizationService.AuthorizeAsync(User, entity, Operations.ProjectCreate);
 
                 await this._unitOfWork.Projects.Add(entity);
-                
 
                 entity = await this._unitOfWork.Projects.SearchProjectByName(entity.Name);
                 await this._unitOfWork.Complete();
@@ -135,5 +133,25 @@ namespace ProjectManagerAPI.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Edit(Guid id, [FromBody] CreateProject project)
+        {
+            if (!ModelState.IsValid) throw new Exception("Invalid information");
+            var result = await this._unitOfWork.Projects.Get(id);
+            result.Name = project.Name;
+            result.StartDate = project.StartDate;
+            result.DueDate = project.DueDate;
+
+            await this._authorizationService.AuthorizeAsync(User, result, Operations.ProjectUpdate);
+            
+            await this._unitOfWork.Complete();
+            return Ok(new { message = "Update " + project.Name + " success." });
+
+        }
+
+
+
+
     }
 }

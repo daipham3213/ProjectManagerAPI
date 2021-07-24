@@ -52,7 +52,7 @@ namespace ProjectManagerAPI.Controllers
                 List<Phase> phases = new List<Phase>();
                 foreach (var report in reports)
                 {
-                    var temp =  this._unitOfWork.Phases.Find(u => u.ReportId == report.Id);
+                    var temp = this._unitOfWork.Phases.Find(u => u.ReportId == report.Id);
                     phases.AddRange(temp);
                 }
 
@@ -87,7 +87,8 @@ namespace ProjectManagerAPI.Controllers
             var user = await _tokenParser.GetUserByToken();
 
             var report = await _unitOfWork.Reports.Get(workingStage.ReportID);
-            if (report == null) {
+            if (report == null)
+            {
                 throw new Exception("Invalid Report");
             }
 
@@ -109,24 +110,25 @@ namespace ProjectManagerAPI.Controllers
             };
             //validation
             await this._authorizationService.AuthorizeAsync(User, entity, Operations.PhaseCreate);
-            
+
             await _unitOfWork.Phases.Add(entity);
-         
 
             entity = await this._unitOfWork.Phases.SearchPhaseByName(entity.Name);
             await _unitOfWork.Complete();
-            return Ok(new JsonResult(_mapper.Map<CreatedPhase>(entity)) {
+            return Ok(new JsonResult(_mapper.Map<CreatedPhase>(entity))
+            {
                 StatusCode = Ok().StatusCode
             });
         }
 
 
 
-
         [HttpDelete()]
-        public async Task<IActionResult> RemovePhase(Guid id) {
-            var phase = await this._unitOfWork.Phases.SingleOrDefault( c => c.Id == id);
-            if (phase == null) {
+        public async Task<IActionResult> RemovePhase(Guid id)
+        {
+            var phase = await this._unitOfWork.Phases.SingleOrDefault(c => c.Id == id);
+            if (phase == null)
+            {
                 throw new Exception("Phase id is invalid");
             }
             //validation
@@ -145,6 +147,19 @@ namespace ProjectManagerAPI.Controllers
         }
 
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Edit(Guid id, [FromBody] CreatedPhase phase)
+        {
+            if (!ModelState.IsValid) throw new Exception("Invalid ìnormation.");
+            var result = await this._unitOfWork.Phases.Get(id);
+            result.ReportId = phase.ReportID;
+            result.DueDate = phase.DueDate;
+            result.StartDate = phase.StartDate;
+            await this._authorizationService.AuthorizeAsync(User, result, Operations.PhaseUpdate);
 
+            await this._unitOfWork.Complete();
+            return Ok(new { message = "Update " + phase.Name + " success." });
         }
+
+    }
 }
