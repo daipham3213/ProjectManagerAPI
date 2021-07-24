@@ -181,6 +181,7 @@ namespace ProjectManagerAPI.Controllers
 
             await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupRead);
             await this._unitOfWork.Users.Load(u => u.GroupRef == group.Id);
+            await this._unitOfWork.GroupTypes.Load(u => u.Id == group.GroupTypeFk);
             if (group == null)
                 throw new Exception("Invalid group ID");
             return Ok(_mapper.Map<GroupResource>(group));
@@ -193,8 +194,10 @@ namespace ProjectManagerAPI.Controllers
             if (user.GroupRef == null)
                 throw new Exception("You haven't join a group.");
             var group = await _unitOfWork.Groups.Get(user.GroupRef.Value);
+            await this._unitOfWork.Users.Load(u => u.Id == group.LeaderId);
             if (group == null)
                 throw new Exception("Invalid group ID");
+            await this._unitOfWork.GroupTypes.Load(u => u.Id == group.GroupTypeFk);
             await this._unitOfWork.Users.Load(u => u.GroupRef == group.Id);
             return Ok(_mapper.Map<GroupResource>(group));
         }

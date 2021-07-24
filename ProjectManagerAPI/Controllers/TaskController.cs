@@ -61,6 +61,17 @@ namespace ProjectManagerAPI.Controllers
             return Ok(_mapper.Map<IEnumerable<TaskViewResource>>(list));
         }
 
+        [HttpGet("contrib")]
+        public async Task<IActionResult> getContrib(Guid userId)
+        {
+            var user = await this._unitOfWork.Users.Get(userId);
+            if (user == null)
+                throw new Exception("Invalid user id");
+            await this._unitOfWork.Tasks.Load(u => u.UserId == userId);
+            var result = user.Tasks.Sum(u => u.Percent)/ (user.Tasks.Count !=0? user.Tasks.Count: 1);
+            return Ok(new{progress = result});
+        }
+
         [HttpGet("report")]
         public async Task<IActionResult> GetListByReport(Guid reportId)
         {
