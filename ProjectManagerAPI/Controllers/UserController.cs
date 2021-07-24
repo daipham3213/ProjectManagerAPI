@@ -42,8 +42,8 @@ namespace ProjectManagerAPI.Controllers
             if (!response.IsActivated)
             {
                 var callbackurl = _configuration["HostUrl:local"] + "/api/User/sendActivationEmail?username=" + request.Username;
-                return BadRequest(new 
-                    {message = "Account have not activated. Please click the link below to receive your activation email.", url = callbackurl}
+                return BadRequest(new
+                { message = "Account have not activated. Please click the link below to receive your activation email.", url = callbackurl }
                 );
             }
             SetTokenCookie(response.RefreshToken);
@@ -125,7 +125,7 @@ namespace ProjectManagerAPI.Controllers
             if (user == null)
                 throw new Exception("Account could not be found");
 
-            if (user.GroupRef !=  null)
+            if (user.GroupRef != null)
             {
                 await _unitOfWork.Groups.Load(u => u.Id == user.GroupRef);
                 await _unitOfWork.GroupTypes.Load(u => u.Id == user.Group.GroupTypeFk);
@@ -167,7 +167,7 @@ namespace ProjectManagerAPI.Controllers
             var result = await _userService.ConfirmChangeEmail(username, newEmail, token);
 
             if (result)
-                return Ok(new {message = "Account Email Changed Successfully." });
+                return Ok(new { message = "Account Email Changed Successfully." });
 
             return Problem(detail: "Failed.", statusCode: 400);
         }
@@ -186,7 +186,7 @@ namespace ProjectManagerAPI.Controllers
             {
                 user.IsActived = true;
                 await _unitOfWork.Complete();
-                return Ok(new {message = "Account Activation Success." });
+                return Ok(new { message = "Account Activation Success." });
             }
 
             return Problem(detail: "Failed.", statusCode: 400);
@@ -216,15 +216,15 @@ namespace ProjectManagerAPI.Controllers
             var result = await this._userService.ChangePassword(user.UserName, updatePasswordResource.CurrentPassword, updatePasswordResource.NewPassword);
 
             if (result == true)
-                return Ok(new {message = "Password changed successfully."});
+                return Ok(new { message = "Password changed successfully." });
 
             return Problem();
         }
         [AllowAnonymous]
         [HttpPost("refresh-token")]
-        public async Task<IActionResult> RefreshToken([FromBody]string token)
+        public async Task<IActionResult> RefreshToken([FromBody] string token)
         {
-            var refreshToken = token?? Request.Cookies["refreshToken"];
+            var refreshToken = token ?? Request.Cookies["refreshToken"];
             var response = await _userService.RefreshToken(refreshToken, IpAddress());
 
             if (response == null)
@@ -255,7 +255,7 @@ namespace ProjectManagerAPI.Controllers
         [HttpGet("{id}/refresh-tokens")]
         public async Task<IActionResult> GetRefreshTokens(Guid id)
         {
-            var user =await this._unitOfWork.Users.SearchUserById(id);
+            var user = await this._unitOfWork.Users.SearchUserById(id);
             if (user == null) return NotFound();
 
             return Ok(user.RefreshTokens);
@@ -282,5 +282,6 @@ namespace ProjectManagerAPI.Controllers
                 return Request.Headers["X-Forwarded-For"];
             return HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString();
         }
+
     }
 }
