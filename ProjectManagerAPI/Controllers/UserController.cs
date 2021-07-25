@@ -139,9 +139,9 @@ namespace ProjectManagerAPI.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileResource userProfileResource)
         {
-            var user = await this._unitOfWork.Users.GetUser(userProfileResource.Username);
+            var user = await this._unitOfWork.Users.GetUser(userProfileResource.UserName);
             if (user == null)
-                return BadRequest();
+                throw new Exception("Account could not be found");
             var oldEmail = user.Email;
             this._mapper.Map<UpdateProfileResource, User>(userProfileResource, user);
             if (!user.Email.Equals(oldEmail)) user.EmailConfirmed = false;
@@ -150,15 +150,11 @@ namespace ProjectManagerAPI.Controllers
             return Ok();
         }
 
-        [HttpPost("sendChangeEmail")]
+        [HttpGet("sendChangeEmail")]
         [AllowAnonymous]
-        public async Task<IActionResult> SendChangeEmailRequest(string username, string newEmail,[FromBody] string password)
+        public async Task<IActionResult> SendChangeEmailRequest(string username, string newEmail)
         {
             var callbackurl = _configuration["HostUrl:local"] + "/api/User/confirmChangeEmail";
-            
-            var user = await this._userService.CheckPassword(username, password);
-            if (!user)
-                throw new Exception("Current password is incorrect.");
 
             await _userService.SendChangeEmailRequest(username, newEmail, callbackurl);
 
@@ -227,7 +223,7 @@ namespace ProjectManagerAPI.Controllers
             if (!updatePasswordResource.NewPassword.Equals(updatePasswordResource.NewPasswordConfirm))
                 throw new Exception("Password confirmation is incorrect.");
             if (currentPass == newPass)
-                ModelState.AddModelError("NewPassword", "The new password and the current password cannot be the same");
+                throw new Exception("The new password and the current password cannot be the same");
 
             if (!ModelState.IsValid)
                 throw new Exception(ModelState.ToString());

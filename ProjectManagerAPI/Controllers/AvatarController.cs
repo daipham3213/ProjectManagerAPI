@@ -18,7 +18,8 @@ namespace ProjectManagerAPI.Controllers
     [ApiController]
     public class AvatarController : Controller
     {
-        public AvatarController(IUnitOfWork unitOfWork, IMapper mapper, IPhotoService photoService, IAuthorizationService authorization)
+        public AvatarController(IUnitOfWork unitOfWork, IMapper mapper, IPhotoService photoService,
+            IAuthorizationService authorization)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -31,12 +32,10 @@ namespace ProjectManagerAPI.Controllers
         private readonly IPhotoService _photoService;
         private readonly IAuthorizationService _authorization;
 
-        
 
         [HttpGet]
         public async Task<IActionResult> Get(string userName)
         {
-
             var user = await _unitOfWork.Users.GetUser(userName);
             if (user == null)
                 throw new Exception("Username can not be found.");
@@ -55,12 +54,32 @@ namespace ProjectManagerAPI.Controllers
         {
             var user = await _unitOfWork.Users.GetUser(userName);
             if (user == null)
-                 throw new Exception("User can not be found.");
+                throw new Exception("User can not be found.");
 
             var avatar = await _unitOfWork.Avatars.SingleOrDefault(a => a.UserId == user.Id && a.IsMain);
             if (avatar == null)
-                 throw new Exception("Main Avatar can not be found.");
+                throw new Exception("Main Avatar can not be found.");
 
+            var result = _mapper.Map<Avatar, AvatarResource>(avatar);
+            return Ok(result);
+        }
+
+        [HttpPost("main")]
+        public async Task<IActionResult> SwitchMain(string userName, Guid id)
+        {
+            var user = await _unitOfWork.Users.GetUser(userName);
+            if (user == null)
+                throw new Exception("User can not be found.");
+
+            var main = await _unitOfWork.Avatars.SingleOrDefault(a => a.UserId == user.Id && a.IsMain);
+            main.IsMain = false;
+
+            var avatar = await _unitOfWork.Avatars.SingleOrDefault(a => a.UserId == user.Id && a.Id == id);
+            if (avatar == null)
+                throw new Exception("Main Avatar can not be found.");
+
+            avatar.IsMain = true;
+            await this._unitOfWork.Complete();
             var result = _mapper.Map<Avatar, AvatarResource>(avatar);
             return Ok(result);
         }
@@ -141,6 +160,13 @@ namespace ProjectManagerAPI.Controllers
             await _unitOfWork.Complete();
 
             return Ok(new {message = "Deleted successfully."});
+        }
+
+        [HttpGet("list")]
+        public async Task<IActionResult> GetList(string username)
+        {
+            var result = await this._unitOfWork.Avatars.GetAvatars(username);
+            return Ok(_mapper.Map<IEnumerable<AvatarResource>>(result));
         }
     }
 }

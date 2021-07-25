@@ -124,7 +124,7 @@ namespace ProjectManagerAPI.Controllers
             var request = new CreatedRequest()
             {
                 Name = RequestNames.CreateGroup,
-                Remark = entity.GroupType.Name,
+                Remark = entity.GroupType.Name +" - "+ entity.Name,
                 To = parent.Id, //Sent to Admin group
                 Value = entity.Id.ToString() //Group need to activate
             };

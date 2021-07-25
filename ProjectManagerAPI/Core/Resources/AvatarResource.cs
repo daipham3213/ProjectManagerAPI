@@ -8,5 +8,6 @@ namespace ProjectManagerAPI.Core.Resources
         public string Path { get; set; }
         public DateTime UploadTime { get; set; }
         public int IsMain { get; set; }
+        public Guid UserId { get; set; }
     }
 }

@@ -30,12 +30,14 @@ namespace ProjectManagerAPI.Mapping
                         p.Avatars.FirstOrDefault(a => a.IsMain) != null
                             ? p.Avatars.FirstOrDefault(a => a.IsMain).Path
                             : null))
-                .ForMember(u => u.EmailConfirmed, opt => opt.MapFrom(a => a.IsActived))
+                .ForMember(u => u.EmailConfirmed, opt => opt.MapFrom(a => a.EmailConfirmed))
                 .ForMember(u => u.GroupId, opt => opt.MapFrom(g => g.GroupRef))
                 .ForMember(u => u.GroupName, opt => opt.MapFrom(g => g.Group.Name))
                 .ForMember(u => u.GroupType, opt => opt.MapFrom(g => g.Group.GroupType.Name));
             CreateMap<User,UpdateProfileResource>()
-                .ForMember(u => u.Username, opt => opt.Ignore());
+                .ForMember(u => u.UserName, opt => opt.Ignore());
+            CreateMap<UpdateProfileResource, User>()
+                .ForMember(u => u.UserName, opt => opt.Ignore());
             CreateMap<User, SearchUserResource>()
                 .ForMember(u => u.AvatarUrl, opt => opt.MapFrom(p => p.Avatars.FirstOrDefault(a => a.IsMain) != null ? p.Avatars.FirstOrDefault(a => a.IsMain).Path : null));
 
@@ -70,11 +72,7 @@ namespace ProjectManagerAPI.Mapping
 
             //Request
             CreateMap<Request,CreatedRequest>();
-            CreateMap<Request, RequestResource>()
-                .ForMember(u => u.url_true,
-                    opt => opt.MapFrom(u => "api/Request/activegroup?requestId=" + u.Id + "&isActive=true"))
-                .ForMember(u => u.url_false,
-                    opt => opt.MapFrom(u => "api/Request/activegroup?requestId=" + u.Id + "&isActive=false"));
+            CreateMap<Request, RequestResource>();
 
             //Task
             CreateMap<Task, CreatedTask>();

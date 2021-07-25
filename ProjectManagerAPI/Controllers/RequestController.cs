@@ -39,7 +39,7 @@ namespace ProjectManagerAPI.Controllers
             _userService = userService;
         }
 
-        [HttpPut("activegroup")]
+        [HttpGet("activegroup")]
         public async Task<IActionResult> ActiveGroup(Guid requestId, bool isAccept)
         {
             var user = await this._tokenManager.GetUserByToken();
