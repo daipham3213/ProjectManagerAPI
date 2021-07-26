@@ -223,7 +223,7 @@ namespace ProjectManagerAPI.Controllers
 
             report.Progress = (totalPercent / (totalTask == 0 ? 1 : totalTask));
             await this._unitOfWork.Complete();
-            return Ok(new { message = "Update task " + task.Name + " success." });
+            return Ok(new { message = "Update task" + task.Name + " success." });
         }
     }
 }

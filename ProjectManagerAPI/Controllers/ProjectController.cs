@@ -70,7 +70,6 @@ namespace ProjectManagerAPI.Controllers
         }
 
 
-
         [HttpDelete]
         public async Task<IActionResult> DeleteProject(Guid idPro)
         {
@@ -81,6 +80,7 @@ namespace ProjectManagerAPI.Controllers
             await this._authorizationService.AuthorizeAsync(User, project, Operations.ProjectDelete);
 
             await this._unitOfWork.Reports.Load(u => u.ProjectId == idPro);
+           
             foreach (var report in project.Reports)   
             {
                 foreach (var phase in report.Phases)
@@ -94,7 +94,6 @@ namespace ProjectManagerAPI.Controllers
                 }
                 this._unitOfWork.Reports.Remove(report);
             }
-
             this._unitOfWork.Projects.Remove(project);
             await this._unitOfWork.Complete();
 
@@ -139,19 +138,13 @@ namespace ProjectManagerAPI.Controllers
         {
             if (!ModelState.IsValid) throw new Exception("Invalid information");
             var result = await this._unitOfWork.Projects.Get(id);
-            result.Name = project.Name;
-            result.StartDate = project.StartDate;
-            result.DueDate = project.DueDate;
 
+            this._mapper.Map<CreateProject, Project>(project,result);
+           
             await this._authorizationService.AuthorizeAsync(User, result, Operations.ProjectUpdate);
             
             await this._unitOfWork.Complete();
             return Ok(new { message = "Update " + project.Name + " success." });
-
         }
-
-
-
-
     }
 }
