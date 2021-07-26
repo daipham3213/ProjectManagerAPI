@@ -47,12 +47,16 @@ namespace ProjectManagerAPI.Mapping
             //Group
             CreateMap<Group, CreatedDepartment>();
             CreateMap<Group, GroupViewResource>()
-                .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Group/" + u.Id))
+                .ForMember(u => u.GroupType, opt => opt.MapFrom(g => g.GroupType.Name))
+                .ForMember(u => u.Leader, opt => opt.MapFrom(g => g.LeaderId))
                 .ForMember(u => u.Users, opt => opt.MapFrom(g => g.Users.Count));
             CreateMap<Group, GroupResource>()
-                .ForMember(u => u.Url, opt => opt.MapFrom(u => "api/Group/" + u.Id));
+                .ForMember(u => u.GroupType, opt => opt.MapFrom(g => g.GroupType.Name));
+
             //Project
             CreateMap<Project, CreateProject>();
+            CreateMap<CreateProject,Project>()
+                .ForMember(u => u.Id, opt => opt.Ignore());
             CreateMap<Project, ProjectViewResource>().ForMember(u => u.url, opt => opt.MapFrom(u => "api/Project/" + u.Id));
             CreateMap<Project, ProjectResource>().ForMember(u => u.url, opt => opt.MapFrom(u => "api/Project/" + u.Id));
             //Report

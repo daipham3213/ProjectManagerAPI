@@ -53,7 +53,6 @@ namespace ProjectManagerAPI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(Guid id)
         {
-            await _unitOfWork.GroupTypes.GetAll();
             var type = await _unitOfWork.GroupTypes.Get(id);
             if (type == null)
             {

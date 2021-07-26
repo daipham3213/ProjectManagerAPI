@@ -72,6 +72,11 @@ namespace ProjectManagerAPI.Controllers
             await _unitOfWork.Complete();
 
             var n = await this._unitOfWork.Groups.SingleOrDefault(u => u.Name == entity.Name);
+            if (user.IsSuperuser)
+            {
+                await AdminGroupCreate(n, parent);
+                return Ok(_mapper.Map<CreatedDepartment>(entity));
+            }
             //Send request to admin to active group
             var request = new CreatedRequest()
             {
@@ -82,10 +87,7 @@ namespace ProjectManagerAPI.Controllers
             };
             await this._unitOfWork.Requests.CreateRequest(request, user);
             
-            return Ok(new JsonResult(_mapper.Map<CreatedDepartment>(entity))
-            {
-                StatusCode = Ok().StatusCode
-            });
+            return Ok(_mapper.Map<CreatedDepartment>(entity));
         }
 
         [HttpPost("Team")]
@@ -100,7 +102,7 @@ namespace ProjectManagerAPI.Controllers
             var groupType = _unitOfWork.GroupTypes
                 .Find(u => u.Name == "Group")
                 .FirstOrDefault();
-            var parent = await this._unitOfWork.Groups.Get(group.parentNId);
+            var parent = await this._unitOfWork.Groups.Get(group.ParentNId);
             var entity = new Group
             {
                 Name = group.Name,
@@ -119,21 +121,24 @@ namespace ProjectManagerAPI.Controllers
             //add new
             await _unitOfWork.Groups.Add(entity);
             await _unitOfWork.Complete();
-
+            var n = await this._unitOfWork.Groups.SingleOrDefault(u => u.Name == entity.Name);
+            if (user.IsSuperuser)
+            {
+                await AdminGroupCreate(n, parent);
+                return Ok(_mapper.Map<CreatedDepartment>(entity));
+            }
             //Send request to admin to active group
+            var adminGroup = await this._unitOfWork.Groups.FindGroupByName("System Admin Group");
             var request = new CreatedRequest()
             {
                 Name = RequestNames.CreateGroup,
-                Remark = entity.GroupType.Name +" - "+ entity.Name,
-                To = parent.Id, //Sent to Admin group
-                Value = entity.Id.ToString() //Group need to activate
+                Remark = n.GroupType.Name +" - "+ n.Name,
+                To = adminGroup.Id, //Sent to Admin group
+                Value = n.Id.ToString() //Group need to activate
             };
             await this._unitOfWork.Requests.CreateRequest(request, user);
             
-            return Ok(new JsonResult(_mapper.Map<CreatedDepartment>(entity))
-            {
-                StatusCode = Ok().StatusCode
-            });
+            return Ok(_mapper.Map<CreatedDepartment>(entity));
         }
 
         [HttpGet("all")]
@@ -141,8 +146,19 @@ namespace ProjectManagerAPI.Controllers
         public async Task<IActionResult> GetGroups()
         {
             //Get user claims from token
-            var user = await _tokenParser.GetUserByToken();
             var result = await _unitOfWork.Groups.GetAll();
+            return Ok(_mapper.Map<IEnumerable<GroupViewResource>>(result));
+        }
+
+        [HttpGet("list")]
+        public async Task<IActionResult> GetList(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+                throw new Exception("Invalid keyword.");
+            var gt = await this._unitOfWork.GroupTypes.GetTypeByName(key);
+            var result = this._unitOfWork.Groups.Find(u => u.GroupTypeFk == gt.Id && u.IsActived);
+            if (!result.Any())
+                throw new Exception("Invalid keyword.");
             return Ok(_mapper.Map<IEnumerable<GroupViewResource>>(result));
         }
 
@@ -162,14 +178,18 @@ namespace ProjectManagerAPI.Controllers
             if (key != null & key != "")
             {
                 var gt = await this._unitOfWork.GroupTypes.GetTypeByName(key);
-               
                 result = result.Where(u => u.GroupTypeFk == gt.Id).ToList();
-                foreach (var res in result)
-                {
-                    await this._unitOfWork.Users.Load(u => u.Id == res.LeaderId);
-                }
             }
-            return Ok(_mapper.Map<IEnumerable<GroupViewResource>>(result));
+
+            var list = _mapper.Map<IEnumerable<GroupViewResource>>(result);
+            foreach (var resource in list)
+            {
+                var gtype = (await this._unitOfWork.GroupTypes.Get(resource.GroupTypeFk)).Name;
+                var leaderName = (await this._unitOfWork.Users.Get(resource.LeaderId)).Name;
+                resource.GroupType = gtype;
+                resource.Leader = leaderName;
+            }
+            return Ok(list);
         }
 
         [HttpGet("{id}")]
@@ -181,10 +201,12 @@ namespace ProjectManagerAPI.Controllers
 
             await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupRead);
             await this._unitOfWork.Users.Load(u => u.GroupRef == group.Id);
-            await this._unitOfWork.GroupTypes.Load(u => u.Id == group.GroupTypeFk);
+           
             if (group == null)
                 throw new Exception("Invalid group ID");
-            return Ok(_mapper.Map<GroupResource>(group));
+            var result = _mapper.Map<GroupResource>(group);
+            result.GroupType = (await this._unitOfWork.GroupTypes.Get(group.GroupTypeFk)).Name;
+            return Ok(result);
         }
 
         [HttpGet]
@@ -199,7 +221,13 @@ namespace ProjectManagerAPI.Controllers
                 throw new Exception("Invalid group ID");
             await this._unitOfWork.GroupTypes.Load(u => u.Id == group.GroupTypeFk);
             await this._unitOfWork.Users.Load(u => u.GroupRef == group.Id);
-            return Ok(_mapper.Map<GroupResource>(group));
+            var result = _mapper.Map<GroupResource>(group);
+            result.GroupType = (await this._unitOfWork.GroupTypes.Get(group.GroupTypeFk)).Name;
+            foreach (var resultUser in result.Users)
+            {
+                resultUser.Contrib = await this._unitOfWork.Tasks.GetContrib(resultUser.Id); ;
+            }
+            return Ok(result);
         }
 
         [HttpGet("{id}/members")]
@@ -231,7 +259,7 @@ namespace ProjectManagerAPI.Controllers
                     throw new Exception(username + " is already a member of " + group.Name);
                 if (user.GroupRef != null)
                     throw new Exception(username + " is already a member of a group.");
-                _unitOfWork.Groups.AddUserToGroup(user.Id, group.Id);
+                await _unitOfWork.Groups.AddUserToGroup(user.Id, group.Id);
             }
             return Ok(new JsonResult(_mapper.Map<GroupResource>(group)) { StatusCode = Ok().StatusCode });
         }
@@ -266,14 +294,33 @@ namespace ProjectManagerAPI.Controllers
         {
             var group = await _unitOfWork.Groups.Get(id);
             await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupDelete);
+       
+            var child = this._unitOfWork.Groups.Find(u => u.ParentNId == group.Id);
+            if (child.Any())
+                throw new Exception("Please remove child groups before remove this group.");
 
             var leader = this._unitOfWork.Users.Find(u => u.Id == group.LeaderId).FirstOrDefault();
-            foreach (var user in group.Users)
-                _unitOfWork.Groups.RemoveUserFromGroup(id, user.Id);
-            _unitOfWork.Groups.Remove(group);
             await this._userService.DePromotion(leader.UserName);
-            //await _unitOfWork.Complete();
-            return Ok(new JsonResult(group.Name + " removed successfully.") { StatusCode = Ok().StatusCode });
+
+            foreach (var user in group.Users.ToList())
+                await _unitOfWork.Groups.RemoveUserFromGroup(user.Id, group.Id);
+            
+            foreach (var report in group.Reports.ToList())
+            {
+                foreach (var phase in report.Phases.ToList())
+                {
+                    foreach (var task in phase.Tasks.ToList())
+                    {
+                        await this._unitOfWork.Tasks.RemoveChild(task);
+                        this._unitOfWork.Tasks.Remove(task);
+                    }
+                    this._unitOfWork.Phases.Remove(phase);
+                }
+                this._unitOfWork.Reports.Remove(report);
+            }
+            _unitOfWork.Groups.Remove(group);
+            await _unitOfWork.Complete();
+            return Ok(new{message = group.Name + " removed successfully." });
         }
 
         [HttpPut("promotion")]
@@ -295,5 +342,16 @@ namespace ProjectManagerAPI.Controllers
             return Ok();
         }
 
+        private async Task AdminGroupCreate(Group entity, Group parent)
+        {
+            var lead = await _unitOfWork.Users.SearchUserById(entity.LeaderId);
+            lead.Group = entity;
+            lead.GroupRef = entity.Id;
+            lead.DateModified = DateTime.Now;
+            lead.ParentNId = parent.LeaderId;
+            await this._userService.Promotion(lead.UserName);
+            entity.IsActived = true;
+            await _unitOfWork.Complete();
+        }
     }
 }

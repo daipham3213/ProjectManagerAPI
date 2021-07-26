@@ -8,5 +8,6 @@ namespace ProjectManagerAPI.Core.Resources
         public string Name { set; get; }
         public string Username { get; set; }
         public string AvatarUrl { get; set; }
+        public float Contrib { get; set; }
     }
 }

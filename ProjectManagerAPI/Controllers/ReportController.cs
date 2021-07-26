@@ -133,9 +133,9 @@ namespace ProjectManagerAPI.Controllers
                 throw new Exception("Invalid id");
             await this._authorization.AuthorizeAsync(User, report, Operations.ReportDelete);
 
-            foreach (var phase in report.Phases)
+            foreach (var phase in report.Phases.ToList())
             {
-                foreach (var task in phase.Tasks)
+                foreach (var task in phase.Tasks.ToList())
                 {
                     await this._unitOfWork.Tasks.RemoveChild(task);
                     this._unitOfWork.Tasks.Remove(task);

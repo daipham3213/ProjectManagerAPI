@@ -71,8 +71,8 @@ namespace ProjectManagerAPI.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: false, defaultValue: "API Server"),
                     IsSeeded = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: new DateTime(2021, 7, 18, 8, 58, 17, 404, DateTimeKind.Utc).AddTicks(2639)),
-                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: new DateTime(2021, 7, 18, 8, 58, 17, 404, DateTimeKind.Utc).AddTicks(4206))
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: new DateTime(2021, 7, 25, 15, 39, 24, 341, DateTimeKind.Utc).AddTicks(8868)),
+                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: new DateTime(2021, 7, 25, 15, 39, 24, 341, DateTimeKind.Utc).AddTicks(9908))
                 },
                 constraints: table =>
                 {
@@ -351,7 +351,7 @@ namespace ProjectManagerAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RefreshToken",
+                name: "RefreshTokens",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -366,9 +366,9 @@ namespace ProjectManagerAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RefreshToken", x => x.Id);
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RefreshToken_AspNetUsers_UserId",
+                        name: "FK_RefreshTokens_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -543,8 +543,8 @@ namespace ProjectManagerAPI.Migrations
                 column: "Name");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RefreshToken_UserId",
-                table: "RefreshToken",
+                name: "IX_RefreshTokens_UserId",
+                table: "RefreshTokens",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -615,7 +615,7 @@ namespace ProjectManagerAPI.Migrations
                 name: "Avatars");
 
             migrationBuilder.DropTable(
-                name: "RefreshToken");
+                name: "RefreshTokens");
 
             migrationBuilder.DropTable(
                 name: "Requests");

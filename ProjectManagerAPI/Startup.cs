@@ -100,7 +100,7 @@ namespace ProjectManagerAPI
 
             //Inject interfaces
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IUserService, UserSerivce>();
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IMailService, MailService>();
             services.AddScoped<ITokenManager, TokenManager>();
             services.AddScoped<IPhotoService, PhotoService>();

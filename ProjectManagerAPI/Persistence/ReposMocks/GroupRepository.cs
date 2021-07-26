@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ProjectManagerAPI.Core.Services;
+using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI.Persistence.ReposMocks
 {
@@ -12,7 +14,7 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
     {
         private readonly ProjectManagerDbContext _context;
 
-        public GroupRepository(ProjectManagerDbContext context)
+        public GroupRepository(ProjectManagerDbContext context )
             : base(context)
         {
             _context = context;
@@ -46,13 +48,18 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
                             & u.IsActived)
                 .ToListAsync();
             List<Group> result = new List<Group>();
-            if (!result.Exists(u => u == mainGroup))
-                result.Add(mainGroup);
+            result.Add(mainGroup);
+            result.AddRange(childGroup);
             foreach (var child in childGroup)
             {
-                if (!result.Exists(u => u == child))
-                    result.Add(child);
+                var chiList = await _context.Groups
+                    .Where(u => u.ParentNId == child.Id
+                                & u.IsDeleted == false
+                                & u.IsActived)
+                    .ToListAsync();
+                result.AddRange(chiList);
             }
+
             return result;
         }
 
@@ -68,7 +75,7 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             return await _context.Users.Where(u => u.GroupRef == group.Result.Id & u.IsDeleted == false).ToListAsync();
         }
 
-        public async void AddUserToGroup(Guid userId, Guid groupId)
+        public async Task AddUserToGroup(Guid userId, Guid groupId)
         {
             var group = await Get(groupId);
             if (!group.IsActived)
@@ -84,18 +91,22 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             await this._context.SaveChangesAsync();
         }
 
-        public async void RemoveUserFromGroup(Guid userId, Guid groupId)
+        public async Task RemoveUserFromGroup(Guid userId, Guid groupId)
         {
             var group = await Get(groupId);
             var user = await _context.Users.FindAsync(userId);
-
-            group.Users.Remove(user);
-            group.DateModified = DateTime.Now;
-            user.Group = null;
-            user.GroupRef = null;
-            user.ParentN = null;
-            user.DateModified = DateTime.Now;
-            await this._context.SaveChangesAsync();
+            if(user != null)
+            {
+                group.Users.Remove(user);
+                group.DateModified = DateTime.Now;
+                user.Group = null;
+                user.GroupRef = null;
+                user.ParentN = null;
+                user.DateModified = DateTime.Now;
+                await this._context.SaveChangesAsync();
+            }
         }
+
+        
     }
 }

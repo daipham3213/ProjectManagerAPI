@@ -15,5 +15,6 @@ namespace ProjectManagerAPI.Core.Repositories
         public Task<IList<Models.Task>> TaskSearchByPhaseId(Guid phaseId);
         public Task<Models.Task> SearchTaskByName(string nameTask);
         Task RemoveChild(Core.Models.Task parent);
+        Task<float> GetContrib(Guid userId);
     }
 }

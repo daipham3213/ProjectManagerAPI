@@ -91,8 +91,11 @@ namespace ProjectManagerAPI.Core.Policy
             {
                 if (resource != null & groups.Contains(resource) & 
                     (isLeader | context.User.HasClaim(u => u.Value.Equals(requirement.Name)))
-                    )
-                    context.Succeed(requirement);
+                )
+                    if (requirement.Name != GroupPermission.Remove)
+                        context.Succeed(requirement);
+                    else if (context.User.HasClaim(u => u.Value == resource.Id.ToString()))
+                        context.Succeed(requirement);
             }
 
             return Task.CompletedTask;

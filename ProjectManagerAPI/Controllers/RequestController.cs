@@ -42,7 +42,6 @@ namespace ProjectManagerAPI.Controllers
         [HttpGet("activegroup")]
         public async Task<IActionResult> ActiveGroup(Guid requestId, bool isAccept)
         {
-            var user = await this._tokenManager.GetUserByToken();
             var request = await this._unitOfWork.Requests.Get(requestId);
             //Authorization
             await this._authorizationService.AuthorizeAsync(User, request, Operations.RequestGroupActivation);

@@ -17,5 +17,6 @@ namespace ProjectManagerAPI.Core.Resources
         public string GroupType { get; set; }
         public bool IsActived { get; set; }
         public DateTime DateCreated { get; set; }
+        public float Contrib { get; set; }
     }
 }

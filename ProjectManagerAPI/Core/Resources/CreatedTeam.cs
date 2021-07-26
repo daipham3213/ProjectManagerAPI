@@ -11,6 +11,6 @@ namespace ProjectManagerAPI.Core.Resources
         public string Name { get; set; }
         public string Remark { get; set; }
         public Guid? LeaderId { get; set; }
-        public Guid parentNId { get; set; }
+        public Guid ParentNId { get; set; }
     }
 }

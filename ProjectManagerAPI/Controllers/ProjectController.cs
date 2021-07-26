@@ -48,7 +48,7 @@ namespace ProjectManagerAPI.Controllers
         public async Task<IActionResult> GetList()
         {
             var type = await _unitOfWork.Projects.LoadValidated();
-            if (type.Count() == 0)
+            if (!type.Any())
             {
                 return NotFound();
             }
@@ -114,6 +114,7 @@ namespace ProjectManagerAPI.Controllers
                 Remark = project.Remark,
                 StartDate = project.StartDate,
                 DueDate = project.DueDate,
+                UserCreated = user.Id,
             };
 
             try
@@ -139,19 +140,12 @@ namespace ProjectManagerAPI.Controllers
         {
             if (!ModelState.IsValid) throw new Exception("Invalid information");
             var result = await this._unitOfWork.Projects.Get(id);
-            result.Name = project.Name;
-            result.StartDate = project.StartDate;
-            result.DueDate = project.DueDate;
-
             await this._authorizationService.AuthorizeAsync(User, result, Operations.ProjectUpdate);
-            
-            await this._unitOfWork.Complete();
-            return Ok(new { message = "Update " + project.Name + " success." });
-
+            var task = await this._unitOfWork.Projects.UpdateProject(id, project);
+            if (task)
+                return Ok(new { message = "Update " + project.Name + " success." });
+            throw new Exception("Forbidden");
         }
-
-
-
 
     }
 }

@@ -62,13 +62,12 @@ namespace ProjectManagerAPI.Controllers
         }
 
         [HttpGet("contrib")]
-        public async Task<IActionResult> getContrib(Guid userId)
+        public async Task<IActionResult> GetContrib(Guid userId)
         {
             var user = await this._unitOfWork.Users.Get(userId);
             if (user == null)
                 throw new Exception("Invalid user id");
-            await this._unitOfWork.Tasks.Load(u => u.UserId == userId);
-            var result = user.Tasks.Sum(u => u.Percent)/ (user.Tasks.Count !=0? user.Tasks.Count: 1);
+            var result = await this._unitOfWork.Tasks.GetContrib(userId);
             return Ok(new{progress = result});
         }
 

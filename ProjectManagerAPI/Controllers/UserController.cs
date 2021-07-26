@@ -97,7 +97,10 @@ namespace ProjectManagerAPI.Controllers
             var users = await _userService.SearchUser(key);
 
             var result = _mapper.Map<IList<User>, IList<SearchUserResource>>(users);
-
+            foreach (var resource in result)
+            {
+                resource.Contrib = await this._unitOfWork.Tasks.GetContrib(resource.Id);
+            }
             return Ok(result);
         }
 
@@ -108,7 +111,10 @@ namespace ProjectManagerAPI.Controllers
             var users = _unitOfWork.Users.Find(u => u.GroupRef == null);
 
             var result = _mapper.Map<IEnumerable<User>, IEnumerable<SearchUserResource>>(users);
-
+            foreach (var resource in result)
+            {
+                resource.Contrib = await this._unitOfWork.Tasks.GetContrib(resource.Id);
+            }
             return Ok(result);
         }
 
@@ -133,6 +139,7 @@ namespace ProjectManagerAPI.Controllers
 
             await this._unitOfWork.Avatars.Load(u => u.UserId == user.Id);
             var result = _mapper.Map<User, UserResource>(user);
+            result.Contrib = await this._unitOfWork.Tasks.GetContrib(user.Id);
             return Ok(result);
         }
         [HttpPut("updateProfile")]

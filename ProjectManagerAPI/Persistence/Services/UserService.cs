@@ -20,7 +20,7 @@ using Task = System.Threading.Tasks.Task;
 
 namespace ProjectManagerAPI.Persistence.Services
 {
-    public class UserSerivce : IUserService
+    public class UserService : IUserService
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
@@ -30,7 +30,7 @@ namespace ProjectManagerAPI.Persistence.Services
         private readonly IConfiguration _config;
         private DateTime expDateTime;
 
-        public UserSerivce(
+        public UserService(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             IUnitOfWork unitOfWork,
@@ -123,7 +123,7 @@ namespace ProjectManagerAPI.Persistence.Services
             loginResponse.UserName = user.UserName;
             loginResponse.Token = finalToken;
             loginResponse.AvatarUrl = path;
-            loginResponse.RoleName = roles.FirstOrDefault();
+            loginResponse.RoleName = roles.LastOrDefault();
             loginResponse.IsActivated = user.IsActived;
             return loginResponse;
         }
@@ -179,7 +179,9 @@ namespace ProjectManagerAPI.Persistence.Services
         public async Task DePromotion(string username)
         {
             var leader = await _userManager.FindByNameAsync(username);
-            var role = await this._roleManager.FindByIdAsync(leader.Group.GroupType.IdentityRoleId.ToString());
+            var group = await this._unitOfWork.Groups.Get(leader.GroupRef?? Guid.Empty);
+            var type = await this._unitOfWork.GroupTypes.Get(group.GroupTypeFk);
+            var role = await this._roleManager.FindByIdAsync(type.IdentityRoleId.ToString());
             await this._userManager.RemoveFromRoleAsync(leader, role.Name);
         }
 
@@ -512,6 +514,8 @@ namespace ProjectManagerAPI.Persistence.Services
             }.Union(userClaims).Union(roleClaims).Union(userRoles);
             return claims;
         }
+        
     }
+
 }
     

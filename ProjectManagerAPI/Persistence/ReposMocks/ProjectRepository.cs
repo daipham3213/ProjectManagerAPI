@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ProjectManagerAPI.Core.Resources;
 
 namespace ProjectManagerAPI.Persistence.ReposMocks
 {
@@ -43,6 +44,27 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
                 return;
             }
             RemoveAllChildren(child.Id);
+        }
+
+        public async Task<bool> UpdateProject(Guid id,CreateProject project)
+        {
+            var result = await this._context.Projects.FindAsync(id);
+
+            result.DueDate = project.DueDate;
+            result.StartDate = project.StartDate;
+            result.Name = project.Name;
+            result.Remark = project.Remark;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

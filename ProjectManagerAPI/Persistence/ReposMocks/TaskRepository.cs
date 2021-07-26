@@ -40,6 +40,13 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             }
         }
 
+        public async Task<float> GetContrib(Guid userId)
+        {
+            var list = await this._context.Tasks.Where(u => u.UserId == userId).ToListAsync();
+            var contrib = list.Sum(u => u.Percent) / (list.Count != 0 ? list.Count : 1);
+            return contrib;
+        }
+
         public async Task<IEnumerable<Task>> LoadByUser(User user)
         {
             return await this._context.Tasks.Where(u => u.IsDeleted == false && u.UserId == user.Id).ToListAsync();

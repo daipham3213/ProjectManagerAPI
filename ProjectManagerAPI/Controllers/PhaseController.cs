@@ -133,7 +133,7 @@ namespace ProjectManagerAPI.Controllers
             }
             //validation
             await this._authorizationService.AuthorizeAsync(User, phase, Operations.PhaseDelete);
-            foreach (var task in phase.Tasks)
+            foreach (var task in phase.Tasks.ToList())
             {
                 await this._unitOfWork.Tasks.RemoveChild(task);
                 this._unitOfWork.Tasks.Remove(task);
@@ -150,7 +150,7 @@ namespace ProjectManagerAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(Guid id, [FromBody] CreatedPhase phase)
         {
-            if (!ModelState.IsValid) throw new Exception("Invalid ìnormation.");
+            if (!ModelState.IsValid) throw new Exception("Invalid information.");
             var result = await this._unitOfWork.Phases.Get(id);
             result.ReportId = phase.ReportID;
             result.DueDate = phase.DueDate;
