@@ -64,7 +64,9 @@ namespace ProjectManagerAPI.Controllers
             {
                 return NotFound();
             }
-            await this._authorizationService.AuthorizeAsync(User, project, Operations.ProjectRead);
+            var auth = await this._authorizationService.AuthorizeAsync(User, project, Operations.ProjectRead);
+            if (!auth.Succeeded)
+                throw new Exception("You don't have permission.");
             var result = _mapper.Map<Project, ProjectResource>(project);
             return Ok(result);
         }
@@ -77,9 +79,9 @@ namespace ProjectManagerAPI.Controllers
             var project = await this._unitOfWork.Projects.SingleOrDefault(c => c.Id == idPro);
             if (project == null)
                 return BadRequest();
-
-            await this._authorizationService.AuthorizeAsync(User, project, Operations.ProjectDelete);
-
+            var auth = await this._authorizationService.AuthorizeAsync(User, project, Operations.ProjectDelete);
+            if (!auth.Succeeded)
+                throw new Exception("You don't have permission.");
             await this._unitOfWork.Reports.Load(u => u.ProjectId == idPro);
             foreach (var report in project.Reports)   
             {
@@ -105,7 +107,7 @@ namespace ProjectManagerAPI.Controllers
         public async Task<IActionResult> Create([FromBody] CreateProject project)
         {
             if (!ModelState.IsValid)
-                throw new Exception("The information provided for creation is not valid");
+                throw new Exception("The information provided for creation is not valid.");
             var user = await _tokenParser.GetUserByToken();
 
             var entity = new Project
@@ -116,10 +118,13 @@ namespace ProjectManagerAPI.Controllers
                 DueDate = project.DueDate,
                 UserCreated = user.Id,
             };
-
+            if (project.StartDate > project.DueDate)
+                throw new Exception("Start date can't not be larger than end date.");
             try
             {
-                await this._authorizationService.AuthorizeAsync(User, entity, Operations.ProjectCreate);
+                var auth = await this._authorizationService.AuthorizeAsync(User, entity, Operations.ProjectCreate);
+                if (!auth.Succeeded)
+                    throw new Exception("You don't have permission.");
 
                 await this._unitOfWork.Projects.Add(entity);
 
@@ -140,7 +145,13 @@ namespace ProjectManagerAPI.Controllers
         {
             if (!ModelState.IsValid) throw new Exception("Invalid information");
             var result = await this._unitOfWork.Projects.Get(id);
-            await this._authorizationService.AuthorizeAsync(User, result, Operations.ProjectUpdate);
+
+            var auth = await this._authorizationService.AuthorizeAsync(User, result, Operations.ProjectUpdate);
+            if (!auth.Succeeded)
+                throw new Exception("You don't have permission.");
+
+            if (project.StartDate > project.DueDate)
+                throw new Exception("Start date can't not be larger than end date.");
             var task = await this._unitOfWork.Projects.UpdateProject(id, project);
             if (task)
                 return Ok(new { message = "Update " + project.Name + " success." });

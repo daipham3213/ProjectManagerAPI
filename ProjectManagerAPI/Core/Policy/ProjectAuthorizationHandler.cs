@@ -37,10 +37,10 @@ namespace ProjectManagerAPI.Core.Policy
             var useName = context.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name);
             var isLeader = isAdmin || await Utils.IsLeader(useName?.Value);
             //Check if user has full permission
-            if (context.User.HasClaim(u => u.Value.Equals(ProjectPermission.Full)))
+            if (context.User.HasClaim(u => u.Value.Equals(ProjectPermission.Full)) && ProjectPermission.SpecialPerm.Contains(requirement.Name))
                 context.Succeed(requirement);
             //Check if user has FULL Self permission
-            if (context.User.HasClaim(u => u.Value.Equals(ProjectPermission.FullSelf)))
+            if (context.User.HasClaim(u => u.Value.Equals(ProjectPermission.FullSelf)) && ProjectPermission.SpecialPerm.Contains(requirement.Name))
                 if (context.User.HasClaim(u => u.Value == resource.UserCreated.ToString()))
                     context.Succeed(requirement);
 
@@ -52,12 +52,12 @@ namespace ProjectManagerAPI.Core.Policy
 
             //Edit leader
             //create leader
-            //detele leader
+            //delete leader
             if (requirement.Name == ProjectPermission.Edit
                 | requirement.Name == ProjectPermission.Add
                 | requirement.Name == ProjectPermission.Remove)
             {
-                if (isLeader | context.User.IsInRole(RoleNames.DepartmentLead))
+                if (isLeader && context.User.IsInRole(RoleNames.DepartmentLead))
                     context.Succeed(requirement);
             }
 

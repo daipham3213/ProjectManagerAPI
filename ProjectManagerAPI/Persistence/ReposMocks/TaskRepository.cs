@@ -70,5 +70,20 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
         {
             return await this._context.Tasks.Where(u => u.PhaseId == phaseId).ToListAsync();
         }
+
+        public async Task<int> UpdateProgress(Guid phaseId)
+        {
+            var phase = await this._context.Phases.FindAsync(phaseId);
+            var report = await this._context.Reports.FindAsync(phase.ReportId);
+            var totalTask = 0;
+            float totalPercent = 0;
+            foreach (var phaseReport in report.Phases)
+            {
+                totalTask += phaseReport.Tasks.Count;
+                totalPercent += phaseReport.Tasks.Sum(taskPhase => taskPhase.Percent);
+            }
+            report.Progress = (totalPercent / (totalTask == 0 ? 1 : totalTask));
+            return 1;
+        }
     }
 }

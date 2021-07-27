@@ -108,9 +108,11 @@ namespace ProjectManagerAPI.Controllers
             if (phase == null)
                 throw new Exception("Invalid Phase id");
             if (task.StartDate < phase.StartDate)
-                throw new Exception("Start date can not be smaller than " + phase.StartDate + "of Phase " + phase.Name);
+                throw new Exception("Start date can not be smaller than " + phase.StartDate + " of Phase " + phase.Name);
             if (task.DueDate > phase.DueDate)
-                throw new Exception("Start date can not be larger than " + phase.DueDate + "of Phase " + phase.Name);
+                throw new Exception("End date can not be larger than " + phase.DueDate + " of Phase " + phase.Name);
+            if (task.DueDate < task.StartDate)
+                throw new Exception("Start date can not be larger than End date");
 
             var checkUser = await _unitOfWork.Users.Get(task.UserId);
             if (checkUser == null)
@@ -134,14 +136,21 @@ namespace ProjectManagerAPI.Controllers
                 UserId = task.UserId,
                 User = checkUser,
                 ParentN = checkP,
+                Percent = task.Percent,
                 DateCreated = DateTime.UtcNow.AddHours(7),
             };
 
             if (checkP != null) entity.StartDate = checkP.DueDate;
             entity.StartDate ??= phase.StartDate;
             if (entity.DueDate == entity.StartDate || entity.DueDate == null) entity.DueDate = entity.StartDate.Value.AddDays(1);
+            if (entity.StartDate < checkP.DueDate)
+                throw new Exception("Start date can not be smaller than " + checkP.DueDate);
+            if (entity.DueDate < checkP.StartDate)
+                throw new Exception("Start date can not be larger than End date");
 
-            await this._authorizationService.AuthorizeAsync(User, entity, Operations.TaskCreate);
+            var auth = await this._authorizationService.AuthorizeAsync(User, entity, Operations.TaskCreate);
+            if (!auth.Succeeded)
+                throw new Exception("You don't have permission");
 
             await this._unitOfWork.Tasks.Add(entity);
             await this._unitOfWork.Complete();
@@ -161,6 +170,7 @@ namespace ProjectManagerAPI.Controllers
                     checkP.ChildTasks = new List<Task>();
                     checkP.ChildTasks.Add(tasked);
                 }
+            await this._unitOfWork.Tasks.UpdateProgress(task.PhaseId);
             await this._unitOfWork.Complete();
             return Ok(new JsonResult(_mapper.Map<CreatedTask>(tasked))
             {
@@ -175,7 +185,9 @@ namespace ProjectManagerAPI.Controllers
               var task = await this._unitOfWork.Tasks.Get(id);
             if (task == null)
                 throw new Exception("Invalid Task ID.");
-            await this._authorizationService.AuthorizeAsync(User, task, Operations.TaskRead);
+            var auth = await this._authorizationService.AuthorizeAsync(User, task, Operations.TaskRead);
+            if (!auth.Succeeded)
+                throw new Exception("You don't have permission");
             var result = _mapper.Map<Core.Models.Task, TaskResources>(task);
             return Ok(result);
         }
@@ -186,9 +198,12 @@ namespace ProjectManagerAPI.Controllers
             var task = await this._unitOfWork.Tasks.Get(id);
             if(task == null)
                 throw new Exception("Invalid id");
-            await this._authorizationService.AuthorizeAsync(User, task, Operations.TaskDelete);
+            var auth = await this._authorizationService.AuthorizeAsync(User, task, Operations.TaskDelete);
+            if (!auth.Succeeded)
+                throw new Exception("You don't have permission");
             await _unitOfWork.Tasks.RemoveChild(task);
             _unitOfWork.Tasks.Remove(task);
+            await this._unitOfWork.Tasks.UpdateProgress(task.PhaseId);
             await this._unitOfWork.Complete();
             return Ok(new { message = "Delete task: " + task.Name + " success." });
         }
@@ -197,7 +212,19 @@ namespace ProjectManagerAPI.Controllers
         public async Task<IActionResult> Edit(Guid id, [FromBody] CreatedTask task) 
         {
             if (!ModelState.IsValid) throw new Exception("Invalid information.");
+            var phase = await _unitOfWork.Phases.Get(task.PhaseId);
+            if (phase == null)
+                throw new Exception("Invalid Phase id");
+            if (task.StartDate < phase.StartDate)
+                throw new Exception("Start date can not be smaller than " + phase.StartDate + " of Phase " + phase.Name);
+            if (task.DueDate > phase.DueDate)
+                throw new Exception("Start date can not be larger than " + phase.DueDate + " of Phase " + phase.Name);
+            if (task.DueDate < task.StartDate)
+                throw new Exception("Start date can not be larger than End date");
+
             var result = await this._unitOfWork.Tasks.Get(id);
+            var checkP = await this._unitOfWork.Tasks.Get(task.ParentNId ?? Guid.Empty);
+           
             result.PhaseId = task.PhaseId;
             result.Name = task.Name;
             result.DueDate = task.DueDate;
@@ -205,22 +232,22 @@ namespace ProjectManagerAPI.Controllers
             result.Percent = task.Percent;
             result.UserId = task.UserId;
             result.DateModified = DateTime.UtcNow.AddHours(7);
-            result.ParentN = await this._unitOfWork.Tasks.Get(task.ParentNId ?? Guid.Empty);
+            result.ParentN = checkP;
 
-            await this._authorizationService.AuthorizeAsync(User, result, Operations.TaskUpdate);
-
-            //Update progress of report
-            var phase = await this._unitOfWork.Phases.Get(result.PhaseId);
-            var report = await this._unitOfWork.Reports.Get(phase.ReportId);
-            int totalTask = 0;
-            float totalPercent = 0;
-            foreach (var phaseReport in report.Phases)
+            if (checkP != null)
             {
-                totalTask += phaseReport.Tasks.Count;
-                totalPercent += phaseReport.Tasks.Sum(taskPhase => task.Percent);
+                if (result.StartDate < checkP.DueDate)
+                    throw new Exception("Start date can not be smaller than " + checkP.DueDate);
+                if (result.DueDate < checkP.StartDate)
+                    throw new Exception("Start date can not be larger than End date");
             }
 
-            report.Progress = (totalPercent / (totalTask == 0 ? 1 : totalTask));
+            var auth = await this._authorizationService.AuthorizeAsync(User, result, Operations.TaskUpdate);
+            if (!auth.Succeeded)
+                throw new Exception("You don't have permission");
+
+            //Update progress of report
+            await this._unitOfWork.Tasks.UpdateProgress(result.PhaseId);
             await this._unitOfWork.Complete();
             return Ok(new { message = "Update task " + task.Name + " success." });
         }

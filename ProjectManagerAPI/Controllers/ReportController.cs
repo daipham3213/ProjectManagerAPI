@@ -42,6 +42,8 @@ namespace ProjectManagerAPI.Controllers
 
             //Get user claims from token
             var user = await _tokenParser.GetUserByToken();
+            if (user.GroupRef == null || user.GroupRef == Guid.Empty)
+                throw new Exception("Join a group first");
            
             var projectRp = await this._unitOfWork.Projects.Get(report.ProjectId);
             if (projectRp == null)
@@ -49,7 +51,8 @@ namespace ProjectManagerAPI.Controllers
             var groupRp = await this._unitOfWork.Groups.Get(report.GroupId);
             if (groupRp == null)
                 throw new Exception("Invalid group id.");
-
+            if (groupRp.LeaderId != user.Id)
+                throw new Exception("You don't have permission.");
             var newRp = new Report
             {
                 Name = report.Name,
@@ -62,6 +65,8 @@ namespace ProjectManagerAPI.Controllers
                 Project = projectRp,
                 UserCreated = user.Id
             };
+            if (report.StartDate > report.DueDate)
+                throw new Exception("Start date can't not be larger than end date.");
             await this._authorization.AuthorizeAsync(User, newRp, Operations.ReportCreate);
             try
             {
@@ -165,6 +170,8 @@ namespace ProjectManagerAPI.Controllers
                 result.ProjectId = report.ProjectId;
                 result.DateModified = DateTime.UtcNow;
                 result.Remark = report.Remark;
+                if (report.StartDate > report.DueDate)
+                    throw new Exception("Start date can't not be larger than end date.");
                 await this._authorization.AuthorizeAsync(User, result, Operations.ReportUpdate);
                 await this._unitOfWork.Complete();
                 return Ok(new { message = "Update " + report.Name + "success." });

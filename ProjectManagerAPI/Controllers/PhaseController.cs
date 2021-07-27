@@ -96,6 +96,8 @@ namespace ProjectManagerAPI.Controllers
                 throw new Exception("Phase end date is larger than " + report.DueDate);
             if (report.StartDate > workingStage.StartDate)
                 throw new Exception("Phase start date is smaller than " + report.StartDate);
+            if(workingStage.DueDate < workingStage.StartDate)
+                throw new Exception("Phase end date is smaller than start date");
 
             var entity = new Phase
             {
@@ -104,12 +106,15 @@ namespace ProjectManagerAPI.Controllers
                 UserCreated = user.Id,
                 StartDate = workingStage.StartDate,
                 DueDate = workingStage.DueDate,
-
                 ReportId = workingStage.ReportID,
                 Report = report,
             };
+
+            if (entity.StartDate == entity.DueDate) entity.DueDate.Value.AddDays(1);
             //validation
-            await this._authorizationService.AuthorizeAsync(User, entity, Operations.PhaseCreate);
+            var auth = await this._authorizationService.AuthorizeAsync(User, entity, Operations.PhaseCreate);
+            if (!auth.Succeeded)
+                throw new Exception("You don't have permission");
 
             await _unitOfWork.Phases.Add(entity);
 
@@ -132,13 +137,16 @@ namespace ProjectManagerAPI.Controllers
                 throw new Exception("Phase id is invalid");
             }
             //validation
-            await this._authorizationService.AuthorizeAsync(User, phase, Operations.PhaseDelete);
+            var auth = await this._authorizationService.AuthorizeAsync(User, phase, Operations.PhaseDelete);
+            if (!auth.Succeeded)
+                throw new Exception("You don't have permission");
             foreach (var task in phase.Tasks.ToList())
             {
                 await this._unitOfWork.Tasks.RemoveChild(task);
                 this._unitOfWork.Tasks.Remove(task);
             }
             this._unitOfWork.Phases.Remove(phase);
+            await this._unitOfWork.Tasks.UpdateProgress(id);
             await _unitOfWork.Complete();
             return Ok(new JsonResult(phase.Name + "removed successfully")
             {
@@ -155,7 +163,13 @@ namespace ProjectManagerAPI.Controllers
             result.ReportId = phase.ReportID;
             result.DueDate = phase.DueDate;
             result.StartDate = phase.StartDate;
-            await this._authorizationService.AuthorizeAsync(User, result, Operations.PhaseUpdate);
+            result.Remark = phase.Remark;
+            if (phase.DueDate < phase.StartDate)
+                throw new Exception("Phase end date is smaller than start date");
+
+            var auth = await this._authorizationService.AuthorizeAsync(User, result, Operations.PhaseUpdate);
+            if (!auth.Succeeded)
+                throw new Exception("You don't have permission");
 
             await this._unitOfWork.Complete();
             return Ok(new { message = "Update " + phase.Name + " success." });

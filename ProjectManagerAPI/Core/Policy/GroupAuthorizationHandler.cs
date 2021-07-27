@@ -98,6 +98,7 @@ namespace ProjectManagerAPI.Core.Policy
                         context.Succeed(requirement);
             }
 
+
             return Task.CompletedTask;
         }
 

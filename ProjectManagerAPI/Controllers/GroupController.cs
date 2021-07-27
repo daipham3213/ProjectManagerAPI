@@ -186,8 +186,10 @@ namespace ProjectManagerAPI.Controllers
             {
                 var gtype = (await this._unitOfWork.GroupTypes.Get(resource.GroupTypeFk)).Name;
                 var leaderName = (await this._unitOfWork.Users.Get(resource.LeaderId)).Name;
+                var users = (this._unitOfWork.Users.Find(u => u.GroupRef == resource.Id)).Count();
                 resource.GroupType = gtype;
                 resource.Leader = leaderName;
+                resource.Users = users;
             }
             return Ok(list);
         }
@@ -248,7 +250,9 @@ namespace ProjectManagerAPI.Controllers
             if (group == null)
                 throw new Exception("Invalid group name.");
             //Check perm
-            await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupMemberUpdate);
+            var auth = await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupMemberUpdate);
+            if (!auth.Succeeded)
+                throw new Exception("You don't have permission");
             List<User> users = new List<User>();
             foreach (var username in resource.Usernames)
             {
@@ -272,7 +276,9 @@ namespace ProjectManagerAPI.Controllers
                 throw new Exception("Invalid group name.");
 
             //Check perm
-            await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupMemberUpdate);
+            var auth = await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupMemberUpdate);
+            if (!auth.Succeeded)
+                throw new Exception("You don't have permission");
             List<User> users = new List<User>();
             foreach (var username in resource.Usernames)
             {
@@ -283,17 +289,19 @@ namespace ProjectManagerAPI.Controllers
                     throw new Exception(username + " is not member of " + group.Name);
                 if (user.Id == group.LeaderId)
                     throw new Exception("Can not remove leader from group.");
-                _unitOfWork.Groups.RemoveUserFromGroup(user.Id, group.Id);
+                await _unitOfWork.Groups.RemoveUserFromGroup(user.Id, group.Id);
             }
             //await _unitOfWork.Complete();
-            return Ok(new JsonResult(_mapper.Map<GroupResource>(group)) { StatusCode = Ok().StatusCode });
+            return Ok(_mapper.Map<GroupResource>(group));
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> RemoveGroup(Guid id)
         {
             var group = await _unitOfWork.Groups.Get(id);
-            await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupDelete);
+            var auth = await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupDelete);
+            if (!auth.Succeeded)
+                throw new Exception("You don't have permission");
        
             var child = this._unitOfWork.Groups.Find(u => u.ParentNId == group.Id);
             if (child.Any())
@@ -326,11 +334,23 @@ namespace ProjectManagerAPI.Controllers
         [HttpPut("promotion")]
         public async Task<IActionResult> Promotion(string username)
         {
-            var user = await this._tokenParser.GetUserByToken();
+            var user =await _tokenParser.GetUserByToken();
             var new_leader = await this._userService.GetUser(username);
-            var group = await this._unitOfWork.Groups.GetGroupByLeaderId(user.Id);
-            await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupLeaderUpdate);
-            await this._userService.PromotionBy(user.UserName, new_leader.UserName);
+            if (new_leader == null)
+                throw new Exception("Invalid username");
+            var group = await this._unitOfWork.Groups.Get(new_leader.GroupRef ?? Guid.Empty);
+            if (group == null)
+                throw new Exception("User has no group.");
+            var old_lead = await this._unitOfWork.Users.Get(group.LeaderId);
+            if (old_lead == null)
+                throw new Exception("Invalid leader id.");
+            var auth = await this._authorizationService.AuthorizeAsync(User, group, Operations.GroupLeaderUpdate);
+            if (!auth.Succeeded)
+                throw new Exception("You don't have permission.");
+            // var adminGroup = await this._unitOfWork.Groups.FindGroupByName("System Admin Group");
+            // if (user.GroupRef != adminGroup.Id && user != old_lead) 
+            //     throw new Exception("You don't have permission.");
+            await this._userService.PromotionBy(old_lead.UserName, new_leader.UserName);
             return Ok();
         }
 

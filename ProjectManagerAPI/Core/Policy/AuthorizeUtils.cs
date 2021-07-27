@@ -39,9 +39,7 @@ namespace ProjectManagerAPI.Core.Policy
                 return false;
             var user = await this._unitOfWork.Users.GetUser(username);
             var group = await this._unitOfWork.Groups.GetGroupByLeaderId(user.Id);
-            if (group == null)
-                return false;
-            return true;
+            return group != null;
         }
     }
 

@@ -97,11 +97,11 @@ namespace ProjectManagerAPI.Persistence.ReposMocks
             var user = await _context.Users.FindAsync(userId);
             if(user != null)
             {
-                group.Users.Remove(user);
-                group.DateModified = DateTime.Now;
                 user.Group = null;
                 user.GroupRef = null;
                 user.ParentN = null;
+                group.Users.Remove(user);
+                group.DateModified = DateTime.Now;
                 user.DateModified = DateTime.Now;
                 await this._context.SaveChangesAsync();
             }
