@@ -41,7 +41,7 @@ namespace ProjectManagerAPI.Core.Policy
                 context.Succeed(requirement);
             //Check if user has FULL Self permission
             if (context.User.HasClaim(u => u.Value.Equals(ProjectPermission.FullSelf)) && ProjectPermission.SpecialPerm.Contains(requirement.Name))
-                if (context.User.HasClaim(u => u.Value == resource.UserCreated.ToString()))
+                if (context.User.HasClaim(u => u.Value == resource.UserCreated.ToString() && u.Type == "ID"))
                     context.Succeed(requirement);
 
             //Read Permission

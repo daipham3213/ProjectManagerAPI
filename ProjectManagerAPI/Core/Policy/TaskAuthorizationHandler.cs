@@ -37,7 +37,7 @@ namespace ProjectManagerAPI.Core.Policy
             if (context.User.HasClaim(u => u.Value.Equals(TaskPermission.FullSelf))
                 & !TaskPermission.SpecialPerm.Contains(requirement.Name))
             {
-                if (context.User.HasClaim(u => u.Value == resource.UserId.ToString()))
+                if (context.User.HasClaim(u => u.Value == resource.UserId.ToString() && u.Type == "ID"))
                     context.Succeed(requirement);
             }
 
@@ -61,7 +61,7 @@ namespace ProjectManagerAPI.Core.Policy
             // user removeSeft
             if (requirement.Name == TaskPermission.RemoveSelf)
             {
-                var isOwner = context.User.HasClaim(u => u.Value == resource.UserCreated.ToString());
+                var isOwner = context.User.HasClaim(u => u.Value == resource.UserCreated.ToString() && u.Type == "ID");
                 if (isOwner)
                     context.Succeed(requirement);
             }

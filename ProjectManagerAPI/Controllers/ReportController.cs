@@ -67,7 +67,9 @@ namespace ProjectManagerAPI.Controllers
             };
             if (report.StartDate > report.DueDate)
                 throw new Exception("Start date can't not be larger than end date.");
-            await this._authorization.AuthorizeAsync(User, newRp, Operations.ReportCreate);
+            var auth = await this._authorization.AuthorizeAsync(User, newRp, Operations.ReportCreate);
+            if (!auth.Succeeded)
+                throw new Exception("You don't have permission");
             try
             {
                 await this._unitOfWork.Reports.Add(newRp);
@@ -126,7 +128,9 @@ namespace ProjectManagerAPI.Controllers
             var report = await this._unitOfWork.Reports.Get(id);
             if (report == null)
                 throw new Exception("Invalid Report ID.");
-            await this._authorization.AuthorizeAsync(User, report, Operations.ReportRead);
+            var auth = await this._authorization.AuthorizeAsync(User, report, Operations.ReportRead);
+            if (!auth.Succeeded)
+                throw new Exception("You don't have permission");
             var result = _mapper.Map<ReportResource>(report);
             var group = await this._unitOfWork.Groups.Get(report.GroupId);
             var project = await this._unitOfWork.Projects.Get(report.ProjectId);
@@ -141,7 +145,9 @@ namespace ProjectManagerAPI.Controllers
             var report = await this._unitOfWork.Reports.Get(id);
             if (report == null)
                 throw new Exception("Invalid id");
-            await this._authorization.AuthorizeAsync(User, report, Operations.ReportDelete);
+            var auth = await this._authorization.AuthorizeAsync(User, report, Operations.ReportDelete);
+            if (!auth.Succeeded)
+                throw new Exception("You don't have permission");
 
             foreach (var phase in report.Phases.ToList())
             {

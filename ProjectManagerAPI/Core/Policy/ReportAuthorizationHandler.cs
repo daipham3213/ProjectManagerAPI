@@ -31,7 +31,7 @@ namespace ProjectManagerAPI.Core.Policy
                 context.Succeed(requirement);
             var groups = await utils.GetValidatedGroups(context);
             var useName = context.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name);
-            var isLeader = isAdmin? true : await utils.IsLeader(useName?.Value);
+            var isLeader = isAdmin || await utils.IsLeader(useName?.Value);
             //Check if user has full permission
             if (context.User.HasClaim(u => u.Value.Equals(ReportPermission.Full)))
                 context.Succeed(requirement);
@@ -51,7 +51,7 @@ namespace ProjectManagerAPI.Core.Policy
             //Create
             if (requirement.Name == ReportPermission.Add)
             {
-                if (isLeader & context.User.HasClaim(u => u.Value == resource.GroupId.ToString()))
+                if (isLeader & context.User.HasClaim(u => u.Value == resource.GroupId.ToString() && u.Type == "ID"))
                     context.Succeed(requirement);
             }
             //Read
@@ -68,7 +68,7 @@ namespace ProjectManagerAPI.Core.Policy
                 else
                 {
                     //if not leader can only view report in their group
-                    if (context.User.HasClaim(u => u.Value == resource.GroupId.ToString()))
+                    if (context.User.HasClaim(u => u.Value == resource.GroupId.ToString() && u.Type == "ID"))
                         context.Succeed(requirement);
                 }
             }
@@ -88,7 +88,7 @@ namespace ProjectManagerAPI.Core.Policy
                 }
                 else 
                 if(context.User.HasClaim(u => u.Value == requirement.Name)
-                   & context.User.HasClaim(u => u.Value == resource.GroupId.ToString()))
+                   & context.User.HasClaim(u => u.Value == resource.GroupId.ToString() && u.Type == "ID"))
                     context.Succeed(requirement);
             }
 

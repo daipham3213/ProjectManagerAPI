@@ -107,13 +107,7 @@ namespace ProjectManagerAPI.Controllers
             var phase = await _unitOfWork.Phases.Get(task.PhaseId);
             if (phase == null)
                 throw new Exception("Invalid Phase id");
-            if (task.StartDate < phase.StartDate)
-                throw new Exception("Start date can not be smaller than " + phase.StartDate + " of Phase " + phase.Name);
-            if (task.DueDate > phase.DueDate)
-                throw new Exception("End date can not be larger than " + phase.DueDate + " of Phase " + phase.Name);
-            if (task.DueDate < task.StartDate)
-                throw new Exception("Start date can not be larger than End date");
-
+           
             var checkUser = await _unitOfWork.Users.Get(task.UserId);
             if (checkUser == null)
             {
@@ -142,11 +136,21 @@ namespace ProjectManagerAPI.Controllers
 
             if (checkP != null) entity.StartDate = checkP.DueDate;
             entity.StartDate ??= phase.StartDate;
-            if (entity.DueDate == entity.StartDate || entity.DueDate == null) entity.DueDate = entity.StartDate.Value.AddDays(1);
-            if (entity.StartDate < checkP.DueDate)
-                throw new Exception("Start date can not be smaller than " + checkP.DueDate);
-            if (entity.DueDate < checkP.StartDate)
+            if (task.StartDate < phase.StartDate)
+                throw new Exception("Start date can not be smaller than " + phase.StartDate + " of Phase " + phase.Name);
+            if (entity.DueDate > phase.DueDate)
+                throw new Exception("End date can not be larger than " + phase.DueDate + " of Phase " + phase.Name);
+            if (entity.DueDate < entity.StartDate)
                 throw new Exception("Start date can not be larger than End date");
+
+            if (entity.DueDate == entity.StartDate || entity.DueDate == null) entity.DueDate = entity.StartDate.Value.AddDays(1);
+            if (checkP != null)
+            {
+                if (entity.StartDate < checkP.DueDate)
+                    throw new Exception("Start date can not be smaller than " + checkP.DueDate);
+                if (entity.DueDate < checkP.StartDate)
+                    throw new Exception("Start date can not be larger than End date");
+            }
 
             var auth = await this._authorizationService.AuthorizeAsync(User, entity, Operations.TaskCreate);
             if (!auth.Succeeded)
@@ -199,7 +203,8 @@ namespace ProjectManagerAPI.Controllers
             if(task == null)
                 throw new Exception("Invalid id");
             var auth = await this._authorizationService.AuthorizeAsync(User, task, Operations.TaskDelete);
-            if (!auth.Succeeded)
+            var authSelf = await this._authorizationService.AuthorizeAsync(User, task, Operations.TaskSelfDelete);
+            if (!auth.Succeeded && !authSelf.Succeeded)
                 throw new Exception("You don't have permission");
             await _unitOfWork.Tasks.RemoveChild(task);
             _unitOfWork.Tasks.Remove(task);

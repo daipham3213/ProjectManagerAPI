@@ -38,7 +38,9 @@ namespace ProjectManagerAPI.Core.Policy
             if (context.User.HasClaim(u => u.Value.Equals(PhasePermission.Full)))
                 context.Succeed(requirement);
 
-            if (context.User.HasClaim(u => u.Value.Equals(ProjectPermission.FullSelf)))
+            if (context.User.HasClaim(u => u.Value.Equals(PhasePermission.FullSelf))
+                && context.User.HasClaim(u => u.Value == resource.UserCreated.ToString() && u.Type == "ID")
+                && !PhasePermission.SpecialPerm.Contains(requirement.Name))
                 context.Succeed(requirement);
 
            if (requirement.Name == PhasePermission.View
@@ -56,7 +58,7 @@ namespace ProjectManagerAPI.Core.Policy
             {
              //   if (context.User.IsInRole(RoleNames.RoleUser))
                     if (context.User.IsInRole(RoleNames.TeamLead) | context.User.IsInRole(RoleNames.DepartmentLead))
-                    context.Succeed(requirement);
+                        context.Succeed(requirement);
             }
             return Task.CompletedTask;
 

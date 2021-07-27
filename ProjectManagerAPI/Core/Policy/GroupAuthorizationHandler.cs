@@ -44,7 +44,10 @@ namespace ProjectManagerAPI.Core.Policy
                 context.Succeed(requirement);
             //Check if user has FULL Self permission
             if (context.User.HasClaim(u => u.Value.Equals(GroupPermission.FullSelf))
-                & !GroupPermission.SpecialPerm.Contains(requirement.Name))
+                &&!GroupPermission.SpecialPerm.Contains(requirement.Name)
+                && context.User.HasClaim(
+                    u => u.Value == resource.LeaderId.ToString()
+                         & u.Type == "ID"))
             {
                 // if (context.User.HasClaim(u => u.Value == resource.LeaderId.ToString()))
                 //     context.Succeed(requirement);
@@ -75,7 +78,7 @@ namespace ProjectManagerAPI.Core.Policy
             //Update
             if (requirement.Name == GroupPermission.Edit)
             {
-                if (groups.Contains(resource) & 
+                if (groups.Contains(resource) &&
                     context.User.HasClaim(
                         u => u.Value == resource.LeaderId.ToString()
                         & u.Type == "ID")
@@ -94,7 +97,7 @@ namespace ProjectManagerAPI.Core.Policy
                 )
                     if (requirement.Name != GroupPermission.Remove)
                         context.Succeed(requirement);
-                    else if (context.User.HasClaim(u => u.Value == resource.Id.ToString()))
+                    else if (context.User.HasClaim(u => u.Value == resource.Id.ToString() && u.Type == "ID"))
                         context.Succeed(requirement);
             }
 
