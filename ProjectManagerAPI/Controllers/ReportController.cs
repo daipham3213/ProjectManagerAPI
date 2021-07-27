@@ -122,7 +122,12 @@ namespace ProjectManagerAPI.Controllers
             if (report == null)
                 throw new Exception("Invalid Report ID.");
             await this._authorization.AuthorizeAsync(User, report, Operations.ReportRead);
-            return Ok(_mapper.Map<ReportResource>(report));
+            var result = _mapper.Map<ReportResource>(report);
+            var group = await this._unitOfWork.Groups.Get(report.GroupId);
+            var project = await this._unitOfWork.Projects.Get(report.ProjectId);
+            result.ProjectName = project.Name;
+            result.GroupName = group.Name;
+            return Ok(result);
         }
 
         [HttpDelete]
@@ -153,14 +158,13 @@ namespace ProjectManagerAPI.Controllers
             if (ModelState.IsValid)
             {
                 var result = await this._unitOfWork.Reports.Get(id);
-                var group = await this._unitOfWork.Groups.FindGroupByName(report.GroupName);
-                var project = await this._unitOfWork.Projects.SearchProjectByName(report.ProjectName);
-                result.GroupId = group.Id;
+                result.GroupId = report.GroupId;
                 result.DueDate = report.DueDate;
                 result.StartDate = report.StartDate;
                 result.Progress = report.Progress;
-                result.ProjectId = project.Id;
+                result.ProjectId = report.ProjectId;
                 result.DateModified = DateTime.UtcNow;
+                result.Remark = report.Remark;
                 await this._authorization.AuthorizeAsync(User, result, Operations.ReportUpdate);
                 await this._unitOfWork.Complete();
                 return Ok(new { message = "Update " + report.Name + "success." });

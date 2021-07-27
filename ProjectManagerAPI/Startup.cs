@@ -49,7 +49,7 @@ namespace ProjectManagerAPI
                     builder =>
                     {
                         builder.WithOrigins("http://localhost:5000", "http://localhost:3000", "https://localhost:5001", "https://daipham3213-001-site1.htempurl.com",
-                                "https://prj-manager.herokuapp.com/")
+                                "https://prj-manager.herokuapp.com")
                             .AllowAnyOrigin()
                             .AllowAnyMethod()
                             .AllowAnyHeader()
@@ -80,7 +80,7 @@ namespace ProjectManagerAPI
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                 });
 
-            services.AddDbContext<ProjectManagerDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("LocalDB")));
+            services.AddDbContext<ProjectManagerDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DeployedDB")));
             services.AddIdentity<User, IdentityRole<Guid>>(opt =>
             {
                 opt.Password.RequireNonAlphanumeric = false;
