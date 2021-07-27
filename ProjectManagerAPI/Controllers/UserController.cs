@@ -232,9 +232,6 @@ namespace ProjectManagerAPI.Controllers
             if (currentPass == newPass)
                 throw new Exception("The new password and the current password cannot be the same");
 
-            if (!ModelState.IsValid)
-                throw new Exception(ModelState.ToString());
-
             var result = await this._userService.ChangePassword(user.UserName, updatePasswordResource.CurrentPassword, updatePasswordResource.NewPassword);
 
             if (result == true)
