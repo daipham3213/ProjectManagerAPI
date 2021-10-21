@@ -166,7 +166,8 @@ namespace ProjectManagerAPI.Controllers
         public async Task<IActionResult> GetGroupsValidated(string? key)
         {
             //Get user claims from token
-            var user = await _tokenParser.GetUserByToken();
+            var userId = User.Claims.FirstOrDefault(u => u.Type == "ID");
+            var user = await this._unitOfWork.Users.Get(Guid.Parse(userId.Value));
             await this._unitOfWork.Users.Load(u => u.Id == user.ParentNId);
             // await this._unitOfWork.Groups.Load(u => u.Id == user.GroupRef);
             var leader = user.ParentN?.Id ?? user.Id;
@@ -214,7 +215,9 @@ namespace ProjectManagerAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetGroupByUser()
         {
-            var user = await _tokenParser.GetUserByToken();
+            //var user = await _tokenParser.GetUserByToken();
+            var userId = User.Claims.FirstOrDefault(u => u.Type == "ID");
+            var user = await this._unitOfWork.Users.Get(Guid.Parse(userId.Value));
             if (user.GroupRef == null)
                 throw new Exception("You haven't join a group.");
             var group = await _unitOfWork.Groups.Get(user.GroupRef.Value);
@@ -334,7 +337,8 @@ namespace ProjectManagerAPI.Controllers
         [HttpPut("promotion")]
         public async Task<IActionResult> Promotion(string username)
         {
-            var user =await _tokenParser.GetUserByToken();
+            var userId = User.Claims.FirstOrDefault(u => u.Type == "ID");
+            var user = await this._unitOfWork.Users.Get(Guid.Parse(userId.Value));
             var new_leader = await this._userService.GetUser(username);
             if (new_leader == null)
                 throw new Exception("Invalid username");
@@ -357,7 +361,8 @@ namespace ProjectManagerAPI.Controllers
         [HttpPost("leave")]
         public async Task<IActionResult> LeaveGroup()
         {
-            var user = await this._tokenParser.GetUserByToken();
+            var userId = User.Claims.FirstOrDefault(u => u.Type == "ID");
+            var user = await this._unitOfWork.Users.Get(Guid.Parse(userId.Value));
             await this._unitOfWork.Users.LeaveGroup(user.Id);
             return Ok();
         }

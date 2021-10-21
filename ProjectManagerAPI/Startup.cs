@@ -80,7 +80,7 @@ namespace ProjectManagerAPI
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                 });
 
-            services.AddDbContext<ProjectManagerDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DeployedDB")));
+            services.AddDbContext<ProjectManagerDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("LocalDB")));
             services.AddIdentity<User, IdentityRole<Guid>>(opt =>
             {
                 opt.Password.RequireNonAlphanumeric = false;
